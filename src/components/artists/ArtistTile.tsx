@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import { Artist } from '@/data/artists'
 import { useTransition } from '@/providers/TransitionProvider'
@@ -14,8 +14,37 @@ interface ArtistTileProps {
 export function ArtistTile({ artist, index }: ArtistTileProps) {
   const { navigateTo } = useTransition()
   const [isHovered, setIsHovered] = useState(false)
+  const [glitchOffset, setGlitchOffset] = useState({ x: 0, y: 0 })
+  const [sliceOffsets, setSliceOffsets] = useState<number[]>([0, 0, 0, 0, 0])
 
-  // Alternate skew for broken grid
+  // Animate glitch on hover
+  useEffect(() => {
+    if (!isHovered) {
+      setGlitchOffset({ x: 0, y: 0 })
+      setSliceOffsets([0, 0, 0, 0, 0])
+      return
+    }
+
+    const interval = setInterval(() => {
+      // Random RGB split offset
+      setGlitchOffset({
+        x: (Math.random() - 0.5) * 8,
+        y: (Math.random() - 0.5) * 4,
+      })
+
+      // Random slice displacements
+      setSliceOffsets([
+        (Math.random() - 0.5) * 20,
+        (Math.random() - 0.5) * 15,
+        (Math.random() - 0.5) * 25,
+        (Math.random() - 0.5) * 10,
+        (Math.random() - 0.5) * 18,
+      ])
+    }, 80)
+
+    return () => clearInterval(interval)
+  }, [isHovered])
+
   const skewAngle = index % 2 === 0 ? -2 : 2
 
   return (
@@ -45,49 +74,175 @@ export function ArtistTile({ artist, index }: ArtistTileProps) {
       >
         {/* Image container */}
         <div className="relative aspect-[3/4] overflow-hidden bg-void">
-          {/* Artist photo with blown-out effect on hover */}
+          {/* RGB Split layers - Red channel */}
           <div
             className={clsx(
-              'absolute inset-0 transition-all duration-700',
-              isHovered ? 'scale-110' : 'scale-100'
+              'absolute inset-0 transition-opacity duration-300',
+              isHovered ? 'opacity-60' : 'opacity-0'
             )}
             style={{
-              filter: isHovered
-                ? 'brightness(1.5) contrast(2) grayscale(0)'
-                : 'brightness(0.7) contrast(1.2) grayscale(1)',
-              transition: 'filter 0.7s ease, transform 0.7s ease',
+              transform: `translate(${glitchOffset.x - 4}px, ${glitchOffset.y}px)`,
+              mixBlendMode: 'screen',
             }}
           >
             <Image
               src={artist.photo}
-              alt={artist.name}
+              alt=""
               fill
               className="object-cover"
+              style={{ filter: 'grayscale(1) brightness(1.2)', opacity: 0.7 }}
               sizes="(max-width: 768px) 100vw, 33vw"
             />
+            <div className="absolute inset-0 bg-red-500 mix-blend-multiply" />
           </div>
 
-          {/* Noise texture overlay */}
+          {/* RGB Split - Cyan channel */}
           <div
-            className="absolute inset-0 pointer-events-none opacity-20 mix-blend-overlay"
+            className={clsx(
+              'absolute inset-0 transition-opacity duration-300',
+              isHovered ? 'opacity-50' : 'opacity-0'
+            )}
             style={{
-              backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")`,
+              transform: `translate(${glitchOffset.x + 4}px, ${-glitchOffset.y}px)`,
+              mixBlendMode: 'screen',
             }}
-          />
+          >
+            <Image
+              src={artist.photo}
+              alt=""
+              fill
+              className="object-cover"
+              style={{ filter: 'grayscale(1) brightness(1.2)', opacity: 0.7 }}
+              sizes="(max-width: 768px) 100vw, 33vw"
+            />
+            <div className="absolute inset-0 bg-cyan-500 mix-blend-multiply" />
+          </div>
+
+          {/* Main image with glitch slices */}
+          <div
+            className={clsx(
+              'absolute inset-0 transition-all duration-700',
+              isHovered ? 'scale-105' : 'scale-100'
+            )}
+            style={{
+              filter: isHovered
+                ? 'brightness(1.3) contrast(1.4)'
+                : 'brightness(0.7) contrast(1.2) grayscale(1)',
+            }}
+          >
+            {/* Slice 1 */}
+            <div
+              className="absolute w-full overflow-hidden"
+              style={{
+                top: '0%',
+                height: '20%',
+                transform: isHovered ? `translateX(${sliceOffsets[0]}px)` : 'none',
+              }}
+            >
+              <Image
+                src={artist.photo}
+                alt={artist.name}
+                fill
+                className="object-cover"
+                style={{ objectPosition: 'center top' }}
+                sizes="(max-width: 768px) 100vw, 33vw"
+              />
+            </div>
+
+            {/* Slice 2 */}
+            <div
+              className="absolute w-full overflow-hidden"
+              style={{
+                top: '20%',
+                height: '20%',
+                transform: isHovered ? `translateX(${sliceOffsets[1]}px)` : 'none',
+              }}
+            >
+              <div className="relative w-full h-[500%]" style={{ top: '-100%' }}>
+                <Image
+                  src={artist.photo}
+                  alt=""
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 768px) 100vw, 33vw"
+                />
+              </div>
+            </div>
+
+            {/* Slice 3 */}
+            <div
+              className="absolute w-full overflow-hidden"
+              style={{
+                top: '40%',
+                height: '20%',
+                transform: isHovered ? `translateX(${sliceOffsets[2]}px)` : 'none',
+              }}
+            >
+              <div className="relative w-full h-[500%]" style={{ top: '-200%' }}>
+                <Image
+                  src={artist.photo}
+                  alt=""
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 768px) 100vw, 33vw"
+                />
+              </div>
+            </div>
+
+            {/* Slice 4 */}
+            <div
+              className="absolute w-full overflow-hidden"
+              style={{
+                top: '60%',
+                height: '20%',
+                transform: isHovered ? `translateX(${sliceOffsets[3]}px)` : 'none',
+              }}
+            >
+              <div className="relative w-full h-[500%]" style={{ top: '-300%' }}>
+                <Image
+                  src={artist.photo}
+                  alt=""
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 768px) 100vw, 33vw"
+                />
+              </div>
+            </div>
+
+            {/* Slice 5 */}
+            <div
+              className="absolute w-full overflow-hidden"
+              style={{
+                top: '80%',
+                height: '20%',
+                transform: isHovered ? `translateX(${sliceOffsets[4]}px)` : 'none',
+              }}
+            >
+              <div className="relative w-full h-[500%]" style={{ top: '-400%' }}>
+                <Image
+                  src={artist.photo}
+                  alt=""
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 768px) 100vw, 33vw"
+                />
+              </div>
+            </div>
+          </div>
 
           {/* Scanlines */}
           <div
             className={clsx(
               'absolute inset-0 pointer-events-none transition-opacity duration-500',
-              isHovered ? 'opacity-30' : 'opacity-50'
+              isHovered ? 'opacity-40' : 'opacity-60'
             )}
             style={{
               background: `repeating-linear-gradient(
                 0deg,
                 transparent,
                 transparent 2px,
-                rgba(0, 0, 0, 0.4) 2px,
-                rgba(0, 0, 0, 0.4) 4px
+                rgba(0, 0, 0, 0.5) 2px,
+                rgba(0, 0, 0, 0.5) 4px
               )`,
             }}
           />
@@ -95,56 +250,42 @@ export function ArtistTile({ artist, index }: ArtistTileProps) {
           {/* Red bleed on hover */}
           <div
             className={clsx(
-              'absolute inset-0 bg-arterial/30 mix-blend-multiply transition-opacity duration-500',
+              'absolute inset-0 bg-arterial/20 mix-blend-overlay transition-opacity duration-300',
               isHovered ? 'opacity-100' : 'opacity-0'
             )}
           />
 
-          {/* Glitch lines on hover */}
+          {/* Glitch noise lines */}
           {isHovered && (
             <>
               <div
-                className="absolute left-0 right-0 h-1 bg-arterial/60"
-                style={{ top: '20%' }}
+                className="absolute left-0 right-0 h-[2px] bg-white/60"
+                style={{ top: `${20 + Math.random() * 10}%` }}
               />
               <div
-                className="absolute left-0 right-0 h-px bg-white/40"
-                style={{ top: '45%' }}
+                className="absolute left-0 right-0 h-[1px] bg-arterial/80"
+                style={{ top: `${50 + Math.random() * 10}%` }}
               />
               <div
-                className="absolute left-0 right-0 h-1 bg-arterial/40"
-                style={{ top: '75%' }}
+                className="absolute left-0 right-0 h-[2px] bg-cyan-400/50"
+                style={{ top: `${75 + Math.random() * 10}%` }}
               />
             </>
           )}
 
-          {/* Index number - industrial */}
+          {/* Index number */}
           <div
             className={clsx(
-              'absolute top-3 left-3 font-mono text-xs transition-all duration-300',
+              'absolute top-3 left-3 font-mono text-xs transition-all duration-300 z-10',
               isHovered ? 'text-arterial' : 'text-white/30'
             )}
           >
             [{String(index + 1).padStart(2, '0')}]
           </div>
-
-          {/* Corner sigil marks */}
-          <svg
-            className={clsx(
-              'absolute top-2 right-2 w-8 h-8 transition-all duration-500',
-              isHovered ? 'opacity-100 text-arterial' : 'opacity-30 text-white'
-            )}
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1"
-          >
-            <path d="M12 2L14 8L20 8L15 12L17 18L12 14L7 18L9 12L4 8L10 8Z" />
-          </svg>
         </div>
       </div>
 
-      {/* Name - large monospace terminal style */}
+      {/* Name */}
       <div
         className={clsx(
           'mt-4 transition-all duration-300',
@@ -158,13 +299,14 @@ export function ArtistTile({ artist, index }: ArtistTileProps) {
             isHovered ? 'text-arterial' : 'text-white'
           )}
           style={{
-            textShadow: isHovered ? '0 0 20px rgba(204, 0, 0, 0.5)' : 'none',
+            textShadow: isHovered
+              ? `${glitchOffset.x}px 0 rgba(0, 255, 255, 0.5), ${-glitchOffset.x}px 0 rgba(255, 0, 0, 0.5)`
+              : 'none',
           }}
         >
           {artist.name}
         </h3>
 
-        {/* Location with terminal prefix */}
         <p
           className={clsx(
             'font-mono text-sm mt-1 transition-colors duration-300',
@@ -175,7 +317,7 @@ export function ArtistTile({ artist, index }: ArtistTileProps) {
         </p>
       </div>
 
-      {/* Bottom border accent */}
+      {/* Bottom border */}
       <div
         className={clsx(
           'h-px mt-4 transition-all duration-500',
