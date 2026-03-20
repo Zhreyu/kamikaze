@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import { Artist } from '@/data/artists'
 import { useTransition } from '@/providers/TransitionProvider'
+import { getAssetPath } from '@/lib/basePath'
 import clsx from 'clsx'
 
 interface ArtistTileProps {
@@ -86,7 +87,7 @@ export function ArtistTile({ artist, index }: ArtistTileProps) {
             }}
           >
             <Image
-              src={artist.photo}
+              src={getAssetPath(artist.photo)}
               alt=""
               fill
               className="object-cover"
@@ -108,7 +109,7 @@ export function ArtistTile({ artist, index }: ArtistTileProps) {
             }}
           >
             <Image
-              src={artist.photo}
+              src={getAssetPath(artist.photo)}
               alt=""
               fill
               className="object-cover"
@@ -140,7 +141,7 @@ export function ArtistTile({ artist, index }: ArtistTileProps) {
               }}
             >
               <Image
-                src={artist.photo}
+                src={getAssetPath(artist.photo)}
                 alt={artist.name}
                 fill
                 className="object-cover"
@@ -160,7 +161,7 @@ export function ArtistTile({ artist, index }: ArtistTileProps) {
             >
               <div className="relative w-full h-[500%]" style={{ top: '-100%' }}>
                 <Image
-                  src={artist.photo}
+                  src={getAssetPath(artist.photo)}
                   alt=""
                   fill
                   className="object-cover"
@@ -180,7 +181,7 @@ export function ArtistTile({ artist, index }: ArtistTileProps) {
             >
               <div className="relative w-full h-[500%]" style={{ top: '-200%' }}>
                 <Image
-                  src={artist.photo}
+                  src={getAssetPath(artist.photo)}
                   alt=""
                   fill
                   className="object-cover"
@@ -200,7 +201,7 @@ export function ArtistTile({ artist, index }: ArtistTileProps) {
             >
               <div className="relative w-full h-[500%]" style={{ top: '-300%' }}>
                 <Image
-                  src={artist.photo}
+                  src={getAssetPath(artist.photo)}
                   alt=""
                   fill
                   className="object-cover"
@@ -220,7 +221,7 @@ export function ArtistTile({ artist, index }: ArtistTileProps) {
             >
               <div className="relative w-full h-[500%]" style={{ top: '-400%' }}>
                 <Image
-                  src={artist.photo}
+                  src={getAssetPath(artist.photo)}
                   alt=""
                   fill
                   className="object-cover"

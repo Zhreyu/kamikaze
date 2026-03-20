@@ -3,6 +3,7 @@
 import { useEffect, useState, useRef, useCallback } from 'react'
 import Image from 'next/image'
 import { Artist } from '@/data/artists'
+import { getAssetPath } from '@/lib/basePath'
 import clsx from 'clsx'
 
 interface ArtistHeaderProps {
@@ -93,7 +94,7 @@ export function ArtistHeader({ artist }: ArtistHeaderProps) {
           }}
         >
           <Image
-            src={artist.photo}
+            src={getAssetPath(artist.photo)}
             alt=""
             fill
             className="object-cover"
@@ -112,7 +113,7 @@ export function ArtistHeader({ artist }: ArtistHeaderProps) {
           }}
         >
           <Image
-            src={artist.photo}
+            src={getAssetPath(artist.photo)}
             alt=""
             fill
             className="object-cover"
@@ -123,7 +124,7 @@ export function ArtistHeader({ artist }: ArtistHeaderProps) {
 
         {/* Main image */}
         <Image
-          src={artist.photo}
+          src={getAssetPath(artist.photo)}
           alt={artist.name}
           fill
           className="object-cover transition-all duration-200"
