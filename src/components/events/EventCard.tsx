@@ -15,6 +15,17 @@ const FAKE_LOCATIONS = [
   'DETROIT', 'TBILISI', 'MELBOURNE', 'SAO_PAULO', 'KIEV'
 ]
 
+// Denial messages
+const DENIAL_MESSAGES = [
+  'ACCESS_DENIED // INVALID_KEY',
+  'REJECTED // CLEARANCE_INSUFFICIENT',
+  'BLOCKED // FIREWALL_ACTIVE',
+  'FAILED // ENCRYPTION_MISMATCH',
+  'DENIED // PROTOCOL_VIOLATION',
+]
+
+const MAX_ATTEMPTS = 5
+
 interface EventCardProps {
   event: Event
   index: number
@@ -24,20 +35,20 @@ export function EventCard({ event, index }: EventCardProps) {
   const [isExpanded, setIsExpanded] = useState(false)
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 })
   const [isHovered, setIsHovered] = useState(false)
-  const [isHacking, setIsHacking] = useState(false)
+  const [isProcessing, setIsProcessing] = useState(false)
   const [hackAttempt, setHackAttempt] = useState(0)
   const [displayCity, setDisplayCity] = useState('')
-  const [hackStatus, setHackStatus] = useState<'idle' | 'trying' | 'denied' | 'partial'>('idle')
-  const [currentGuess, setCurrentGuess] = useState('')
+  const [hackStatus, setHackStatus] = useState<'idle' | 'denied' | 'compromised' | 'partial'>('idle')
+  const [statusMessage, setStatusMessage] = useState('')
   const cardRef = useRef<HTMLDivElement>(null)
   const hackTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   const isSoldOut = !event.ticketUrl
   const isSecretLocation = event.isSecretLocation
+  const isFullyRedacted = event.isFullyRedacted
 
   // Initialize display city
   useEffect(() => {
     if (isSecretLocation && hackStatus === 'idle') {
-      // Secret locations start fully masked
       setDisplayCity('█'.repeat(event.city.length))
     } else if (!isSecretLocation) {
       setDisplayCity(event.city.toUpperCase())
@@ -53,72 +64,76 @@ export function EventCard({ event, index }: EventCardProps) {
     }
   }, [])
 
-  // Handle ACQUIRE_ACCESS for secret locations - ACCESS_DENIED sequence
-  const handleSecretAccess = useCallback((e: React.MouseEvent) => {
-    e.stopPropagation()
+  // Format date - mask for secret/redacted events
+  const getDisplayDate = () => {
+    if (isFullyRedacted) {
+      return '??.??.????'
+    }
+    if (isSecretLocation) {
+      return 'XX.?X.X026'
+    }
+    return formatEventDate(event.date)
+  }
 
-    if (hackStatus === 'partial') return // Already done
-    if (isHacking) return
+  // Handle each ACQUIRE_ACCESS click - manual attempts
+  const handleSecretAccessClick = useCallback(() => {
+    if (hackStatus === 'partial' || hackStatus === 'compromised') return
+    if (isProcessing) return
 
-    setIsHacking(true)
-    setHackStatus('trying')
-    triggerSigilGlitch(1, 500)
+    const newAttempt = hackAttempt + 1
+    setHackAttempt(newAttempt)
+    setIsProcessing(true)
+    triggerSigilGlitch(0.8, 400)
 
     const cityUpper = event.city.toUpperCase()
-    let attempt = 0
-    const maxAttempts = 5
 
-    const tryNextGuess = () => {
-      attempt++
-      setHackAttempt(attempt)
+    // Pick a random fake location to "try"
+    const guess = FAKE_LOCATIONS[Math.floor(Math.random() * FAKE_LOCATIONS.length)]
 
-      // Pick a random fake location
-      const guess = FAKE_LOCATIONS[Math.floor(Math.random() * FAKE_LOCATIONS.length)]
-      setCurrentGuess(guess)
+    // Scramble display while processing
+    let scrambleCount = 0
+    const scrambleInterval = setInterval(() => {
+      scrambleCount++
+      setDisplayCity(
+        Array(event.city.length).fill(0).map(() =>
+          GLITCH_CHARS[Math.floor(Math.random() * GLITCH_CHARS.length)]
+        ).join('')
+      )
 
-      // Scramble display while "trying"
-      let scrambleCount = 0
-      const scrambleInterval = setInterval(() => {
-        scrambleCount++
-        setDisplayCity(
-          Array(event.city.length).fill(0).map(() =>
-            GLITCH_CHARS[Math.floor(Math.random() * GLITCH_CHARS.length)]
-          ).join('')
-        )
-        if (scrambleCount > 10) {
-          clearInterval(scrambleInterval)
-          setDisplayCity(guess.slice(0, event.city.length).padEnd(event.city.length, '█'))
-          triggerSigilGlitch(0.5, 200)
+      if (scrambleCount > 15) {
+        clearInterval(scrambleInterval)
 
-          // Show ACCESS_DENIED
-          hackTimeoutRef.current = setTimeout(() => {
+        // Show the fake guess briefly
+        setDisplayCity(guess.slice(0, event.city.length).padEnd(event.city.length, '█'))
+
+        hackTimeoutRef.current = setTimeout(() => {
+          if (newAttempt >= MAX_ATTEMPTS) {
+            // Final attempt - they're watching!
+            setHackStatus('compromised')
+            setStatusMessage('SOMEONE IS WATCHING, ABORTING...')
+            triggerSigilGlitch(1.5, 800)
+
+            // After dramatic pause, reveal first letter only
+            hackTimeoutRef.current = setTimeout(() => {
+              setHackStatus('partial')
+              const firstLetter = cityUpper[0]
+              const masked = '█'.repeat(cityUpper.length - 1)
+              setDisplayCity(firstLetter + masked)
+              setStatusMessage('PARTIAL_DECRYPT: 0x01')
+              setIsProcessing(false)
+            }, 1500)
+          } else {
+            // Failed attempt - show denial
             setHackStatus('denied')
-            triggerSigilGlitch(0.8, 300)
-
-            if (attempt < maxAttempts) {
-              // Try again
-              hackTimeoutRef.current = setTimeout(() => {
-                setHackStatus('trying')
-                tryNextGuess()
-              }, 800)
-            } else {
-              // Final: reveal only first letter
-              hackTimeoutRef.current = setTimeout(() => {
-                setHackStatus('partial')
-                setIsHacking(false)
-                const firstLetter = cityUpper[0]
-                const masked = '█'.repeat(cityUpper.length - 1)
-                setDisplayCity(firstLetter + masked)
-                triggerSigilGlitch(1, 500)
-              }, 800)
-            }
-          }, 600)
-        }
-      }, 50)
-    }
-
-    tryNextGuess()
-  }, [event.city, isHacking, hackStatus])
+            setStatusMessage(DENIAL_MESSAGES[newAttempt - 1] || DENIAL_MESSAGES[0])
+            setDisplayCity('█'.repeat(event.city.length))
+            setIsProcessing(false)
+            triggerSigilGlitch(0.5, 200)
+          }
+        }, 400)
+      }
+    }, 40)
+  }, [event.city, hackAttempt, hackStatus, isProcessing])
 
   // Handle normal ACQUIRE_ACCESS - just go to ticket URL
   const handleNormalAccess = useCallback((e: React.MouseEvent) => {
@@ -235,7 +250,7 @@ export function EventCard({ event, index }: EventCardProps) {
               transform: 'rotate(180deg)',
             }}
           >
-            {formatEventDate(event.date).replace(/\./g, '')}
+            {getDisplayDate().replace(/\./g, '')}
           </span>
         </div>
 
@@ -243,12 +258,13 @@ export function EventCard({ event, index }: EventCardProps) {
         <div className="relative p-8 pl-16 md:pl-24">
           {/* Date badge - small */}
           <div className="font-mono text-xs text-arterial mb-2 tracking-widest">
-            {formatEventDate(event.date)} {'// '}
+            {getDisplayDate()} {'// '}
             <span className={clsx(
               'transition-colors',
-              hackStatus === 'trying' ? 'text-signal animate-pulse' :
+              isProcessing ? 'text-signal animate-pulse' :
               hackStatus === 'denied' ? 'text-red-bright' :
-              hackStatus === 'partial' ? 'text-arterial' :
+              hackStatus === 'compromised' ? 'text-red-bright animate-pulse' :
+              hackStatus === 'partial' ? 'text-white' :
               'text-arterial'
             )}>
               {displayCity || (isSecretLocation ? '█'.repeat(event.city.length) : event.city.toUpperCase())}
@@ -267,16 +283,41 @@ export function EventCard({ event, index }: EventCardProps) {
           </h3>
 
           {/* Meta stack */}
-          <div className="space-y-2">
-            <div className="font-mono text-sm">
-              <span className="text-grey-dark">LOC://</span>
-              <span className="text-white/80 ml-2">{event.venue}</span>
+          {isFullyRedacted ? (
+            <div className="space-y-1">
+              <div className="font-mono text-sm">
+                <span className="text-grey-dark">LOC://</span>
+                <span className="text-grey-mid ml-2">UNKNOWN</span>
+              </div>
+              <div className="font-mono text-sm">
+                <span className="text-grey-dark">STATUS://</span>
+                <span className="text-arterial ml-2">RESTRICTED</span>
+              </div>
+              <div className="font-mono text-sm">
+                <span className="text-grey-dark">ACCESS://</span>
+                <span className="text-red-bright ml-2">DENIED</span>
+              </div>
+              <div className="font-mono text-sm">
+                <span className="text-grey-dark">SIGNAL://</span>
+                <span className="text-grey-mid ml-2">ENCRYPTED</span>
+              </div>
+              <div className="font-mono text-sm mt-2">
+                <span className="text-grey-dark">SET://</span>
+                <span className="text-grey-dark/60 ml-2">████████ × ██████ × ███████</span>
+              </div>
             </div>
-            <div className="font-mono text-sm">
-              <span className="text-grey-dark">SET://</span>
-              <span className="text-white/60 ml-2">{event.lineup.join(' × ')}</span>
+          ) : (
+            <div className="space-y-2">
+              <div className="font-mono text-sm">
+                <span className="text-grey-dark">LOC://</span>
+                <span className="text-white/80 ml-2">{event.venue}</span>
+              </div>
+              <div className="font-mono text-sm">
+                <span className="text-grey-dark">SET://</span>
+                <span className="text-white/60 ml-2">{event.lineup.join(' × ')}</span>
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Expanded content */}
           <div
@@ -291,47 +332,47 @@ export function EventCard({ event, index }: EventCardProps) {
               </p>
             )}
 
-            {/* Secret location event - hacking sequence */}
-            {isSecretLocation ? (
+            {/* Fully redacted event - no access at all */}
+            {isFullyRedacted ? (
+              <div className="inline-block">
+                <TerminalButton disabled>
+                  [ACCESS DENIED]
+                </TerminalButton>
+              </div>
+            ) : isSecretLocation ? (
               <div className="space-y-3">
                 {/* Hacking status display */}
-                {hackStatus !== 'idle' && (
+                {statusMessage && (
                   <div className={clsx(
                     'font-mono text-xs tracking-widest border-l-2 pl-3 py-1',
-                    hackStatus === 'trying' ? 'border-signal text-signal' :
                     hackStatus === 'denied' ? 'border-red-bright text-red-bright' :
-                    'border-arterial text-grey-mid'
+                    hackStatus === 'compromised' ? 'border-red-bright text-red-bright animate-pulse' :
+                    hackStatus === 'partial' ? 'border-arterial text-grey-mid' :
+                    'border-signal text-signal'
                   )}>
-                    {hackStatus === 'trying' && (
-                      <span className="animate-pulse">
-                        ATTEMPTING: {currentGuess}... [{hackAttempt}/5]
-                      </span>
-                    )}
+                    <span className={hackStatus === 'compromised' ? 'animate-pulse' : ''}>
+                      {statusMessage}
+                    </span>
                     {hackStatus === 'denied' && (
-                      <span className="animate-pulse">
-                        ACCESS_DENIED // INVALID_COORDINATES
-                      </span>
-                    )}
-                    {hackStatus === 'partial' && (
-                      <span>
-                        PARTIAL_DECRYPT: 10% // SIGNAL_INTERCEPTED
-                      </span>
+                      <span className="text-grey-dark ml-2">[{hackAttempt}/{MAX_ATTEMPTS}]</span>
                     )}
                   </div>
                 )}
 
-                {/* ACQUIRE_ACCESS button */}
-                <button
-                  onClick={handleSecretAccess}
-                  className="inline-block"
-                  disabled={isHacking}
-                >
-                  <TerminalButton>
-                    {hackStatus === 'idle' ? 'ACQUIRE_ACCESS' :
-                     hackStatus === 'partial' ? 'SIGNAL_LOCKED' :
-                     'BREACH_IN_PROGRESS...'}
+                {/* ACQUIRE_ACCESS / TRY_AGAIN button */}
+                <div onClick={(e) => e.stopPropagation()}>
+                  <TerminalButton
+                    onClick={handleSecretAccessClick}
+                    disabled={isProcessing || hackStatus === 'partial' || hackStatus === 'compromised'}
+                  >
+                    {isProcessing ? 'DECRYPTING...' :
+                     hackStatus === 'idle' ? 'ACQUIRE_ACCESS' :
+                     hackStatus === 'denied' ? 'TRY AGAIN_' :
+                     hackStatus === 'compromised' ? 'ABORTING...' :
+                     hackStatus === 'partial' ? 'SIGNAL_LOST_' :
+                     'ACQUIRE_ACCESS'}
                   </TerminalButton>
-                </button>
+                </div>
               </div>
             ) : isSoldOut ? (
               <div className="inline-block">

@@ -89,6 +89,13 @@ export function TerminalButton({
     }
   }, [loading, success, phase, originalText])
 
+  // Update displayText when children changes (for dynamic text like TRY AGAIN_)
+  useEffect(() => {
+    if (phase === 'idle' && !loading && !success) {
+      setDisplayText(originalText)
+    }
+  }, [originalText, phase, loading, success])
+
   const handleClick = () => {
     if (disabled || loading) return
     setIsClicked(true)

@@ -279,8 +279,6 @@ function LoadingFallback() {
 }
 
 function Scene() {
-  const [hoveredNav, setHoveredNav] = useState<string | null>(null)
-
   return (
     <>
       <color attach="background" args={['#050505']} />
@@ -292,17 +290,7 @@ function Scene() {
       <pointLight position={[-10, -10, -10]} intensity={0.5} color="#400000" />
       <pointLight position={[10, -5, 10]} intensity={0.3} color="#200000" />
 
-      <SigilModel hoveredNav={hoveredNav} />
-
-      {/* Navigation labels orbiting the sigil */}
-      {NAV_ITEMS.map((item) => (
-        <NavLabel
-          key={item.label}
-          {...item}
-          hoveredNav={hoveredNav}
-          setHoveredNav={setHoveredNav}
-        />
-      ))}
+      <SigilModel hoveredNav={null} />
 
       <ContactShadows
         position={[0, -3.5, 0]}

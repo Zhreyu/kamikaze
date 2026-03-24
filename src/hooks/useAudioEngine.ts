@@ -278,6 +278,10 @@ export function getIsSwitching() {
   return state.isSwitching
 }
 
+export function getBeatPhase() {
+  return beatPhase
+}
+
 export function clearSwitching() {
   state.isSwitching = false
   notifyListeners()

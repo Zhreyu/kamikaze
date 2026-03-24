@@ -8,53 +8,44 @@ export interface Event {
   ticketUrl?: string
   isPast: boolean
   description?: string
-  isSecretLocation?: boolean // For events with hidden location reveal
+  isSecretLocation?: boolean // For events with hidden location reveal (click to decrypt)
+  isFullyRedacted?: boolean // For fully locked events (no access at all)
 }
 
 export const events: Event[] = [
   {
-    id: 'signal-breach',
-    name: 'SIGNAL BREACH',
+    id: 'kamikaze-override',
+    name: 'KAMIKAZE OVERRIDE',
     date: '2026-07-26',
     venue: 'Undisclosed',
     city: 'Trivandrum',
     lineup: ['KAMIKAZE COLLECTIVE', 'LOCAL FREQUENCIES', 'TBA'],
-    ticketUrl: 'https://ra.co/events/kamikaze-signal-breach',
+    ticketUrl: 'https://ra.co/events/kamikaze-override',
     isPast: false,
     description: 'The signal reaches the subcontinent. Location decrypts 48 hours before.',
     isSecretLocation: true, // Special flag for hacking sequence
   },
   {
-    id: 'void-descent',
-    name: 'VOID DESCENT',
+    id: 'redacted-session-01',
+    name: '[REDACTED SESSION]',
     date: '2025-05-17',
-    venue: 'Warehouse 17',
-    city: 'Berlin',
-    lineup: ['KNTXT', 'VTSS', 'TRYM', 'PARFAIT'],
-    ticketUrl: 'https://ra.co/events/kamikaze-void-descent',
+    venue: 'UNKNOWN',
+    city: 'UNKNOWN',
+    lineup: ['█████████', '███████', '██████'],
     isPast: false,
-    description: 'Six hours of unrelenting industrial techno in the depths of Kreuzberg.',
+    description: 'You are not authorized to view this transmission. Clearance required. Signal locked until further notice.',
+    isFullyRedacted: true,
   },
   {
-    id: 'system-collapse',
-    name: 'SYSTEM COLLAPSE',
+    id: 'redacted-session-02',
+    name: '[REDACTED SESSION]',
     date: '2025-06-28',
-    venue: 'The Tunnels',
-    city: 'London',
-    lineup: ['999999999', 'BLAWAN', 'PAULA TEMPLE', 'PHASE FATALE'],
-    ticketUrl: 'https://ra.co/events/kamikaze-system-collapse',
+    venue: 'UNKNOWN',
+    city: 'UNKNOWN',
+    lineup: ['█████████', '███████', '██████'],
     isPast: false,
-    description: 'The system fails. We dance in the wreckage.',
-  },
-  {
-    id: 'total-destruction',
-    name: 'TOTAL DESTRUCTION',
-    date: '2025-08-15',
-    venue: 'Bunker Unknown',
-    city: 'Amsterdam',
-    lineup: ['ANSOME', 'REBEKAH', 'HEADLESS HORSEMAN'],
-    isPast: false,
-    description: 'Location revealed 24 hours before. No phones. No mercy.',
+    description: 'You are not authorized to view this transmission. Clearance required. Signal locked until further notice.',
+    isFullyRedacted: true,
   },
   {
     id: 'ritual-001',
