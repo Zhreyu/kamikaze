@@ -10,6 +10,7 @@ import { DepthLayers } from '@/components/canvas/DepthLayers'
 import { ScrollTracker } from '@/components/layout/ScrollTracker'
 import { TerminalAudioPlayer } from '@/components/audio/TerminalAudioPlayer'
 import { BootSequence } from '@/components/layout/BootSequence'
+import { FontLoader } from '@/components/layout/FontLoader'
 
 // Dynamic import for 3D scene (client-only, no SSR for WebGL)
 const SigilScene3D = dynamic(
@@ -42,6 +43,9 @@ export function AppShell({ children }: AppShellProps) {
 
   return (
     <>
+      {/* Load fonts with correct base path */}
+      <FontLoader />
+
       {/* Boot sequence overlay */}
       {showBootSequence && (
         <BootSequence onComplete={handleBootComplete} />
