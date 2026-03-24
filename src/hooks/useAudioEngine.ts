@@ -14,7 +14,7 @@ interface AudioEngineState {
   // Local mode only
   audioContext: AudioContext | null
   analyzer: AnalyserNode | null
-  frequencyData: Uint8Array
+  frequencyData: Uint8Array<ArrayBuffer>
 }
 
 // Global state
@@ -27,7 +27,7 @@ const state: AudioEngineState = {
   bpm: 140, // Default techno BPM
   audioContext: null,
   analyzer: null,
-  frequencyData: new Uint8Array(128),
+  frequencyData: new Uint8Array(128) as Uint8Array<ArrayBuffer>,
 }
 
 const listeners: Set<() => void> = new Set()

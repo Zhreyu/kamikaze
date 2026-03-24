@@ -65,9 +65,10 @@ export function TerminalAudioPlayer() {
 
   // Subscribe to audio state changes
   useEffect(() => {
-    return onAudioChange(() => {
+    const unsubscribe = onAudioChange(() => {
       setState(getAudioState())
     })
+    return () => { unsubscribe() }
   }, [])
 
   // Animate frequency bars
