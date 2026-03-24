@@ -22,6 +22,15 @@
   font-display: swap;
 }
 
+/* Slaughter of the Death - aggressive display font */
+@font-face {
+  font-family: 'Slaughter';
+  src: url('/slaughter-of-the-death-font/SlaughterofthedeathRegular-w1gaZ.otf') format('opentype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
 /* ============================================
    CSS VARIABLES
    ============================================ */
@@ -92,16 +101,25 @@ body {
    ============================================ */
 
 .font-display {
-  font-family: 'Archivo Black', sans-serif;
-  font-weight: 900;
+  font-family: 'Slaughter', 'Archivo Black', sans-serif;
+  font-weight: 400;
   text-transform: uppercase;
-  letter-spacing: var(--tracking-tight);
-  line-height: 0.9;
+  letter-spacing: 0.05em;
+  line-height: 1;
 }
 
 .font-mono {
   font-family: 'JetBrains Mono', monospace;
   letter-spacing: var(--tracking-wide);
+}
+
+/* Slaughter for ritual headlines */
+.font-ritual {
+  font-family: 'Slaughter', 'Archivo Black', sans-serif;
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  line-height: 1.1;
 }
 
 /* Hero text with chromatic aberration */
@@ -133,6 +151,115 @@ body {
   96% {
     text-shadow: 2px 1px 0 rgba(255, 0, 0, 0.8), -2px -1px 0 rgba(0, 255, 255, 0.8);
   }
+}
+
+/* Heavy chromatic aberration for hero text */
+.text-chromatic {
+  position: relative;
+  text-shadow:
+    -4px 0 0 rgba(255, 0, 0, 0.5),
+    4px 0 0 rgba(0, 255, 255, 0.5),
+    0 0 40px rgba(204, 0, 0, 0.5);
+}
+
+.text-chromatic::before,
+.text-chromatic::after {
+  content: attr(data-text);
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.text-chromatic::before {
+  color: #ff0000;
+  animation: chromatic-red 3s ease-in-out infinite;
+  mix-blend-mode: screen;
+  opacity: 0.5;
+}
+
+.text-chromatic::after {
+  color: #00ffff;
+  animation: chromatic-cyan 3s ease-in-out infinite reverse;
+  mix-blend-mode: screen;
+  opacity: 0.5;
+}
+
+@keyframes chromatic-red {
+  0%, 100% { transform: translate(-3px, 0); }
+  25% { transform: translate(-5px, 2px); }
+  50% { transform: translate(-2px, -1px); }
+  75% { transform: translate(-4px, 1px); }
+}
+
+@keyframes chromatic-cyan {
+  0%, 100% { transform: translate(3px, 0); }
+  25% { transform: translate(5px, -2px); }
+  50% { transform: translate(2px, 1px); }
+  75% { transform: translate(4px, -1px); }
+}
+
+/* Intense jitter on hover - CSS var controlled */
+.text-jitter {
+  --jitter-x: 0;
+  --jitter-y: 0;
+  animation: jitter 0.1s infinite;
+}
+
+@keyframes jitter {
+  0% { transform: translate(calc(var(--jitter-x) * 1px), calc(var(--jitter-y) * 1px)); }
+  25% { transform: translate(calc(var(--jitter-x) * -0.5px), calc(var(--jitter-y) * 0.5px)); }
+  50% { transform: translate(calc(var(--jitter-x) * 0.5px), calc(var(--jitter-y) * -0.5px)); }
+  75% { transform: translate(calc(var(--jitter-x) * -1px), calc(var(--jitter-y) * -0.5px)); }
+}
+
+/* RGB split effect - increases with distance from center */
+.rgb-split {
+  position: relative;
+}
+
+.rgb-split::before {
+  content: attr(data-text);
+  position: absolute;
+  top: 0;
+  left: -2px;
+  color: #ff0000;
+  opacity: 0.7;
+  mix-blend-mode: screen;
+  clip-path: polygon(0 0, 100% 0, 100% 45%, 0 45%);
+}
+
+.rgb-split::after {
+  content: attr(data-text);
+  position: absolute;
+  top: 0;
+  left: 2px;
+  color: #00ffff;
+  opacity: 0.7;
+  mix-blend-mode: screen;
+  clip-path: polygon(0 55%, 100% 55%, 100% 100%, 0 100%);
+}
+
+/* Glitch tear line */
+.glitch-tear {
+  position: fixed;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent 0%, var(--arterial) 20%, #00ffff 50%, var(--arterial) 80%, transparent 100%);
+  opacity: 0;
+  z-index: 9997;
+  animation: tear-flash 8s linear infinite;
+}
+
+@keyframes tear-flash {
+  0%, 95%, 100% { opacity: 0; top: 50%; }
+  96% { opacity: 1; top: 30%; }
+  97% { opacity: 0.8; top: 70%; }
+  98% { opacity: 1; top: 20%; }
+  99% { opacity: 0; top: 80%; }
 }
 
 /* ============================================
@@ -346,6 +473,30 @@ a:hover {
 /* ============================================
    UTILITY CLASSES
    ============================================ */
+
+/* Glass card effect for floating over 3D sigil */
+.glass-card {
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(4px) brightness(0.5);
+  -webkit-backdrop-filter: blur(4px) brightness(0.5);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.glass-card-heavy {
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(8px) brightness(0.4);
+  -webkit-backdrop-filter: blur(8px) brightness(0.4);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* Skewed container for aggressive layout */
+.skew-container {
+  transform: skewY(-3deg);
+}
+
+.skew-container > * {
+  transform: skewY(3deg); /* Counter-skew content */
+}
 
 .text-shadow-glow {
   text-shadow: 0 0 20px currentColor;

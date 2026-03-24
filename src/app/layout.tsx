@@ -1,9 +1,5 @@
 import type { Metadata } from 'next'
-import { LenisProvider } from '@/providers/LenisProvider'
-import { CursorProvider } from '@/providers/CursorProvider'
-import { TransitionProvider } from '@/providers/TransitionProvider'
-import { Navigation } from '@/components/layout/Navigation'
-import { DepthLayers } from '@/components/canvas/DepthLayers'
+import { AppShell } from '@/components/layout/AppShell'
 import '@/styles/globals.css'
 
 export const metadata: Metadata = {
@@ -24,16 +20,8 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className="bg-void text-white min-h-screen">
-        <LenisProvider>
-          <CursorProvider>
-            <TransitionProvider>
-              <Navigation />
-              <main className="relative z-10">{children}</main>
-              <DepthLayers />
-            </TransitionProvider>
-          </CursorProvider>
-        </LenisProvider>
+      <body className="bg-void text-white min-h-screen overflow-x-hidden">
+        <AppShell>{children}</AppShell>
       </body>
     </html>
   )

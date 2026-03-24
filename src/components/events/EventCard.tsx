@@ -3,6 +3,7 @@
 import { useState, useRef, useCallback } from 'react'
 import { Event, formatEventDate } from '@/data/events'
 import { TerminalButton } from '@/components/ui/TerminalButton'
+import { triggerSigilGlitch } from '@/hooks/useSigilGlitch'
 import clsx from 'clsx'
 
 interface EventCardProps {
@@ -45,7 +46,10 @@ export function EventCard({ event, index }: EventCardProps) {
       }}
       onClick={() => setIsExpanded(!isExpanded)}
       onMouseMove={handleMouseMove}
-      onMouseEnter={() => setIsHovered(true)}
+      onMouseEnter={() => {
+        setIsHovered(true)
+        triggerSigilGlitch(0.8, 200) // Trigger 3D sigil shake
+      }}
       onMouseLeave={() => setIsHovered(false)}
     >
       {/* Torn edge top */}
@@ -63,12 +67,12 @@ export function EventCard({ event, index }: EventCardProps) {
         }}
       />
 
-      {/* Main card body */}
+      {/* Main card body - glass effect */}
       <div
         className={clsx(
-          'relative border-l-4 border-arterial bg-void/80 backdrop-blur-sm',
+          'relative border-l-4 border-arterial glass-card',
           'transition-all duration-300',
-          isHovered ? 'bg-void/95 border-l-8' : ''
+          isHovered ? 'glass-card-heavy border-l-8' : ''
         )}
         style={{
           transform: `skewY(${-skewDirection}deg)`, // Counter-skew content
