@@ -25,7 +25,8 @@ export function TerminalAudioPlayer() {
   const [isExpanded, setIsExpanded] = useState(true) // Default maximized
   const [showChannelSelector, setShowChannelSelector] = useState(false)
   const [bars, setBars] = useState<number[]>(new Array(16).fill(0.1))
-  const [trackTitle, setTrackTitle] = useState('LOADING...')
+  const [trackTitle, setTrackTitle] = useState('INITIALIZING...')
+  const [scApiLoaded, setScApiLoaded] = useState(false)
   const [scReady, setScReady] = useState(false)
   const [currentUrl, setCurrentUrl] = useState(CHANNELS[0].url)
   const [isFading, setIsFading] = useState(false)
@@ -34,10 +35,18 @@ export function TerminalAudioPlayer() {
 
   // Load SoundCloud Widget API script
   useEffect(() => {
+    // Check if already loaded
+    if (window.SC?.Widget) {
+      setScApiLoaded(true)
+      initAudioEngine()
+      return
+    }
+
     const script = document.createElement('script')
     script.src = 'https://w.soundcloud.com/player/api.js'
     script.async = true
     script.onload = () => {
+      setScApiLoaded(true)
       initAudioEngine()
     }
     document.body.appendChild(script)
@@ -49,11 +58,11 @@ export function TerminalAudioPlayer() {
     }
   }, [])
 
-  // Initialize widget when iframe loads/changes
+  // Initialize widget when API is loaded and iframe exists
   useEffect(() => {
-    if (!iframeRef.current || !window.SC?.Widget) return
+    if (!scApiLoaded || !iframeRef.current || !window.SC?.Widget) return
 
-    const SC = window.SC // Capture reference for TypeScript
+    const SC = window.SC
 
     // Small delay to let iframe load
     const initWidget = setTimeout(() => {
@@ -64,11 +73,14 @@ export function TerminalAudioPlayer() {
 
       widget.bind(SC.Widget.Events.READY, () => {
         setScReady(true)
+        setTrackTitle('READY // PRESS PLAY')
         initSoundCloudWidget(iframeRef.current!)
+
+        // Set initial volume
+        widget.setVolume(70)
 
         // If we're coming back from a fade, restore volume and play
         if (isFading) {
-          // Fade in
           let vol = 0
           const fadeIn = setInterval(() => {
             vol += 10
@@ -89,10 +101,10 @@ export function TerminalAudioPlayer() {
           }
         })
       })
-    }, 100)
+    }, 300)
 
     return () => clearTimeout(initWidget)
-  }, [currentUrl, isFading])
+  }, [scApiLoaded, currentUrl, isFading])
 
   // Subscribe to audio state changes
   useEffect(() => {
@@ -224,8 +236,11 @@ export function TerminalAudioPlayer() {
 
       {/* Track info */}
       <div className="px-2 py-1.5">
-        <div className="text-white/90 truncate tracking-wider">
-          {scReady ? trackTitle : 'CONNECTING...'}
+        <div className={clsx(
+          'truncate tracking-wider',
+          scReady ? 'text-white/90' : 'text-grey-mid animate-pulse'
+        )}>
+          {!scApiLoaded ? 'LOADING_API...' : !scReady ? 'CONNECTING...' : trackTitle}
         </div>
         <div className="flex items-center gap-2 text-grey-dark truncate">
           <span style={{ color: channel.color }}>[{channel.code}]</span>
@@ -297,7 +312,7 @@ export function TerminalAudioPlayer() {
             >
               <span style={{ color: channel.color }}>[{channel.code}]</span>
               <span className="text-grey-mid ml-1">{channel.name}</span>
-              <span className="text-arterial/50 ml-2">// SWITCH</span>
+              <span className="text-arterial/50 ml-2">{'// SWITCH'}</span>
             </button>
           </div>
         </div>

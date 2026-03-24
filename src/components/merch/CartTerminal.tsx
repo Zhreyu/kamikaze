@@ -36,7 +36,7 @@ export function CartTerminal({
         `> BUFFER_LOADED: ${lastItem.item.serial} [${lastItem.size}]`,
       ])
     }
-  }, [items.length])
+  }, [items])
 
   // Typing animation for execute button
   useEffect(() => {
