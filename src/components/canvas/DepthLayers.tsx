@@ -116,7 +116,7 @@ export function DepthLayers() {
 
       {/* Scroll indicator - blood drip */}
       <div
-        className="fixed right-4 top-1/2 -translate-y-1/2 w-[2px] h-[30vh] bg-grey-dark z-[60]"
+        className="fixed right-4 top-1/2 -translate-y-1/2 w-[2px] h-[30vh] bg-white/30 z-[60]"
         aria-hidden="true"
       >
         <div

@@ -31,7 +31,7 @@ export function ContactForm() {
             <div className="font-mono text-signal text-xl mb-4">
               SIGNAL_SENT <span className="text-white"></span>
             </div>
-            <p className="font-mono text-grey-mid text-sm">
+            <p className="font-mono text-white/70 text-sm">
               Your transmission has been received. We will respond.
             </p>
           </GlitchSlice>

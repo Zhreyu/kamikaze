@@ -32,7 +32,7 @@ export const TornInput = forwardRef<HTMLInputElement, TornInputProps>(
             }}
             className={clsx(
               'w-full bg-transparent font-mono text-white py-3 px-0',
-              'border-0 border-b border-grey-mid/50',
+              'border-0 border-b border-white/40/50',
               'placeholder:text-white/40',
               'focus:outline-none focus:border-transparent',
               'transition-colors duration-300'
@@ -40,7 +40,7 @@ export const TornInput = forwardRef<HTMLInputElement, TornInputProps>(
           />
           {/* Torn bottom border */}
           <div
-            className="absolute bottom-0 left-0 right-0 h-[2px] bg-grey-mid/60"
+            className="absolute bottom-0 left-0 right-0 h-[2px] bg-white/40/60"
             style={{
               clipPath: `polygon(
                 0% 0%, 2% 100%, 5% 0%, 8% 100%, 12% 0%, 15% 100%, 20% 0%,

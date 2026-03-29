@@ -61,7 +61,7 @@ export function MerchCard({ item, index, onAddToCart, onSelect }: MerchCardProps
     HIGH: 'text-signal',
     LOW: 'text-yellow-500',
     CRITICAL: 'text-arterial',
-    DEPLETED: 'text-grey-dark',
+    DEPLETED: 'text-white/50',
   }[item.stock]
 
   // Stagger offset for asymmetric grid
@@ -81,7 +81,7 @@ export function MerchCard({ item, index, onAddToCart, onSelect }: MerchCardProps
     >
       {/* Image container with glitch effects */}
       <div
-        className="relative aspect-[3/4] overflow-hidden bg-void border border-grey-dark/20"
+        className="relative aspect-[3/4] overflow-hidden bg-void border border-white/30/20"
         style={{
           transform: `perspective(1000px) rotateY(${rotateY}deg)`,
           transition: 'transform 0.1s ease-out',
@@ -184,17 +184,17 @@ export function MerchCard({ item, index, onAddToCart, onSelect }: MerchCardProps
         >
           <div className="grid grid-cols-3 gap-2 font-mono text-[10px]">
             <div>
-              <span className="text-grey-dark block">STOCK</span>
+              <span className="text-white/50 block">STOCK</span>
               <span className={stockColor}>{item.stock}</span>
             </div>
             {item.fabric && (
               <div>
-                <span className="text-grey-dark block">FABRIC</span>
+                <span className="text-white/50 block">FABRIC</span>
                 <span className="text-white">{item.fabric.split(' ')[0]}</span>
               </div>
             )}
             <div>
-              <span className="text-grey-dark block">SIGNAL</span>
+              <span className="text-white/50 block">SIGNAL</span>
               <span className="text-arterial">{item.signal}/10</span>
             </div>
           </div>
@@ -227,7 +227,7 @@ export function MerchCard({ item, index, onAddToCart, onSelect }: MerchCardProps
             >
               {item.name}
             </h3>
-            <p className="font-mono text-xs text-grey-dark mt-1">
+            <p className="font-mono text-xs text-white/50 mt-1">
               {item.category}
             </p>
           </div>
@@ -238,7 +238,7 @@ export function MerchCard({ item, index, onAddToCart, onSelect }: MerchCardProps
 
         {/* Size selector */}
         <div className="flex items-center gap-2">
-          <span className="font-mono text-[10px] text-grey-dark">SIZE:</span>
+          <span className="font-mono text-[10px] text-white/50">SIZE:</span>
           <div className="flex gap-1">
             {item.sizes.map((size) => (
               <button
@@ -251,7 +251,7 @@ export function MerchCard({ item, index, onAddToCart, onSelect }: MerchCardProps
                   'font-mono text-[10px] px-2 py-1 border transition-all duration-200',
                   selectedSize === size
                     ? 'border-arterial text-arterial bg-arterial/10'
-                    : 'border-grey-dark/30 text-grey-dark hover:border-grey-mid hover:text-grey-mid'
+                    : 'border-white/30/30 text-white/50 hover:border-white/60 hover:text-white/80'
                 )}
               >
                 {size}
@@ -267,8 +267,8 @@ export function MerchCard({ item, index, onAddToCart, onSelect }: MerchCardProps
           className={clsx(
             'w-full py-3 font-mono text-xs tracking-widest border transition-all duration-300',
             item.stock === 'DEPLETED'
-              ? 'border-grey-dark/30 text-grey-dark cursor-not-allowed'
-              : 'border-grey-dark/50 text-white hover:border-arterial hover:text-arterial hover:bg-arterial/5'
+              ? 'border-white/30/30 text-white/50 cursor-not-allowed'
+              : 'border-white/30/50 text-white hover:border-arterial hover:text-arterial hover:bg-arterial/5'
           )}
         >
           {item.stock === 'DEPLETED' ? '[ DEPLETED ]' : '[ ACQUIRE ]'}

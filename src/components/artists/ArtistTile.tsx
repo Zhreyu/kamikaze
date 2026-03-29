@@ -311,7 +311,7 @@ export function ArtistTile({ artist, index }: ArtistTileProps) {
         <p
           className={clsx(
             'font-mono text-sm mt-1 transition-colors duration-300',
-            isHovered ? 'text-grey-mid' : 'text-grey-dark'
+            isHovered ? 'text-white/70' : 'text-white/50'
           )}
         >
           <span className="text-arterial/60">{'>'}</span> {artist.location}
@@ -322,7 +322,7 @@ export function ArtistTile({ artist, index }: ArtistTileProps) {
       <div
         className={clsx(
           'h-px mt-4 transition-all duration-500',
-          isHovered ? 'bg-arterial w-full' : 'bg-grey-dark/30 w-1/2'
+          isHovered ? 'bg-arterial w-full' : 'bg-white/20/30 w-1/2'
         )}
       />
     </article>

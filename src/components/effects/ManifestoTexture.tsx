@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 
 const MANIFESTO_PHRASES = [
   'WE MAKE RUPTURES',
@@ -27,10 +27,18 @@ export function ManifestoTexture({
   const [scrollY, setScrollY] = useState(0)
   const [phraseIndex, setPhrase] = useState(0)
 
-  // Track scroll for parallax
+  // Track scroll for parallax with RAF throttling for mobile performance
+  const tickingRef = useRef(false)
+
   useEffect(() => {
     const handleScroll = () => {
-      setScrollY(window.scrollY)
+      if (!tickingRef.current) {
+        requestAnimationFrame(() => {
+          setScrollY(window.scrollY)
+          tickingRef.current = false
+        })
+        tickingRef.current = true
+      }
     }
     window.addEventListener('scroll', handleScroll, { passive: true })
     return () => window.removeEventListener('scroll', handleScroll)

@@ -1,28 +1,29 @@
-import { SignalFeed } from '@/components/artists/SignalFeed'
-import { SignalUpload } from '@/components/artists/SignalUpload'
-import { AsciiSigilBackground } from '@/components/canvas/AsciiSigil'
+'use client'
 
-export const metadata = {
-  title: 'OPEN SIGNAL NETWORK | KAMIKAZE',
-  description:
-    'Transmission is open. Hierarchy is terminated. Submit your signal.',
-}
+import { useState } from 'react'
+import { Genre } from '@/data/signals'
+import { SignalFeed } from './SignalFeed'
+import { SignalUpload } from './SignalUpload'
+import { FrequencyTuner } from './FrequencyTuner'
+import FrequencySigil from '@/components/canvas/FrequencySigil'
 
-export default function ArtistsPage() {
+export function SignalNetworkContent() {
+  const [selectedGenre, setSelectedGenre] = useState<Genre | null>(null)
+
   return (
-    <div className="relative pt-24 pb-16">
-      {/* ASCII Sigil - terminal aesthetic background */}
-      <AsciiSigilBackground />
+    <div className="relative min-h-screen pt-24 pb-32">
+      {/* Frequency Sigil - background visual */}
+      <FrequencySigil />
 
       {/* Content */}
       <div className="relative z-10 max-w-4xl mx-auto px-6">
         {/* Header */}
         <header className="mb-16">
-          <div className="flex flex-col sm:flex-row sm:items-baseline gap-2 sm:gap-4 mb-4">
-            <span className="font-mono text-arterial text-xs tracking-widest hidden sm:inline">
+          <div className="flex items-baseline gap-4 mb-4">
+            <span className="font-mono text-arterial text-xs tracking-widest">
               [SYS://
             </span>
-            <h1 className="font-display text-2xl xs:text-3xl sm:text-5xl md:text-7xl tracking-wider break-words">
+            <h1 className="font-display text-4xl sm:text-5xl md:text-7xl tracking-wider">
               OPEN_SIGNAL_NETWORK
             </h1>
             <span className="font-mono text-arterial text-xs tracking-widest hidden sm:inline">
@@ -37,7 +38,7 @@ export default function ArtistsPage() {
           {/* Decorative line */}
           <div className="mt-8 flex items-center gap-4">
             <div className="h-px flex-1 bg-gradient-to-r from-arterial/50 to-transparent" />
-            <span className="font-mono text-xs text-white/50 tracking-widest">
+            <span className="font-mono text-[10px] text-white/50 tracking-widest">
               NO_IDOLS // ONLY_FREQUENCY
             </span>
             <div className="h-px flex-1 bg-gradient-to-l from-arterial/50 to-transparent" />
@@ -45,7 +46,7 @@ export default function ArtistsPage() {
         </header>
 
         {/* Manifesto snippet */}
-        <div className="mb-16 py-8 border-y border-white/20">
+        <div className="mb-12 py-8 border-y border-white/30/20">
           <p className="font-mono text-sm text-white/70 leading-relaxed max-w-2xl">
             <span className="text-arterial">{'>'}</span> We are not here to
             build idols. We are here to amplify sound. The underground was
@@ -54,8 +55,16 @@ export default function ArtistsPage() {
           </p>
         </div>
 
+        {/* Frequency Tuner */}
+        <div className="mb-12">
+          <FrequencyTuner
+            selectedGenre={selectedGenre}
+            onGenreChange={setSelectedGenre}
+          />
+        </div>
+
         {/* Signal Feed */}
-        <SignalFeed />
+        <SignalFeed genreFilter={selectedGenre} />
 
         {/* Signal Upload Form */}
         <SignalUpload />

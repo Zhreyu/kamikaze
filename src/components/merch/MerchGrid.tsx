@@ -13,19 +13,19 @@ export function MerchGrid({ items, onAddToCart, onSelectItem }: MerchGridProps) 
   return (
     <div className="max-w-7xl mx-auto px-6 pb-32">
       {/* Filter/sort bar */}
-      <div className="flex items-center justify-between mb-8 pb-4 border-b border-grey-dark/20">
+      <div className="flex items-center justify-between mb-8 pb-4 border-b border-white/30/20">
         <div className="flex items-center gap-6">
           <button className="font-mono text-xs text-white border-b border-arterial pb-1">
             ALL
           </button>
-          <button className="font-mono text-xs text-grey-dark hover:text-grey-mid transition-colors">
+          <button className="font-mono text-xs text-white/50 hover:text-white/70 transition-colors">
             APPAREL
           </button>
-          <button className="font-mono text-xs text-grey-dark hover:text-grey-mid transition-colors">
+          <button className="font-mono text-xs text-white/50 hover:text-white/70 transition-colors">
             ACCESSORY
           </button>
         </div>
-        <div className="font-mono text-[10px] text-grey-dark">
+        <div className="font-mono text-[10px] text-white/50">
           {items.length} UNITS_AVAILABLE
         </div>
       </div>

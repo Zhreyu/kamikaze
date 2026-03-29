@@ -80,7 +80,7 @@ export default function CartPage() {
           <div className="flex items-center gap-4 mb-4">
             <button
               onClick={() => navigateTo('/merch')}
-              className="font-mono text-xs text-grey-mid hover:text-white transition-colors"
+              className="font-mono text-xs text-white/70 hover:text-white transition-colors"
             >
               {'<'} BACK_TO_INVENTORY
             </button>
@@ -103,7 +103,7 @@ export default function CartPage() {
         </div>
 
         {/* Terminal log */}
-        <div className="mb-8 p-4 border border-grey-dark/30 bg-black/50 font-mono text-[11px] text-grey-dark space-y-1">
+        <div className="mb-8 p-4 border border-white/30/30 bg-black/50 font-mono text-[11px] text-white/50 space-y-1">
           {terminalLines.map((line, i) => (
             <p key={i} className={line.includes('ERROR') ? 'text-arterial' : line.includes('LOADED') ? 'text-signal' : ''}>
               {line}
@@ -114,9 +114,9 @@ export default function CartPage() {
 
         {/* Cart items */}
         {cartItems.length === 0 ? (
-          <div className="text-center py-20 border border-grey-dark/20">
-            <p className="font-mono text-lg text-grey-dark mb-2">[BUFFER_EMPTY]</p>
-            <p className="font-mono text-xs text-grey-dark/60 mb-6">
+          <div className="text-center py-20 border border-white/30/20">
+            <p className="font-mono text-lg text-white/50 mb-2">[BUFFER_EMPTY]</p>
+            <p className="font-mono text-xs text-white/50/60 mb-6">
               No items queued for acquisition
             </p>
             <button
@@ -133,7 +133,7 @@ export default function CartPage() {
               {cartItems.map((cartItem) => (
                 <div
                   key={`${cartItem.item.id}-${cartItem.size}`}
-                  className="p-6 border border-grey-dark/30 bg-black/30 flex flex-col md:flex-row md:items-center gap-6"
+                  className="p-6 border border-white/30/30 bg-black/30 flex flex-col md:flex-row md:items-center gap-6"
                 >
                   {/* Item info */}
                   <div className="flex-1">
@@ -141,14 +141,14 @@ export default function CartPage() {
                       <span className="font-mono text-xs text-arterial">
                         #{cartItem.item.serial}
                       </span>
-                      <span className="font-mono text-[10px] text-grey-dark px-2 py-0.5 border border-grey-dark/30">
+                      <span className="font-mono text-[10px] text-white/50 px-2 py-0.5 border border-white/30/30">
                         {cartItem.size}
                       </span>
                     </div>
                     <h3 className="font-mono text-lg text-white">
                       {cartItem.item.name}
                     </h3>
-                    <p className="font-mono text-xs text-grey-dark mt-1">
+                    <p className="font-mono text-xs text-white/50 mt-1">
                       {cartItem.item.category}
                     </p>
                   </div>
@@ -156,7 +156,7 @@ export default function CartPage() {
                   {/* Quantity controls */}
                   <div className="flex items-center gap-4">
                     <div className="flex items-center gap-2">
-                      <span className="font-mono text-xs text-grey-dark">QTY:</span>
+                      <span className="font-mono text-xs text-white/50">QTY:</span>
                       <button
                         onClick={() =>
                           handleUpdateQuantity(
@@ -165,7 +165,7 @@ export default function CartPage() {
                             cartItem.quantity - 1
                           )
                         }
-                        className="font-mono text-lg text-grey-mid hover:text-white px-2 border border-grey-dark/30 hover:border-grey-mid transition-colors"
+                        className="font-mono text-lg text-white/70 hover:text-white px-2 border border-white/30/30 hover:border-white/40 transition-colors"
                       >
                         -
                       </button>
@@ -180,7 +180,7 @@ export default function CartPage() {
                             cartItem.quantity + 1
                           )
                         }
-                        className="font-mono text-lg text-grey-mid hover:text-white px-2 border border-grey-dark/30 hover:border-grey-mid transition-colors"
+                        className="font-mono text-lg text-white/70 hover:text-white px-2 border border-white/30/30 hover:border-white/40 transition-colors"
                       >
                         +
                       </button>
@@ -193,7 +193,7 @@ export default function CartPage() {
                       €{(cartItem.item.price * cartItem.quantity).toFixed(2)}
                     </span>
                     {cartItem.quantity > 1 && (
-                      <p className="font-mono text-[10px] text-grey-dark">
+                      <p className="font-mono text-[10px] text-white/50">
                         €{cartItem.item.price.toFixed(2)} each
                       </p>
                     )}
@@ -202,7 +202,7 @@ export default function CartPage() {
                   {/* Remove button */}
                   <button
                     onClick={() => handleRemoveItem(cartItem.item.id, cartItem.size)}
-                    className="font-mono text-xs text-grey-dark hover:text-arterial transition-colors"
+                    className="font-mono text-xs text-white/50 hover:text-arterial transition-colors"
                   >
                     [DEL]
                   </button>
@@ -211,19 +211,19 @@ export default function CartPage() {
             </div>
 
             {/* Totals */}
-            <div className="border border-grey-dark/30 bg-black/30 p-6">
+            <div className="border border-white/30/30 bg-black/30 p-6">
               <div className="space-y-3 font-mono text-sm mb-6">
                 <div className="flex justify-between">
-                  <span className="text-grey-dark">SUBTOTAL:</span>
-                  <span className="text-grey-mid">€{subtotal.toFixed(2)}</span>
+                  <span className="text-white/50">SUBTOTAL:</span>
+                  <span className="text-white/70">€{subtotal.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-grey-dark">TRANSMISSION_FEE:</span>
-                  <span className={shipping === 0 ? 'text-signal' : 'text-grey-mid'}>
+                  <span className="text-white/50">TRANSMISSION_FEE:</span>
+                  <span className={shipping === 0 ? 'text-signal' : 'text-white/70'}>
                     {shipping === 0 ? 'WAIVED (ORDER > €100)' : `€${shipping.toFixed(2)}`}
                   </span>
                 </div>
-                <div className="flex justify-between pt-4 border-t border-grey-dark/30">
+                <div className="flex justify-between pt-4 border-t border-white/30/30">
                   <span className="text-white text-lg">TOTAL:</span>
                   <span className="text-arterial text-xl">€{total.toFixed(2)}</span>
                 </div>
@@ -239,7 +239,7 @@ export default function CartPage() {
                 [ EXECUTE_ORDER ]
               </button>
 
-              <p className="font-mono text-[10px] text-grey-dark text-center mt-4">
+              <p className="font-mono text-[10px] text-white/50 text-center mt-4">
                 SECURE_TRANSMISSION // STRIPE_ENCRYPTED // ALL_SALES_FINAL
               </p>
             </div>

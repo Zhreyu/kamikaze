@@ -61,26 +61,26 @@ export function CartTerminal({
       {/* Terminal sidebar */}
       <div
         className={clsx(
-          'fixed top-0 right-0 h-full w-full max-w-md bg-void border-l border-grey-dark/30 z-50',
+          'fixed top-0 right-0 h-full w-full max-w-md bg-void border-l border-white/30/30 z-50',
           'transition-transform duration-500 ease-out',
           isOpen ? 'translate-x-0' : 'translate-x-full'
         )}
       >
         {/* Terminal header */}
-        <div className="flex items-center justify-between p-4 border-b border-grey-dark/30">
+        <div className="flex items-center justify-between p-4 border-b border-white/30/30">
           <div className="flex items-center gap-3">
             <div className="flex gap-1.5">
               <div className="w-3 h-3 rounded-full bg-arterial" />
               <div className="w-3 h-3 rounded-full bg-yellow-500/60" />
               <div className="w-3 h-3 rounded-full bg-signal/60" />
             </div>
-            <span className="font-mono text-xs text-grey-mid">
+            <span className="font-mono text-xs text-white/70">
               ACQUISITION_BUFFER.exe
             </span>
           </div>
           <button
             onClick={onClose}
-            className="font-mono text-xs text-grey-dark hover:text-white transition-colors"
+            className="font-mono text-xs text-white/50 hover:text-white transition-colors"
           >
             [X]
           </button>
@@ -89,7 +89,7 @@ export function CartTerminal({
         {/* Terminal content */}
         <div className="flex flex-col h-[calc(100%-60px)]">
           {/* Log lines */}
-          <div className="p-4 border-b border-grey-dark/20 font-mono text-[10px] text-grey-dark space-y-1">
+          <div className="p-4 border-b border-white/30/20 font-mono text-[10px] text-white/50 space-y-1">
             <p>{'>'} INITIALIZING_CART_SYSTEM...</p>
             <p>{'>'} CONNECTION_ESTABLISHED</p>
             {terminalLines.map((line, i) => (
@@ -104,10 +104,10 @@ export function CartTerminal({
           <div className="flex-1 overflow-y-auto p-4 space-y-4">
             {items.length === 0 ? (
               <div className="text-center py-12">
-                <p className="font-mono text-xs text-grey-dark">
+                <p className="font-mono text-xs text-white/50">
                   [BUFFER_EMPTY]
                 </p>
-                <p className="font-mono text-[10px] text-grey-dark/60 mt-2">
+                <p className="font-mono text-[10px] text-white/50/60 mt-2">
                   No items queued for acquisition
                 </p>
               </div>
@@ -115,7 +115,7 @@ export function CartTerminal({
               items.map((cartItem) => (
                 <div
                   key={`${cartItem.item.id}-${cartItem.size}`}
-                  className="p-3 border border-grey-dark/30 bg-black/30"
+                  className="p-3 border border-white/30/30 bg-black/30"
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex-1">
@@ -123,7 +123,7 @@ export function CartTerminal({
                         <span className="font-mono text-[10px] text-arterial">
                           #{cartItem.item.serial}
                         </span>
-                        <span className="font-mono text-[10px] text-grey-dark">
+                        <span className="font-mono text-[10px] text-white/50">
                           [{cartItem.size}]
                         </span>
                       </div>
@@ -133,7 +133,7 @@ export function CartTerminal({
                     </div>
                     <button
                       onClick={() => onRemoveItem(cartItem.item.id, cartItem.size)}
-                      className="font-mono text-[10px] text-grey-dark hover:text-arterial transition-colors"
+                      className="font-mono text-[10px] text-white/50 hover:text-arterial transition-colors"
                     >
                       [DEL]
                     </button>
@@ -141,7 +141,7 @@ export function CartTerminal({
 
                   <div className="flex items-center justify-between mt-3">
                     <div className="flex items-center gap-2">
-                      <span className="font-mono text-[10px] text-grey-dark">QTY:</span>
+                      <span className="font-mono text-[10px] text-white/50">QTY:</span>
                       <button
                         onClick={() =>
                           onUpdateQuantity(
@@ -150,7 +150,7 @@ export function CartTerminal({
                             Math.max(1, cartItem.quantity - 1)
                           )
                         }
-                        className="font-mono text-xs text-grey-mid hover:text-white px-1"
+                        className="font-mono text-xs text-white/70 hover:text-white px-1"
                       >
                         -
                       </button>
@@ -165,7 +165,7 @@ export function CartTerminal({
                             cartItem.quantity + 1
                           )
                         }
-                        className="font-mono text-xs text-grey-mid hover:text-white px-1"
+                        className="font-mono text-xs text-white/70 hover:text-white px-1"
                       >
                         +
                       </button>
@@ -181,19 +181,19 @@ export function CartTerminal({
 
           {/* Totals and checkout */}
           {items.length > 0 && (
-            <div className="p-4 border-t border-grey-dark/30 space-y-3">
+            <div className="p-4 border-t border-white/30/30 space-y-3">
               <div className="space-y-2 font-mono text-xs">
                 <div className="flex justify-between">
-                  <span className="text-grey-dark">SUBTOTAL:</span>
-                  <span className="text-grey-mid">€{subtotal.toFixed(2)}</span>
+                  <span className="text-white/50">SUBTOTAL:</span>
+                  <span className="text-white/70">€{subtotal.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-grey-dark">TRANSMISSION_FEE:</span>
-                  <span className={shipping === 0 ? 'text-signal' : 'text-grey-mid'}>
+                  <span className="text-white/50">TRANSMISSION_FEE:</span>
+                  <span className={shipping === 0 ? 'text-signal' : 'text-white/70'}>
                     {shipping === 0 ? 'WAIVED' : `€${shipping.toFixed(2)}`}
                   </span>
                 </div>
-                <div className="flex justify-between pt-2 border-t border-grey-dark/20">
+                <div className="flex justify-between pt-2 border-t border-white/30/20">
                   <span className="text-white">TOTAL:</span>
                   <span className="text-arterial text-sm">€{total.toFixed(2)}</span>
                 </div>
@@ -210,7 +210,7 @@ export function CartTerminal({
                 [ EXECUTE_ORDER ]
               </button>
 
-              <p className="font-mono text-[9px] text-grey-dark text-center">
+              <p className="font-mono text-[9px] text-white/50 text-center">
                 SECURE_TRANSMISSION // STRIPE_ENCRYPTED
               </p>
             </div>

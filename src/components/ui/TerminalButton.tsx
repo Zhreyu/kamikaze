@@ -129,7 +129,7 @@ export function TerminalButton({
           'focus:outline-none focus:border-arterial',
           'disabled:opacity-50 disabled:cursor-not-allowed',
           isClicked && 'scale-95',
-          loading ? 'border-arterial text-arterial' : 'border-grey-mid',
+          loading ? 'border-arterial text-arterial' : 'border-white/40',
           className
         )}
       >
@@ -143,7 +143,7 @@ export function TerminalButton({
 
         {/* Button content */}
         <span className="relative flex items-center justify-center gap-2">
-          <span className="text-grey-mid group-hover:text-arterial transition-colors">
+          <span className="text-white/60 group-hover:text-arterial transition-colors">
             &gt;
           </span>
           <span className="tracking-wider">{displayText}</span>

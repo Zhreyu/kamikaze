@@ -5,12 +5,14 @@ import { usePathname } from 'next/navigation'
 import { useTransition } from '@/providers/TransitionProvider'
 import { ScrambleText } from '@/components/effects/ScrambleText'
 import { MobileNav } from './MobileNav'
+import { playHoverSound } from '@/hooks/useSonicFeedback'
 import clsx from 'clsx'
 
 const NAV_LINKS = [
   { href: '/', label: 'HOME' },
   { href: '/events', label: 'EVENTS' },
-  { href: '/artists', label: 'ARTISTS' },
+  { href: '/artists', label: 'SIGNALS' },
+  { href: '/about', label: 'MANIFESTO' },
   { href: '/merch', label: 'ARTIFACTS' },
   { href: '/contact', label: 'CONTACT' },
 ]
@@ -79,7 +81,7 @@ export function Navigation() {
 
   return (
     <>
-      <nav className="fixed top-0 left-0 right-0 z-50 px-6 py-4 bg-transparent">
+      <nav className="fixed top-0 left-0 right-0 z-50 px-6 py-4 bg-black/80 backdrop-blur-sm border-b border-white/10">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           {/* Morphing Logo */}
           <button
@@ -92,7 +94,7 @@ export function Navigation() {
             <span
               className={clsx(
                 'font-mono text-sm tracking-wider transition-all duration-300',
-                logoHovered ? 'text-white' : 'text-grey-mid'
+                logoHovered ? 'text-white' : 'text-white/60'
               )}
               style={{
                 textShadow: logoHovered ? '0 0 20px rgba(204, 0, 0, 0.6)' : 'none',
@@ -112,11 +114,12 @@ export function Navigation() {
                 <button
                   key={link.href}
                   onClick={() => handleNavClick(link.href)}
+                  onMouseEnter={playHoverSound}
                   className={clsx(
                     'relative font-display text-sm tracking-widest transition-all duration-300',
                     isActive
                       ? 'text-white scale-105'
-                      : 'text-grey-dark/60 hover:text-grey-mid'
+                      : 'text-white/50 hover:text-white/80'
                   )}
                   style={{
                     textShadow: isActive ? '0 0 20px rgba(204, 0, 0, 0.5)' : 'none',
@@ -147,7 +150,7 @@ export function Navigation() {
           {/* Mobile Menu Button */}
           <button
             onClick={() => setIsMobileOpen(true)}
-            className="md:hidden font-mono text-xs text-grey-mid"
+            className="md:hidden font-mono text-xs text-white/60"
             aria-label="Open menu"
           >
             [MENU]

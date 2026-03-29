@@ -40,15 +40,15 @@ export function ArtistPageContent({ artist }: ArtistPageContentProps) {
           <span className="font-mono text-xs text-arterial tracking-widest">
             [BIO]
           </span>
-          <div className="flex-1 h-px bg-grey-dark/30 mt-2" />
+          <div className="flex-1 h-px bg-white/20/30 mt-2" />
         </div>
 
-        <div className="border-l-2 border-grey-dark/40 pl-6 md:pl-8">
+        <div className="border-l-2 border-white/30/40 pl-6 md:pl-8">
           <div className="space-y-6 max-w-xl">
             {regularBio.map((paragraph, index) => (
               <p
                 key={index}
-                className="font-mono text-sm md:text-base text-grey-mid leading-relaxed"
+                className="font-mono text-sm md:text-base text-white/70 leading-relaxed"
                 style={{
                   transform: `translateY(${Math.max(0, (scrollY - 600) * 0.02 * (index + 1))}px)`,
                 }}
@@ -91,7 +91,7 @@ export function ArtistPageContent({ artist }: ArtistPageContentProps) {
           </div>
 
           {/* Attribution */}
-          <div className="mt-6 font-mono text-xs text-grey-dark">
+          <div className="mt-6 font-mono text-xs text-white/50">
             — {artist.name.toUpperCase()}
           </div>
         </section>
@@ -104,7 +104,7 @@ export function ArtistPageContent({ artist }: ArtistPageContentProps) {
             <span className="font-mono text-xs text-arterial tracking-widest">
               [TRANSMISSIONS]
             </span>
-            <div className="flex-1 h-px bg-grey-dark/30 mt-2" />
+            <div className="flex-1 h-px bg-white/20/30 mt-2" />
           </div>
 
           <div className="space-y-4">
@@ -120,14 +120,14 @@ export function ArtistPageContent({ artist }: ArtistPageContentProps) {
                 >
                   <div
                     className={clsx(
-                      'relative p-6 bg-void/50 border border-grey-dark/30',
+                      'relative p-6 bg-void/50 border border-white/30/30',
                       'transition-all duration-300',
                       'hover:border-arterial/50 hover:bg-void/80'
                     )}
                   >
                     {/* Top row - index and title */}
                     <div className="flex items-start gap-4 mb-4">
-                      <span className="font-mono text-xs text-grey-dark">
+                      <span className="font-mono text-xs text-white/50">
                         [{String(index + 1).padStart(2, '0')}]
                       </span>
                       <h3 className="font-mono text-lg md:text-xl text-white group-hover:text-arterial transition-colors">
@@ -138,31 +138,31 @@ export function ArtistPageContent({ artist }: ArtistPageContentProps) {
                     {/* Metadata row - rack mount style */}
                     <div className="flex flex-wrap gap-6 font-mono text-xs">
                       <div>
-                        <span className="text-grey-dark">SIZE:</span>
-                        <span className="text-grey-mid ml-2">{meta.size}</span>
+                        <span className="text-white/50">SIZE:</span>
+                        <span className="text-white/70 ml-2">{meta.size}</span>
                       </div>
                       <div>
-                        <span className="text-grey-dark">BPM:</span>
-                        <span className="text-grey-mid ml-2">{meta.bpm}</span>
+                        <span className="text-white/50">BPM:</span>
+                        <span className="text-white/70 ml-2">{meta.bpm}</span>
                       </div>
                       <div>
-                        <span className="text-grey-dark">DUR:</span>
-                        <span className="text-grey-mid ml-2">{meta.duration}</span>
+                        <span className="text-white/50">DUR:</span>
+                        <span className="text-white/70 ml-2">{meta.duration}</span>
                       </div>
                       <div>
-                        <span className="text-grey-dark">SRC:</span>
+                        <span className="text-white/50">SRC:</span>
                         <span className="text-arterial/60 ml-2 uppercase">
                           {mix.platform}
                         </span>
                       </div>
                       <div>
-                        <span className="text-grey-dark">STATUS:</span>
+                        <span className="text-white/50">STATUS:</span>
                         <span className="text-signal ml-2">DECRYPTED</span>
                       </div>
                     </div>
 
                     {/* Progress bar - simulated playback */}
-                    <div className="mt-4 h-1 bg-grey-dark/20 overflow-hidden">
+                    <div className="mt-4 h-1 bg-white/20/20 overflow-hidden">
                       <div
                         className={clsx(
                           'h-full bg-arterial/40 transition-all duration-700',
@@ -175,8 +175,8 @@ export function ArtistPageContent({ artist }: ArtistPageContentProps) {
                     </div>
 
                     {/* Corner accent */}
-                    <div className="absolute top-0 right-0 w-4 h-4 border-t border-r border-grey-dark/30 group-hover:border-arterial/50 transition-colors" />
-                    <div className="absolute bottom-0 left-0 w-4 h-4 border-b border-l border-grey-dark/30 group-hover:border-arterial/50 transition-colors" />
+                    <div className="absolute top-0 right-0 w-4 h-4 border-t border-r border-white/30/30 group-hover:border-arterial/50 transition-colors" />
+                    <div className="absolute bottom-0 left-0 w-4 h-4 border-b border-l border-white/30/30 group-hover:border-arterial/50 transition-colors" />
                   </div>
                 </a>
               )
@@ -191,7 +191,7 @@ export function ArtistPageContent({ artist }: ArtistPageContentProps) {
           <span className="font-mono text-xs text-arterial tracking-widest">
             [UPLINK]
           </span>
-          <div className="flex-1 h-px bg-grey-dark/30 mt-2" />
+          <div className="flex-1 h-px bg-white/20/30 mt-2" />
         </div>
 
         <div className="flex flex-wrap gap-6">
@@ -202,11 +202,11 @@ export function ArtistPageContent({ artist }: ArtistPageContentProps) {
               rel="noopener noreferrer"
               className="group flex items-center gap-2"
             >
-              <span className="font-mono text-xs text-grey-dark">{'>'}</span>
-              <span className="font-mono text-sm text-grey-mid group-hover:text-arterial transition-colors">
+              <span className="font-mono text-xs text-white/50">{'>'}</span>
+              <span className="font-mono text-sm text-white/70 group-hover:text-arterial transition-colors">
                 INSTAGRAM
               </span>
-              <span className="font-mono text-xs text-grey-dark group-hover:text-arterial transition-colors">
+              <span className="font-mono text-xs text-white/50 group-hover:text-arterial transition-colors">
                 [LINK]
               </span>
             </a>
@@ -218,11 +218,11 @@ export function ArtistPageContent({ artist }: ArtistPageContentProps) {
               rel="noopener noreferrer"
               className="group flex items-center gap-2"
             >
-              <span className="font-mono text-xs text-grey-dark">{'>'}</span>
-              <span className="font-mono text-sm text-grey-mid group-hover:text-arterial transition-colors">
+              <span className="font-mono text-xs text-white/50">{'>'}</span>
+              <span className="font-mono text-sm text-white/70 group-hover:text-arterial transition-colors">
                 SOUNDCLOUD
               </span>
-              <span className="font-mono text-xs text-grey-dark group-hover:text-arterial transition-colors">
+              <span className="font-mono text-xs text-white/50 group-hover:text-arterial transition-colors">
                 [LINK]
               </span>
             </a>
@@ -234,11 +234,11 @@ export function ArtistPageContent({ artist }: ArtistPageContentProps) {
               rel="noopener noreferrer"
               className="group flex items-center gap-2"
             >
-              <span className="font-mono text-xs text-grey-dark">{'>'}</span>
-              <span className="font-mono text-sm text-grey-mid group-hover:text-arterial transition-colors">
+              <span className="font-mono text-xs text-white/50">{'>'}</span>
+              <span className="font-mono text-sm text-white/70 group-hover:text-arterial transition-colors">
                 BANDCAMP
               </span>
-              <span className="font-mono text-xs text-grey-dark group-hover:text-arterial transition-colors">
+              <span className="font-mono text-xs text-white/50 group-hover:text-arterial transition-colors">
                 [LINK]
               </span>
             </a>
@@ -250,11 +250,11 @@ export function ArtistPageContent({ artist }: ArtistPageContentProps) {
               rel="noopener noreferrer"
               className="group flex items-center gap-2"
             >
-              <span className="font-mono text-xs text-grey-dark">{'>'}</span>
-              <span className="font-mono text-sm text-grey-mid group-hover:text-arterial transition-colors">
+              <span className="font-mono text-xs text-white/50">{'>'}</span>
+              <span className="font-mono text-sm text-white/70 group-hover:text-arterial transition-colors">
                 SPOTIFY
               </span>
-              <span className="font-mono text-xs text-grey-dark group-hover:text-arterial transition-colors">
+              <span className="font-mono text-xs text-white/50 group-hover:text-arterial transition-colors">
                 [LINK]
               </span>
             </a>

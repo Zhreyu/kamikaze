@@ -69,7 +69,7 @@ export function ProductModal({ item, isOpen, onClose, onAddToCart }: ProductModa
     HIGH: 'text-signal',
     LOW: 'text-yellow-500',
     CRITICAL: 'text-arterial animate-pulse',
-    DEPLETED: 'text-grey-dark',
+    DEPLETED: 'text-white/50',
   }[item.stock]
 
   return (
@@ -87,7 +87,7 @@ export function ProductModal({ item, isOpen, onClose, onAddToCart }: ProductModa
       <div
         className={clsx(
           'fixed inset-4 md:inset-12 z-50 overflow-hidden',
-          'bg-void border border-grey-dark/30',
+          'bg-void border border-white/30/30',
           'transition-all duration-500',
           isOpen ? 'opacity-100 scale-100' : 'opacity-0 scale-95 pointer-events-none'
         )}
@@ -192,7 +192,7 @@ export function ProductModal({ item, isOpen, onClose, onAddToCart }: ProductModa
                   <span className="font-mono text-lg text-signal animate-pulse block">
                     [ITEM_LOCKED_IN_BUFFER]
                   </span>
-                  <span className="font-mono text-xs text-grey-dark mt-2 block">
+                  <span className="font-mono text-xs text-white/50 mt-2 block">
                     REDIRECTING_TO_CART...
                   </span>
                 </div>
@@ -201,13 +201,13 @@ export function ProductModal({ item, isOpen, onClose, onAddToCart }: ProductModa
           </div>
 
           {/* Details section */}
-          <div className="flex-1 md:w-1/2 p-6 md:p-8 overflow-y-auto border-t md:border-t-0 md:border-l border-grey-dark/30">
+          <div className="flex-1 md:w-1/2 p-6 md:p-8 overflow-y-auto border-t md:border-t-0 md:border-l border-white/30/30">
             <div className="max-w-md">
               {/* Header */}
               <div className="mb-6">
                 <div className="flex items-center gap-3 mb-2">
                   <span className="font-mono text-xs text-arterial">#{item.serial}</span>
-                  <span className="font-mono text-[10px] text-grey-dark px-2 py-0.5 border border-grey-dark/30">
+                  <span className="font-mono text-[10px] text-white/50 px-2 py-0.5 border border-white/30/30">
                     {item.category}
                   </span>
                 </div>
@@ -220,38 +220,38 @@ export function ProductModal({ item, isOpen, onClose, onAddToCart }: ProductModa
               </div>
 
               {/* Description */}
-              <p className="font-mono text-sm text-grey-mid leading-relaxed mb-8">
+              <p className="font-mono text-sm text-white/70 leading-relaxed mb-8">
                 {item.description}
               </p>
 
               {/* Technical specs */}
-              <div className="mb-8 p-4 border border-grey-dark/30 bg-black/30">
+              <div className="mb-8 p-4 border border-white/30/30 bg-black/30">
                 <h4 className="font-mono text-xs text-arterial mb-3">[SPECIFICATIONS]</h4>
                 <div className="grid grid-cols-2 gap-3 font-mono text-xs">
                   <div>
-                    <span className="text-grey-dark block">STOCK_STATUS:</span>
+                    <span className="text-white/50 block">STOCK_STATUS:</span>
                     <span className={stockColor}>{item.stock}</span>
                   </div>
                   {item.fabric && (
                     <div>
-                      <span className="text-grey-dark block">MATERIAL:</span>
+                      <span className="text-white/50 block">MATERIAL:</span>
                       <span className="text-white">{item.fabric}</span>
                     </div>
                   )}
                   <div>
-                    <span className="text-grey-dark block">SIGNAL_RATING:</span>
+                    <span className="text-white/50 block">SIGNAL_RATING:</span>
                     <span className="text-arterial">{item.signal}/10</span>
                   </div>
                   <div>
-                    <span className="text-grey-dark block">RELEASE_DATE:</span>
-                    <span className="text-grey-mid">{item.releaseDate}</span>
+                    <span className="text-white/50 block">RELEASE_DATE:</span>
+                    <span className="text-white/70">{item.releaseDate}</span>
                   </div>
                 </div>
               </div>
 
               {/* Size selector */}
               <div className="mb-6">
-                <h4 className="font-mono text-xs text-grey-dark mb-3">SELECT_SIZE:</h4>
+                <h4 className="font-mono text-xs text-white/50 mb-3">SELECT_SIZE:</h4>
                 <div className="flex flex-wrap gap-2">
                   {item.sizes.map((size) => (
                     <button
@@ -261,7 +261,7 @@ export function ProductModal({ item, isOpen, onClose, onAddToCart }: ProductModa
                         'font-mono text-sm px-4 py-2 border transition-all duration-200',
                         selectedSize === size
                           ? 'border-arterial text-arterial bg-arterial/10'
-                          : 'border-grey-dark/40 text-grey-mid hover:border-grey-mid'
+                          : 'border-white/30/40 text-white/70 hover:border-white/60'
                       )}
                     >
                       {size}
@@ -271,7 +271,7 @@ export function ProductModal({ item, isOpen, onClose, onAddToCart }: ProductModa
               </div>
 
               {/* Size guide link */}
-              <button className="font-mono text-[10px] text-grey-dark hover:text-grey-mid mb-8 underline underline-offset-2">
+              <button className="font-mono text-[10px] text-white/50 hover:text-white/70 mb-8 underline underline-offset-2">
                 [VIEW_SIZE_BLUEPRINT]
               </button>
 
@@ -282,7 +282,7 @@ export function ProductModal({ item, isOpen, onClose, onAddToCart }: ProductModa
                 className={clsx(
                   'w-full py-4 font-mono text-sm tracking-widest border transition-all duration-300',
                   item.stock === 'DEPLETED'
-                    ? 'border-grey-dark/30 text-grey-dark cursor-not-allowed'
+                    ? 'border-white/30/30 text-white/50 cursor-not-allowed'
                     : 'border-arterial text-arterial hover:bg-arterial hover:text-black'
                 )}
               >
@@ -290,7 +290,7 @@ export function ProductModal({ item, isOpen, onClose, onAddToCart }: ProductModa
               </button>
 
               {/* Warning */}
-              <p className="font-mono text-[9px] text-grey-dark text-center mt-4">
+              <p className="font-mono text-[9px] text-white/50 text-center mt-4">
                 FINAL_SALE // NO_RETURNS // SIGNAL_PERMANENT
               </p>
             </div>

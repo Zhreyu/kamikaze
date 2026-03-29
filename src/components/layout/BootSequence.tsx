@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import clsx from 'clsx'
 import { initAudioEngine, play } from '@/hooks/useAudioEngine'
+import { playBootSound } from '@/hooks/useSonicFeedback'
 
 interface BootSequenceProps {
   onComplete: () => void
@@ -61,6 +62,9 @@ export function BootSequence({ onComplete }: BootSequenceProps) {
     // Initialize audio engine (this requires user interaction)
     initAudioEngine()
 
+    // Play boot confirmation sound
+    playBootSound()
+
     // Start exit animation
     setIsExiting(true)
 
@@ -116,9 +120,9 @@ export function BootSequence({ onComplete }: BootSequenceProps) {
           {/* Terminal header */}
           <div className="flex items-center gap-2 px-4 py-2 border-b border-arterial/20">
             <div className="w-3 h-3 rounded-full bg-arterial/60" />
-            <div className="w-3 h-3 rounded-full bg-grey-dark/40" />
-            <div className="w-3 h-3 rounded-full bg-grey-dark/40" />
-            <span className="ml-4 font-mono text-xs text-grey-mid">KAMIKAZE://init</span>
+            <div className="w-3 h-3 rounded-full bg-white/20/40" />
+            <div className="w-3 h-3 rounded-full bg-white/20/40" />
+            <span className="ml-4 font-mono text-xs text-white/70">KAMIKAZE://init</span>
           </div>
 
           {/* Terminal body */}
@@ -130,7 +134,7 @@ export function BootSequence({ onComplete }: BootSequenceProps) {
                   'transition-all duration-200',
                   line.text.includes('SYSTEM_READY') && 'text-arterial font-bold',
                   line.text.includes('CLICK') && 'text-white animate-pulse mt-4',
-                  !line.text.includes('SYSTEM_READY') && !line.text.includes('CLICK') && 'text-grey-mid'
+                  !line.text.includes('SYSTEM_READY') && !line.text.includes('CLICK') && 'text-white/70'
                 )}
               >
                 {line.text}
@@ -160,7 +164,7 @@ export function BootSequence({ onComplete }: BootSequenceProps) {
                 >
                   ENTER
                 </div>
-                <div className="mt-4 text-grey-dark text-xs tracking-widest">
+                <div className="mt-4 text-white/50 text-xs tracking-widest">
                   [ PRESS ENTER OR CLICK ]
                 </div>
               </div>
@@ -183,23 +187,23 @@ export function BootSequence({ onComplete }: BootSequenceProps) {
         </div>
 
         {/* Bottom status bar */}
-        <div className="flex justify-between items-center mt-2 font-mono text-[10px] text-grey-dark">
+        <div className="flex justify-between items-center mt-2 font-mono text-[10px] text-white/50">
           <span>SYS_STATUS: {isReady ? 'READY' : 'LOADING'}</span>
           <span>AUDIO_CTX: {isReady ? 'AWAIT_INIT' : '---'}</span>
         </div>
       </div>
 
       {/* Corner decorations */}
-      <div className="absolute top-4 left-4 font-mono text-[10px] text-grey-dark">
+      <div className="absolute top-4 left-4 font-mono text-[10px] text-white/50">
         [BOOT_SEQ_2026.03.25]
       </div>
       <div className="absolute top-4 right-4 font-mono text-[10px] text-arterial/50">
         KAMIKAZE_NET
       </div>
-      <div className="absolute bottom-4 left-4 font-mono text-[10px] text-grey-dark">
+      <div className="absolute bottom-4 left-4 font-mono text-[10px] text-white/50">
         THE UNDERGROUND NEVER DIES
       </div>
-      <div className="absolute bottom-4 right-4 font-mono text-[10px] text-grey-dark">
+      <div className="absolute bottom-4 right-4 font-mono text-[10px] text-white/50">
         {isReady ? '[INTERACTIVE]' : '[LOADING...]'}
       </div>
     </div>

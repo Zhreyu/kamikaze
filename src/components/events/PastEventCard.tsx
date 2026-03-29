@@ -29,7 +29,7 @@ export function PastEventCard({ event, index }: PastEventCardProps) {
       <div
         className={clsx(
           'relative flex items-center gap-6 py-4 px-6',
-          'border-l-2 border-grey-dark/30',
+          'border-l-2 border-white/30/30',
           'transition-all duration-300',
           isHovered ? 'border-l-4 border-arterial/50 bg-void/50' : ''
         )}
@@ -37,7 +37,7 @@ export function PastEventCard({ event, index }: PastEventCardProps) {
         {/* Strike-through line */}
         <div
           className={clsx(
-            'absolute left-0 right-0 top-1/2 h-px bg-grey-dark/20',
+            'absolute left-0 right-0 top-1/2 h-px bg-white/20',
             'transition-opacity duration-300',
             isHovered ? 'opacity-0' : 'opacity-100'
           )}
@@ -48,7 +48,7 @@ export function PastEventCard({ event, index }: PastEventCardProps) {
           className={clsx(
             'font-mono text-sm tabular-nums',
             'transition-colors duration-300',
-            isHovered ? 'text-arterial/60' : 'text-grey-dark'
+            isHovered ? 'text-arterial/60' : 'text-white/50'
           )}
         >
           {formatEventDate(event.date)}
@@ -59,7 +59,7 @@ export function PastEventCard({ event, index }: PastEventCardProps) {
           className={clsx(
             'font-display text-lg md:text-xl tracking-wide',
             'transition-all duration-300',
-            isHovered ? 'text-white/80' : 'text-grey-mid/60'
+            isHovered ? 'text-white/80' : 'text-white/70/60'
           )}
         >
           {event.name}
@@ -73,7 +73,7 @@ export function PastEventCard({ event, index }: PastEventCardProps) {
           className={clsx(
             'font-mono text-xs uppercase tracking-widest',
             'transition-colors duration-300',
-            isHovered ? 'text-grey-mid' : 'text-grey-dark/50'
+            isHovered ? 'text-white/70' : 'text-white/50/50'
           )}
         >
           {event.city}
@@ -82,7 +82,7 @@ export function PastEventCard({ event, index }: PastEventCardProps) {
         {/* Lineup - only on hover */}
         <div
           className={clsx(
-            'absolute left-6 -bottom-6 font-mono text-xs text-grey-dark/60',
+            'absolute left-6 -bottom-6 font-mono text-xs text-white/50/60',
             'transition-all duration-300',
             isHovered ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-2'
           )}

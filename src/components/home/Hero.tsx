@@ -12,6 +12,15 @@ export function Hero() {
   const [isVisible, setIsVisible] = useState(true)
   const [mouseDistance, setMouseDistance] = useState(0)
   const [audioIntensity, setAudioIntensity] = useState(0)
+  const [isMobile, setIsMobile] = useState(false)
+
+  // Detect mobile to disable depth scrolling
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768)
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
 
   // Track scroll progress for UI updates
   useEffect(() => {
@@ -70,7 +79,8 @@ export function Hero() {
   }, [])
 
   // Calculate hero progress (0-1 through the hero section)
-  const heroProgress = Math.min(1, scrollProgress * 5)
+  // On mobile, disable depth scrolling by keeping progress at 0
+  const heroProgress = isMobile ? 0 : Math.min(1, scrollProgress * 5)
 
   // Chromatic aberration intensity based on mouse distance and audio
   const chromaticOffset = 2 + mouseDistance * 6 + audioIntensity * 8
@@ -79,7 +89,7 @@ export function Hero() {
     <section
       ref={sectionRef}
       className="relative"
-      style={{ height: '500vh' }}
+      style={{ height: isMobile ? '100vh' : '500vh' }}
     >
       {/* Glitch tear line */}
       <div className="glitch-tear" />
@@ -140,7 +150,7 @@ export function Hero() {
 
           {/* Subtitle - Monospace */}
           <p
-            className="font-mono text-xs md:text-sm text-grey-mid text-center mt-6 tracking-[0.3em] transition-all duration-75"
+            className="font-mono text-xs md:text-sm text-white/70 text-center mt-6 tracking-[0.3em] transition-all duration-75"
             style={{
               textShadow: audioIntensity > 0.3 ? '0 0 10px rgba(204, 0, 0, 0.5)' : 'none',
             }}
@@ -165,14 +175,14 @@ export function Hero() {
           )}
         </div>
 
-        {/* Scroll indicator */}
-        {heroProgress < 0.8 && (
+        {/* Scroll indicator - hidden on mobile (no depth scrolling) */}
+        {!isMobile && heroProgress < 0.8 && (
           <div className="absolute bottom-12 left-1/2 -translate-x-1/2">
             <div className="flex flex-col items-center gap-3">
-              <span className="font-mono text-[10px] text-grey-dark tracking-widest animate-pulse">
+              <span className="font-mono text-[10px] text-white/50 tracking-widest animate-pulse">
                 DESCEND
               </span>
-              <div className="w-px h-16 bg-grey-dark relative overflow-hidden">
+              <div className="w-px h-16 bg-white/20 relative overflow-hidden">
                 <div
                   className="w-full bg-arterial transition-all duration-100"
                   style={{ height: `${heroProgress * 100}%` }}
@@ -183,13 +193,15 @@ export function Hero() {
         )}
       </div>
 
-      {/* Depth indicator - shows how deep you've gone */}
-      <div className="fixed top-1/2 right-6 -translate-y-1/2 z-30">
-        <div className="font-mono text-[10px] text-grey-dark tracking-widest writing-mode-vertical">
-          <span className="opacity-50">DEPTH</span>
-          <span className="ml-2 text-arterial">{Math.round(heroProgress * 100)}%</span>
+      {/* Depth indicator - shows how deep you've gone (hidden on mobile) */}
+      {!isMobile && (
+        <div className="fixed top-1/2 right-6 -translate-y-1/2 z-30">
+          <div className="font-mono text-[10px] text-white/50 tracking-widest writing-mode-vertical">
+            <span className="opacity-50">DEPTH</span>
+            <span className="ml-2 text-arterial">{Math.round(heroProgress * 100)}%</span>
+          </div>
         </div>
-      </div>
+      )}
     </section>
   )
 }

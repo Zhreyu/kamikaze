@@ -3,7 +3,8 @@
 import { useState, useRef, useCallback, useEffect } from 'react'
 import { Event, formatEventDate } from '@/data/events'
 import { TerminalButton } from '@/components/ui/TerminalButton'
-import { triggerSigilGlitch } from '@/hooks/useSigilGlitch'
+import { triggerSigilGlitch, setDangerLevel } from '@/hooks/useSigilGlitch'
+import { playErrorSound, playSubmitSound, playHoverSound } from '@/hooks/useSonicFeedback'
 import clsx from 'clsx'
 
 // Glitch characters for the reveal effect
@@ -23,7 +24,7 @@ const DENIAL_MESSAGES = [
   'BLOCKED // PROTOCOL_VIOLATION',
 ]
 
-const MAX_ATTEMPTS = 3
+const MAX_ATTEMPTS = 2
 
 interface EventCardProps {
   event: Event
@@ -86,6 +87,9 @@ export function EventCard({ event, index }: EventCardProps) {
     setHackStatus('denied')
     triggerSigilGlitch(0.8, 400)
 
+    // Trigger danger level 2 on access attempt
+    setDangerLevel(2)
+
     const cityUpper = event.city.toUpperCase()
     const cityLength = event.city.length
 
@@ -132,6 +136,10 @@ export function EventCard({ event, index }: EventCardProps) {
             setStatusMessage('SOMEONE IS WATCHING, ABORTING...')
             triggerSigilGlitch(1.5, 800)
 
+            // Critical danger + error sound
+            setDangerLevel(3)
+            playErrorSound()
+
             // After dramatic pause, reveal first letter only
             hackTimeoutRef.current = setTimeout(() => {
               setHackStatus('partial')
@@ -140,6 +148,9 @@ export function EventCard({ event, index }: EventCardProps) {
               setDisplayCity(firstLetter + masked)
               setStatusMessage('PARTIAL_DECRYPT: 0x01')
               setIsProcessing(false)
+
+              // Success sound on partial reveal
+              playSubmitSound()
             }, 1500)
           } else {
             // Failed attempt - show denial
@@ -147,6 +158,10 @@ export function EventCard({ event, index }: EventCardProps) {
             setDisplayCity('█'.repeat(cityLength))
             setIsProcessing(false)
             triggerSigilGlitch(0.5, 200)
+
+            // Error sound + danger level 2 on denial
+            playErrorSound()
+            setDangerLevel(2)
           }
         }
       }
@@ -193,6 +208,12 @@ export function EventCard({ event, index }: EventCardProps) {
       onMouseEnter={() => {
         setIsHovered(true)
         triggerSigilGlitch(0.8, 200) // Trigger 3D sigil shake
+        playHoverSound()
+
+        // Trigger danger level 1 on hover of classified events
+        if (isFullyRedacted || isSecretLocation) {
+          setDangerLevel(1)
+        }
       }}
       onMouseLeave={() => setIsHovered(false)}
     >
@@ -305,34 +326,34 @@ export function EventCard({ event, index }: EventCardProps) {
           {isFullyRedacted ? (
             <div className="space-y-1">
               <div className="font-mono text-sm">
-                <span className="text-grey-dark">LOC://</span>
-                <span className="text-grey-mid ml-2">UNKNOWN</span>
+                <span className="text-white/50">LOC://</span>
+                <span className="text-white/70 ml-2">UNKNOWN</span>
               </div>
               <div className="font-mono text-sm">
-                <span className="text-grey-dark">STATUS://</span>
+                <span className="text-white/50">STATUS://</span>
                 <span className="text-arterial ml-2">RESTRICTED</span>
               </div>
               <div className="font-mono text-sm">
-                <span className="text-grey-dark">ACCESS://</span>
+                <span className="text-white/50">ACCESS://</span>
                 <span className="text-red-bright ml-2">DENIED</span>
               </div>
               <div className="font-mono text-sm">
-                <span className="text-grey-dark">SIGNAL://</span>
-                <span className="text-grey-mid ml-2">ENCRYPTED</span>
+                <span className="text-white/50">SIGNAL://</span>
+                <span className="text-white/70 ml-2">ENCRYPTED</span>
               </div>
               <div className="font-mono text-sm mt-2">
-                <span className="text-grey-dark">SET://</span>
-                <span className="text-grey-dark/60 ml-2">████████ × ██████ × ███████</span>
+                <span className="text-white/50">SET://</span>
+                <span className="text-white/50/60 ml-2">████████ × ██████ × ███████</span>
               </div>
             </div>
           ) : (
             <div className="space-y-2">
               <div className="font-mono text-sm">
-                <span className="text-grey-dark">LOC://</span>
+                <span className="text-white/50">LOC://</span>
                 <span className="text-white/80 ml-2">{event.venue}</span>
               </div>
               <div className="font-mono text-sm">
-                <span className="text-grey-dark">SET://</span>
+                <span className="text-white/50">SET://</span>
                 <span className="text-white/60 ml-2">{event.lineup.join(' × ')}</span>
               </div>
             </div>
@@ -346,7 +367,7 @@ export function EventCard({ event, index }: EventCardProps) {
             )}
           >
             {event.description && (
-              <p className="font-mono text-sm text-grey-mid mb-8 max-w-xl border-l-2 border-grey-dark/30 pl-4">
+              <p className="font-mono text-sm text-white/70 mb-8 max-w-xl border-l-2 border-white/30/30 pl-4">
                 {event.description}
               </p>
             )}
@@ -366,14 +387,14 @@ export function EventCard({ event, index }: EventCardProps) {
                     'font-mono text-xs tracking-widest border-l-2 pl-3 py-1',
                     hackStatus === 'denied' ? 'border-red-bright text-red-bright' :
                     hackStatus === 'compromised' ? 'border-red-bright text-red-bright animate-pulse' :
-                    hackStatus === 'partial' ? 'border-arterial text-grey-mid' :
+                    hackStatus === 'partial' ? 'border-arterial text-white/70' :
                     'border-signal text-signal'
                   )}>
                     <span className={hackStatus === 'compromised' ? 'animate-pulse' : ''}>
                       {statusMessage}
                     </span>
                     {hackStatus === 'denied' && (
-                      <span className="text-grey-dark ml-2">[{hackAttempt}/{MAX_ATTEMPTS}]</span>
+                      <span className="text-white/50 ml-2">[{hackAttempt}/{MAX_ATTEMPTS}]</span>
                     )}
                   </div>
                 )}
@@ -395,7 +416,7 @@ export function EventCard({ event, index }: EventCardProps) {
               </div>
             ) : isSoldOut ? (
               <div className="inline-block">
-                <span className="font-mono text-grey-dark line-through tracking-widest">
+                <span className="font-mono text-white/50 line-through tracking-widest">
                   [VOID] NO ENTRY
                 </span>
               </div>
@@ -414,7 +435,7 @@ export function EventCard({ event, index }: EventCardProps) {
           <div
             className={clsx(
               'absolute bottom-4 right-4 font-mono text-xs transition-all duration-300',
-              isExpanded ? 'text-arterial' : 'text-grey-dark'
+              isExpanded ? 'text-arterial' : 'text-white/50'
             )}
           >
             [{isExpanded ? 'COLLAPSE' : 'EXPAND'}]

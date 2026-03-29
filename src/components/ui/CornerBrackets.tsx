@@ -16,7 +16,7 @@ export function CornerBrackets({
 }: CornerBracketsProps) {
   const bracketClass = clsx(
     'absolute w-4 h-4 transition-all duration-300',
-    isActive ? 'text-arterial scale-110' : 'text-grey-mid'
+    isActive ? 'text-arterial scale-110' : 'text-white/60'
   )
 
   const glowStyle = isActive

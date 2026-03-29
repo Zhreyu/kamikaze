@@ -242,7 +242,7 @@ export function ArtistHeader({ artist }: ArtistHeaderProps) {
 
       {/* Serial number badge - top right */}
       <div className="absolute top-24 right-6 text-right">
-        <div className="font-mono text-[10px] text-grey-dark tracking-widest mb-1">
+        <div className="font-mono text-[10px] text-white/50 tracking-widest mb-1">
           UNIT_ID
         </div>
         <div className="font-mono text-sm text-arterial/60 tracking-widest">
@@ -252,7 +252,7 @@ export function ArtistHeader({ artist }: ArtistHeaderProps) {
 
       {/* Location - stamped serial number style */}
       <div className="absolute top-24 left-6">
-        <div className="font-mono text-[10px] text-grey-dark tracking-widest mb-1">
+        <div className="font-mono text-[10px] text-white/50 tracking-widest mb-1">
           ORIGIN_POINT
         </div>
         <div
@@ -290,10 +290,10 @@ export function ArtistHeader({ artist }: ArtistHeaderProps) {
 
           {/* Scroll indicator */}
           <div className="hidden md:flex flex-col items-center gap-2">
-            <span className="font-mono text-[10px] text-grey-dark tracking-widest">
+            <span className="font-mono text-[10px] text-white/50 tracking-widest">
               SCROLL
             </span>
-            <div className="w-px h-16 bg-grey-dark relative overflow-hidden">
+            <div className="w-px h-16 bg-white/30 relative overflow-hidden">
               <div className="absolute top-0 w-full h-4 bg-arterial animate-pulse" />
             </div>
           </div>
@@ -301,8 +301,8 @@ export function ArtistHeader({ artist }: ArtistHeaderProps) {
       </div>
 
       {/* Corner marks */}
-      <div className="absolute top-20 left-6 w-8 h-8 border-l-2 border-t-2 border-grey-dark/30" />
-      <div className="absolute top-20 right-6 w-8 h-8 border-r-2 border-t-2 border-grey-dark/30" />
+      <div className="absolute top-20 left-6 w-8 h-8 border-l-2 border-t-2 border-white/30/30" />
+      <div className="absolute top-20 right-6 w-8 h-8 border-r-2 border-t-2 border-white/30/30" />
     </header>
   )
 }

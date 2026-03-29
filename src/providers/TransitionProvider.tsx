@@ -3,6 +3,7 @@
 import { createContext, useContext, useState, useCallback, useRef, ReactNode, useEffect } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import { GlitchTransition } from '@/lib/canvas/glitchTransition'
+import { playClickSound } from '@/hooks/useSonicFeedback'
 
 interface TransitionContextValue {
   isTransitioning: boolean
@@ -53,6 +54,9 @@ export function TransitionProvider({ children }: TransitionProviderProps) {
 
   const navigateTo = useCallback(async (href: string) => {
     if (isTransitioning || href === pathname) return
+
+    // Play navigation click sound
+    playClickSound()
 
     setIsTransitioning(true)
 

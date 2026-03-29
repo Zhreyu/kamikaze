@@ -72,7 +72,7 @@ export function MobileNav({
 
       {/* Close hint */}
       <div className="absolute bottom-8 left-0 right-0 text-center">
-        <span className="font-mono text-xs text-grey-mid">
+        <span className="font-mono text-xs text-white/70">
           TAP ANYWHERE TO CLOSE
         </span>
       </div>

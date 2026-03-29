@@ -3,7 +3,6 @@ import { EventCard } from '@/components/events/EventCard'
 import { PastEventCard } from '@/components/events/PastEventCard'
 import { PerspectiveGrid } from '@/components/canvas/PerspectiveGrid'
 import { ManifestoTexture } from '@/components/effects/ManifestoTexture'
-import { Footer } from '@/components/layout/Footer'
 
 export const metadata = {
   title: 'EVENTS | KAMIKAZE',
@@ -15,7 +14,7 @@ export default function EventsPage() {
   const pastEvents = getPastEvents()
 
   return (
-    <div className="relative min-h-screen pt-24 pb-32">
+    <div className="relative min-h-screen flex flex-col pt-24">
       {/* Manifesto texture - huge scrolling text */}
       <ManifestoTexture phrase="CONTROLLED COLLAPSE" parallaxSpeed={0.12} />
 
@@ -27,13 +26,13 @@ export default function EventsPage() {
         }}
       />
 
-      <div className="relative z-10 max-w-4xl mx-auto px-6">
+      <div className="relative z-10 max-w-4xl mx-auto px-6 flex-grow pb-16">
         {/* Header */}
         <header className="mb-16">
           <h1 className="font-display text-5xl md:text-7xl tracking-wider mb-4">
             EVENTS
           </h1>
-          <p className="font-mono text-grey-mid">
+          <p className="font-mono text-white/70">
             Every event is a controlled collapse.
           </p>
         </header>
@@ -55,7 +54,7 @@ export default function EventsPage() {
         {/* Past Events */}
         {pastEvents.length > 0 && (
           <section>
-            <h2 className="font-mono text-xs text-grey-dark uppercase tracking-[0.5em] mb-12 skew-x-3">
+            <h2 className="font-mono text-xs text-white/50 uppercase tracking-[0.5em] mb-12 skew-x-3">
               [ARCHIVE] DEAD SIGNALS
             </h2>
             <div className="space-y-4">
@@ -67,7 +66,6 @@ export default function EventsPage() {
         )}
       </div>
 
-      <Footer />
       <PerspectiveGrid />
     </div>
   )

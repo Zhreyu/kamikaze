@@ -2,6 +2,8 @@
 
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import { useGLTF, useAnimations, Environment, ContactShadows, Html } from '@react-three/drei'
+import { EffectComposer, Bloom, ChromaticAberration, Noise, Vignette } from '@react-three/postprocessing'
+import { BlendFunction } from 'postprocessing'
 import { useRef, useEffect, useMemo, useState, Suspense } from 'react'
 import * as THREE from 'three'
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js'
@@ -20,10 +22,11 @@ useGLTF.setDecoderPath('https://www.gstatic.com/draco/versioned/decoders/1.5.6/'
 
 // Navigation labels that float around the sigil
 const NAV_ITEMS = [
-  { label: 'EVENTS', href: '/events', angle: -30, distance: 4.5 },
-  { label: 'ARTISTS', href: '/artists', angle: 30, distance: 4.5 },
-  { label: 'MERCH', href: '/merch', angle: 150, distance: 4.5 },
-  { label: 'CONTACT', href: '/contact', angle: 210, distance: 4.5 },
+  { label: 'EVENTS', href: '/events', angle: -45, distance: 4.5 },
+  { label: 'SIGNALS', href: '/artists', angle: 0, distance: 4.5 },
+  { label: 'MANIFESTO', href: '/about', angle: 45, distance: 4.5 },
+  { label: 'MERCH', href: '/merch', angle: 135, distance: 4.5 },
+  { label: 'CONTACT', href: '/contact', angle: 225, distance: 4.5 },
 ]
 
 function NavLabel({ label, href, angle, distance, hoveredNav, setHoveredNav }: {
@@ -269,6 +272,82 @@ function StrobeLight() {
   )
 }
 
+// Floor light that creates a "light leak" effect on bass hits
+function FloorLight() {
+  const lightRef = useRef<THREE.SpotLight>(null!)
+  const meshRef = useRef<THREE.Mesh>(null!)
+  const smoothIntensity = useRef(0)
+
+  useFrame(() => {
+    if (!lightRef.current || !meshRef.current) return
+
+    const bass = getBass()
+    const highs = getHighs()
+
+    // Light reacts to bass with slow decay
+    if (bass > 0.3) {
+      smoothIntensity.current = Math.min(1, smoothIntensity.current + bass * 0.5)
+    } else {
+      smoothIntensity.current *= 0.92
+    }
+
+    // Update spotlight
+    lightRef.current.intensity = smoothIntensity.current * 8
+
+    // Update floor glow mesh opacity
+    const mat = meshRef.current.material as THREE.MeshBasicMaterial
+    mat.opacity = smoothIntensity.current * 0.4
+  })
+
+  return (
+    <group>
+      {/* Spotlight pointing down at floor */}
+      <spotLight
+        ref={lightRef}
+        position={[0, 3, 0]}
+        angle={0.8}
+        penumbra={1}
+        intensity={0}
+        color="#cc0000"
+        distance={10}
+        castShadow={false}
+      />
+      {/* Floor glow plane */}
+      <mesh ref={meshRef} rotation={[-Math.PI / 2, 0, 0]} position={[0, -3.4, 0]}>
+        <circleGeometry args={[8, 32]} />
+        <meshBasicMaterial
+          color="#cc0000"
+          transparent
+          opacity={0}
+          blending={THREE.AdditiveBlending}
+        />
+      </mesh>
+    </group>
+  )
+}
+
+// Post-processing effects (static - refs cause React 19 circular JSON issues)
+function PostProcessing() {
+  return (
+    <EffectComposer>
+      <Bloom
+        intensity={0.8}
+        luminanceThreshold={0.2}
+        luminanceSmoothing={0.9}
+        mipmapBlur
+      />
+      <ChromaticAberration
+        offset={new THREE.Vector2(0.003, 0.003)}
+        blendFunction={BlendFunction.NORMAL}
+        radialModulation={false}
+        modulationOffset={0}
+      />
+      <Noise opacity={0.03} blendFunction={BlendFunction.OVERLAY} />
+      <Vignette darkness={0.5} offset={0.3} />
+    </EffectComposer>
+  )
+}
+
 function LoadingFallback() {
   return (
     <mesh>
@@ -282,6 +361,8 @@ function Scene() {
   return (
     <>
       <color attach="background" args={['#050505']} />
+      {/* Volumetric fog for depth */}
+      <fog attach="fog" args={['#050505', 8, 25]} />
       <Environment preset="night" />
       <ambientLight intensity={0.2} />
 
@@ -289,6 +370,9 @@ function Scene() {
       <StrobeLight />
       <pointLight position={[-10, -10, -10]} intensity={0.5} color="#400000" />
       <pointLight position={[10, -5, 10]} intensity={0.3} color="#200000" />
+
+      {/* Floor light leak - audio reactive */}
+      <FloorLight />
 
       <SigilModel hoveredNav={null} />
 
@@ -299,6 +383,9 @@ function Scene() {
         blur={2}
         far={4.5}
       />
+
+      {/* Post-processing effects */}
+      <PostProcessing />
     </>
   )
 }

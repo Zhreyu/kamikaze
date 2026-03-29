@@ -3,18 +3,18 @@ import { getArtistBySlug, getAllArtistSlugs } from '@/data/artists'
 import { ArtistPageContent } from '@/components/artists/ArtistPageContent'
 import { ArtistHeader } from '@/components/artists/ArtistHeader'
 import { PerspectiveGrid } from '@/components/canvas/PerspectiveGrid'
-import { Footer } from '@/components/layout/Footer'
 
 interface ArtistPageProps {
-  params: { slug: string }
+  params: Promise<{ slug: string }>
 }
 
 export function generateStaticParams() {
   return getAllArtistSlugs().map((slug) => ({ slug }))
 }
 
-export function generateMetadata({ params }: ArtistPageProps) {
-  const artist = getArtistBySlug(params.slug)
+export async function generateMetadata({ params }: ArtistPageProps) {
+  const { slug } = await params
+  const artist = getArtistBySlug(slug)
   if (!artist) return { title: 'Artist Not Found' }
 
   return {
@@ -23,8 +23,9 @@ export function generateMetadata({ params }: ArtistPageProps) {
   }
 }
 
-export default function ArtistPage({ params }: ArtistPageProps) {
-  const artist = getArtistBySlug(params.slug)
+export default async function ArtistPage({ params }: ArtistPageProps) {
+  const { slug } = await params
+  const artist = getArtistBySlug(slug)
 
   if (!artist) {
     notFound()
@@ -43,7 +44,6 @@ export default function ArtistPage({ params }: ArtistPageProps) {
       <ArtistHeader artist={artist} />
       <ArtistPageContent artist={artist} />
 
-      <Footer />
       <PerspectiveGrid />
     </div>
   )

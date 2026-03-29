@@ -10,6 +10,7 @@ export interface Event {
   description?: string
   isSecretLocation?: boolean // For events with hidden location reveal (click to decrypt)
   isFullyRedacted?: boolean // For fully locked events (no access at all)
+  isDateHidden?: boolean // Hide the date completely
 }
 
 export const events: Event[] = [

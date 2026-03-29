@@ -7,7 +7,7 @@ export function ScrollIndicator() {
 
   return (
     <div
-      className="fixed right-4 top-1/2 -translate-y-1/2 w-[2px] h-[30vh] bg-grey-dark z-50"
+      className="fixed right-4 top-1/2 -translate-y-1/2 w-[2px] h-[30vh] bg-white/30 z-50"
       aria-hidden="true"
     >
       <div

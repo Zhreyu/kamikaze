@@ -46,24 +46,24 @@ export function MerchHeader() {
           <span className="font-mono text-xs text-arterial tracking-widest">
             [CAPITAL_EQUIPMENT]
           </span>
-          <div className="flex-1 h-px bg-grey-dark/30 mt-2" />
+          <div className="flex-1 h-px bg-white/20/30 mt-2" />
         </div>
 
         <h1 className="font-display text-5xl md:text-7xl tracking-wider mb-4">
           ASSET_ACQUISITION
         </h1>
 
-        <div className="flex flex-wrap gap-6 font-mono text-xs text-grey-mid">
+        <div className="flex flex-wrap gap-6 font-mono text-xs text-white/70">
           <div>
-            <span className="text-grey-dark">STATUS:</span>
+            <span className="text-white/50">STATUS:</span>
             <span className="text-signal ml-2">ACTIVE</span>
           </div>
           <div>
-            <span className="text-grey-dark">INVENTORY:</span>
+            <span className="text-white/50">INVENTORY:</span>
             <span className="text-white ml-2">8 UNITS</span>
           </div>
           <div>
-            <span className="text-grey-dark">SHIPPING:</span>
+            <span className="text-white/50">SHIPPING:</span>
             <span className="text-arterial ml-2">WORLDWIDE</span>
           </div>
         </div>
@@ -72,7 +72,7 @@ export function MerchHeader() {
         <div className="mt-8 p-4 border border-arterial/30 bg-arterial/5">
           <div className="flex items-center gap-3">
             <span className="font-mono text-xs text-arterial animate-pulse">[!]</span>
-            <p className="font-mono text-xs text-grey-mid">
+            <p className="font-mono text-xs text-white/70">
               ALL ITEMS FINAL SALE. NO REFUNDS. NO EXCHANGES. SIGNALS CANNOT BE RETURNED.
             </p>
           </div>

@@ -21,8 +21,8 @@ export function JaggedCard({
   return (
     <div
       className={clsx(
-        'relative bg-black border border-grey-dark transition-all duration-300',
-        hoverEffect && 'hover:border-grey-mid',
+        'relative bg-black border border-white/30 transition-all duration-300',
+        hoverEffect && 'hover:border-white/40',
         onClick && 'cursor-pointer',
         className
       )}

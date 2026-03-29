@@ -118,7 +118,7 @@ export function ContactConstellation() {
         {/* Diagonal wires */}
         <div
           className={clsx(
-            'absolute w-px bg-gradient-to-b from-transparent via-grey-dark/30 to-transparent h-[200%] transition-opacity duration-700',
+            'absolute w-px bg-gradient-to-b from-transparent via-white/20/30 to-transparent h-[200%] transition-opacity duration-700',
             isRevealed ? 'opacity-100' : 'opacity-0'
           )}
           style={{
@@ -129,7 +129,7 @@ export function ContactConstellation() {
         />
         <div
           className={clsx(
-            'absolute w-px bg-gradient-to-b from-transparent via-grey-dark/30 to-transparent h-[200%] transition-opacity duration-700',
+            'absolute w-px bg-gradient-to-b from-transparent via-white/20/30 to-transparent h-[200%] transition-opacity duration-700',
             isRevealed ? 'opacity-100' : 'opacity-0'
           )}
           style={{
@@ -180,7 +180,7 @@ export function ContactConstellation() {
 
             <div
               className={clsx(
-                'relative bg-void/80 border border-grey-dark/30 px-4 py-3',
+                'relative bg-void/80 border border-white/30/30 px-4 py-3',
                 'hover:border-arterial/50 transition-colors duration-300',
                 'before:absolute before:inset-0 before:bg-arterial/5 before:opacity-0 hover:before:opacity-100 before:transition-opacity'
               )}
@@ -237,7 +237,7 @@ export function ContactConstellation() {
       >
         <div className="flex items-center gap-3">
           <div className="w-2 h-2 bg-arterial/60 animate-pulse" />
-          <span className="font-mono text-xs text-grey-dark tracking-[0.3em]">
+          <span className="font-mono text-xs text-white/50 tracking-[0.3em]">
             AWAIT_INPUT
           </span>
         </div>

@@ -4,7 +4,6 @@ import { useState, useEffect, useCallback } from 'react'
 import { ContactConstellation } from '@/components/contact/ContactConstellation'
 import { ContactForm } from '@/components/contact/ContactForm'
 import { PerspectiveGrid } from '@/components/canvas/PerspectiveGrid'
-import { Footer } from '@/components/layout/Footer'
 import clsx from 'clsx'
 
 const DEFAULT_TEXT = '[SIGNAL_PATH]'
@@ -64,7 +63,7 @@ export default function ContactPage() {
   }, [isHovered, scrambleTo])
 
   return (
-    <div className="relative min-h-screen">
+    <div className="relative min-h-screen flex flex-col">
       {/* Loading overlay */}
       <div
         className={clsx(
@@ -73,7 +72,7 @@ export default function ContactPage() {
         )}
       />
 
-      <div className="pt-24 pb-32 px-6">
+      <div className="pt-24 pb-16 px-6 flex-grow">
         <div className="max-w-4xl mx-auto">
           {/* Header */}
           <header className="mb-8 text-center">
@@ -107,7 +106,6 @@ export default function ContactPage() {
         </div>
       </div>
 
-      <Footer />
       <PerspectiveGrid />
     </div>
   )

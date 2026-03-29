@@ -137,7 +137,7 @@ export function SigilAnimation({
     >
       {!isLoaded && (
         <div className="absolute inset-0 flex items-center justify-center">
-          <div className="font-mono text-[10px] text-grey-dark">
+          <div className="font-mono text-[10px] text-white/50">
             {Math.round(loadProgress * 100)}%
           </div>
         </div>
