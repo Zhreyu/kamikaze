@@ -37,36 +37,6 @@ export const events: Event[] = [
     description: 'You are not authorized to view this transmission. Clearance required. Signal locked until further notice.',
     isFullyRedacted: true,
   },
-  {
-    id: 'ritual-001',
-    name: 'RITUAL 001',
-    date: '2025-02-22',
-    venue: 'Tresor',
-    city: 'Berlin',
-    lineup: ['KOBOSIL', 'RÖYKSOPP', 'FJAAK'],
-    isPast: true,
-    description: 'The first invocation. 800 souls witnessed.',
-  },
-  {
-    id: 'concrete-prayer',
-    name: 'CONCRETE PRAYER',
-    date: '2024-11-30',
-    venue: 'Printworks',
-    city: 'London',
-    lineup: ['I HATE MODELS', 'DASHA RUSH', 'SETAOC MASS'],
-    isPast: true,
-    description: 'Sold out in 4 minutes. 3000 bodies. One frequency.',
-  },
-  {
-    id: 'neural-damage',
-    name: 'NEURAL DAMAGE',
-    date: '2024-09-14',
-    venue: 'Bassiani',
-    city: 'Tbilisi',
-    lineup: ['ANCIENT METHODS', 'NENE H', 'HECTOR OAKS'],
-    isPast: true,
-    description: 'The Caucasus experiment. Frequencies still echoing.',
-  },
 ]
 
 export function getUpcomingEvents(): Event[] {

@@ -4,6 +4,7 @@ import { PastEventCard } from '@/components/events/PastEventCard'
 import { PerspectiveGrid } from '@/components/canvas/PerspectiveGrid'
 import { ManifestoTexture } from '@/components/effects/ManifestoTexture'
 import { ScrambleText } from '@/components/effects/ScrambleText'
+import { DeadSignalsEmpty } from '@/components/events/DeadSignalsEmpty'
 
 export const metadata = {
   title: 'EVENTS | KAMIKAZE',
@@ -59,19 +60,21 @@ export default function EventsPage() {
           </section>
         )}
 
-        {/* Past Events */}
-        {pastEvents.length > 0 && (
-          <section>
-            <h2 className="font-mono text-xs text-white/50 uppercase tracking-[0.5em] mb-12 skew-x-3">
-              [ARCHIVE] DEAD SIGNALS
-            </h2>
+        {/* Past Events / Dead Signals */}
+        <section>
+          <h2 className="font-mono text-xs text-white/50 uppercase tracking-[0.5em] mb-12 skew-x-3">
+            [ARCHIVE] DEAD SIGNALS
+          </h2>
+          {pastEvents.length > 0 ? (
             <div className="space-y-4">
               {pastEvents.map((event, index) => (
                 <PastEventCard key={event.id} event={event} index={index} />
               ))}
             </div>
-          </section>
-        )}
+          ) : (
+            <DeadSignalsEmpty />
+          )}
+        </section>
       </div>
 
       <PerspectiveGrid />

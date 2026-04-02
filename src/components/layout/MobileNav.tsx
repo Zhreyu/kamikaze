@@ -44,7 +44,7 @@ export function MobileNav({
   return (
     <div
       className={clsx(
-        'fixed inset-0 z-[100] bg-black transition-opacity duration-500',
+        'fixed inset-0 z-[200] bg-black transition-opacity duration-500',
         isAnimating ? 'opacity-100' : 'opacity-0'
       )}
       onClick={onClose}
