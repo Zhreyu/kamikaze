@@ -2,7 +2,16 @@
 
 import { Canvas, useFrame } from '@react-three/fiber'
 import { useRef, useMemo, useState, useEffect, Suspense } from 'react'
-import * as THREE from 'three'
+import {
+  Points,
+  ShaderMaterial,
+  Color,
+  AdditiveBlending,
+  MathUtils,
+  Mesh,
+  MeshBasicMaterial,
+  DoubleSide,
+} from 'three'
 import { Genre, GENRE_FREQUENCIES } from '@/data/signals'
 
 // Shared state for cross-component communication
@@ -25,18 +34,18 @@ interface WaveformParticlesProps {
 }
 
 function WaveformParticles({ count = 2000 }: WaveformParticlesProps) {
-  const points = useRef<THREE.Points>(null!)
-  const materialRef = useRef<THREE.ShaderMaterial>(null!)
+  const points = useRef<Points>(null!)
+  const materialRef = useRef<ShaderMaterial>(null!)
 
   // Current animation state
   const state = useRef({
     curl: 1.5,
     speed: 0.5,
-    color: new THREE.Color('#cc0000'),
+    color: new Color('#cc0000'),
     intensity: 0.5,
     targetCurl: 1.5,
     targetSpeed: 0.5,
-    targetColor: new THREE.Color('#cc0000'),
+    targetColor: new Color('#cc0000'),
     targetIntensity: 0.5,
     shake: 0,
   })
@@ -93,10 +102,10 @@ function WaveformParticles({ count = 2000 }: WaveformParticlesProps) {
 
   // Shader material for particles
   const shaderMaterial = useMemo(() => {
-    return new THREE.ShaderMaterial({
+    return new ShaderMaterial({
       uniforms: {
         uTime: { value: 0 },
-        uColor: { value: new THREE.Color('#cc0000') },
+        uColor: { value: new Color('#cc0000') },
         uIntensity: { value: 0.5 },
         uSize: { value: 3.0 },
       },
@@ -139,7 +148,7 @@ function WaveformParticles({ count = 2000 }: WaveformParticlesProps) {
         }
       `,
       transparent: true,
-      blending: THREE.AdditiveBlending,
+      blending: AdditiveBlending,
       depthWrite: false,
     })
   }, [])
@@ -151,9 +160,9 @@ function WaveformParticles({ count = 2000 }: WaveformParticlesProps) {
     const t = materialRef.current.uniforms.uTime.value + delta
 
     // Lerp current values toward targets
-    s.curl = THREE.MathUtils.lerp(s.curl, s.targetCurl, 0.1)
-    s.speed = THREE.MathUtils.lerp(s.speed, s.targetSpeed, 0.1)
-    s.intensity = THREE.MathUtils.lerp(s.intensity, s.targetIntensity, 0.1)
+    s.curl = MathUtils.lerp(s.curl, s.targetCurl, 0.1)
+    s.speed = MathUtils.lerp(s.speed, s.targetSpeed, 0.1)
+    s.intensity = MathUtils.lerp(s.intensity, s.targetIntensity, 0.1)
     s.color.lerp(s.targetColor, 0.1)
     s.shake *= 0.95 // Decay shake
 
@@ -212,10 +221,10 @@ function WaveformParticles({ count = 2000 }: WaveformParticlesProps) {
 }
 
 function FrequencyRing() {
-  const ringRef = useRef<THREE.Mesh>(null!)
+  const ringRef = useRef<Mesh>(null!)
   const state = useRef({
-    color: new THREE.Color('#cc0000'),
-    targetColor: new THREE.Color('#cc0000'),
+    color: new Color('#cc0000'),
+    targetColor: new Color('#cc0000'),
     intensity: 0.3,
     targetIntensity: 0.3,
   })
@@ -243,9 +252,9 @@ function FrequencyRing() {
 
     const s = state.current
     s.color.lerp(s.targetColor, 0.1)
-    s.intensity = THREE.MathUtils.lerp(s.intensity, s.targetIntensity, 0.1)
+    s.intensity = MathUtils.lerp(s.intensity, s.targetIntensity, 0.1)
 
-    const mat = ringRef.current.material as THREE.MeshBasicMaterial
+    const mat = ringRef.current.material as MeshBasicMaterial
     mat.color = s.color
     mat.opacity = s.intensity
 
@@ -259,7 +268,7 @@ function FrequencyRing() {
         color="#cc0000"
         transparent
         opacity={0.3}
-        side={THREE.DoubleSide}
+        side={DoubleSide}
       />
     </mesh>
   )

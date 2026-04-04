@@ -10,7 +10,20 @@ import {
 } from '@react-three/postprocessing'
 import { BlendFunction } from 'postprocessing'
 import { useRef, useMemo, useState, useEffect, Suspense } from 'react'
-import * as THREE from 'three'
+import {
+  Points,
+  ShaderMaterial,
+  Color,
+  AdditiveBlending,
+  MathUtils,
+  BufferGeometry,
+  Float32BufferAttribute,
+  Group,
+  Mesh,
+  DoubleSide,
+  Vector2,
+  LineSegments,
+} from 'three'
 import { getScrollVelocity, getRawScrollVelocity } from '@/hooks/useScrollStore'
 import { getBass, getMids, getHighs, getIsSwitching } from '@/hooks/useAudioEngine'
 import { Genre, GENRE_FREQUENCIES } from '@/data/signals'
@@ -41,15 +54,15 @@ interface DataDustProps {
 }
 
 function DataDust({ count = 4000 }: DataDustProps) {
-  const points = useRef<THREE.Points>(null!)
-  const materialRef = useRef<THREE.ShaderMaterial>(null!)
+  const points = useRef<Points>(null!)
+  const materialRef = useRef<ShaderMaterial>(null!)
 
   // Particle state
   const state = useRef({
     baseSpeed: 0.3,
     scrollMultiplier: 0,
-    color: new THREE.Color('#00cccc'),
-    targetColor: new THREE.Color('#00cccc'),
+    color: new Color('#00cccc'),
+    targetColor: new Color('#00cccc'),
   })
 
   // Listen for genre changes
@@ -93,10 +106,10 @@ function DataDust({ count = 4000 }: DataDustProps) {
 
   // Shader for data dust
   const shaderMaterial = useMemo(() => {
-    return new THREE.ShaderMaterial({
+    return new ShaderMaterial({
       uniforms: {
         uTime: { value: 0 },
-        uColor: { value: new THREE.Color('#00cccc') },
+        uColor: { value: new Color('#00cccc') },
         uScrollVelocity: { value: 0 },
         uBass: { value: 0 },
         uPointSize: { value: 2.0 },
@@ -168,7 +181,7 @@ function DataDust({ count = 4000 }: DataDustProps) {
         }
       `,
       transparent: true,
-      blending: THREE.AdditiveBlending,
+      blending: AdditiveBlending,
       depthWrite: false,
     })
   }, [])
@@ -184,7 +197,7 @@ function DataDust({ count = 4000 }: DataDustProps) {
 
     // Get scroll velocity (drives the "lightspeed" effect)
     const scrollVel = getScrollVelocity()
-    s.scrollMultiplier = THREE.MathUtils.lerp(s.scrollMultiplier, scrollVel, 0.15)
+    s.scrollMultiplier = MathUtils.lerp(s.scrollMultiplier, scrollVel, 0.15)
     uniforms.uScrollVelocity.value = s.scrollMultiplier
 
     // Get bass for pulse effect
@@ -215,12 +228,12 @@ function DataDust({ count = 4000 }: DataDustProps) {
 // Circular grid that glitches on bass
 // ============================================
 function RadarMesh() {
-  const meshRef = useRef<THREE.LineSegments>(null!)
-  const materialRef = useRef<THREE.ShaderMaterial>(null!)
+  const meshRef = useRef<LineSegments>(null!)
+  const materialRef = useRef<ShaderMaterial>(null!)
 
   // Create circular radar grid geometry
   const geometry = useMemo(() => {
-    const geo = new THREE.BufferGeometry()
+    const geo = new BufferGeometry()
     const positions: number[] = []
 
     // Concentric circles
@@ -244,17 +257,17 @@ function RadarMesh() {
       positions.push(Math.cos(angle) * ringCount * 0.8, 0, Math.sin(angle) * ringCount * 0.8)
     }
 
-    geo.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3))
+    geo.setAttribute('position', new Float32BufferAttribute(positions, 3))
     return geo
   }, [])
 
   // Shader for the radar with bass glitch
   const shaderMaterial = useMemo(() => {
-    return new THREE.ShaderMaterial({
+    return new ShaderMaterial({
       uniforms: {
         uTime: { value: 0 },
         uBass: { value: 0 },
-        uColor: { value: new THREE.Color('#1a4a4a') },
+        uColor: { value: new Color('#1a4a4a') },
         uGlitchOffset: { value: 0 },
       },
       vertexShader: `
@@ -297,7 +310,7 @@ function RadarMesh() {
         }
       `,
       transparent: true,
-      blending: THREE.AdditiveBlending,
+      blending: AdditiveBlending,
       depthWrite: false,
     })
   }, [])
@@ -336,8 +349,8 @@ function RadarMesh() {
 // Rings that exist in 3D space, passing through the scene
 // ============================================
 function ToroidalPulses() {
-  const groupRef = useRef<THREE.Group>(null!)
-  const ringsRef = useRef<THREE.Mesh[]>([])
+  const groupRef = useRef<Group>(null!)
+  const ringsRef = useRef<Mesh[]>([])
 
   // Create multiple rings at different phases
   const ringCount = 5
@@ -352,12 +365,12 @@ function ToroidalPulses() {
 
   // Shared ring material
   const ringMaterial = useMemo(() => {
-    return new THREE.ShaderMaterial({
+    return new ShaderMaterial({
       uniforms: {
         uTime: { value: 0 },
         uPhase: { value: 0 },
         uBass: { value: 0 },
-        uColor: { value: new THREE.Color('#00cccc') },
+        uColor: { value: new Color('#00cccc') },
       },
       vertexShader: `
         varying vec2 vUv;
@@ -393,9 +406,9 @@ function ToroidalPulses() {
         }
       `,
       transparent: true,
-      blending: THREE.AdditiveBlending,
+      blending: AdditiveBlending,
       depthWrite: false,
-      side: THREE.DoubleSide,
+      side: DoubleSide,
     })
   }, [])
 
@@ -420,7 +433,7 @@ function ToroidalPulses() {
       mesh.position.z = -5 + ring.phase * 15 // -5 to +10
 
       // Update material uniforms
-      const mat = mesh.material as THREE.ShaderMaterial
+      const mat = mesh.material as ShaderMaterial
       if (mat.uniforms) {
         mat.uniforms.uPhase.value = ring.phase
         mat.uniforms.uBass.value = bass
@@ -456,15 +469,15 @@ function ToroidalPulses() {
 // Scanlines, vignette, bass strobe
 // ============================================
 function AtmospherePlane() {
-  const meshRef = useRef<THREE.Mesh>(null!)
-  const materialRef = useRef<THREE.ShaderMaterial>(null!)
+  const meshRef = useRef<Mesh>(null!)
+  const materialRef = useRef<ShaderMaterial>(null!)
 
   const shaderMaterial = useMemo(() => {
-    return new THREE.ShaderMaterial({
+    return new ShaderMaterial({
       uniforms: {
         uTime: { value: 0 },
         uBass: { value: 0 },
-        uResolution: { value: new THREE.Vector2(1920, 1080) },
+        uResolution: { value: new Vector2(1920, 1080) },
       },
       vertexShader: `
         varying vec2 vUv;
@@ -538,7 +551,7 @@ function PostProcessing() {
         radius={0.3}
       />
       <ChromaticAberration
-        offset={new THREE.Vector2(0.0005, 0.0005)}
+        offset={new Vector2(0.0005, 0.0005)}
         blendFunction={BlendFunction.NORMAL}
         radialModulation={false}
         modulationOffset={0}

@@ -3,7 +3,20 @@
 import { useRef, useMemo, useEffect, useState } from 'react'
 import { useFrame } from '@react-three/fiber'
 import { useGLTF } from '@react-three/drei'
-import * as THREE from 'three'
+import {
+  InstancedMesh,
+  ShaderMaterial,
+  Vector3,
+  Mesh,
+  CanvasTexture,
+  LinearFilter,
+  InstancedBufferAttribute,
+  Object3D,
+  MathUtils,
+  Color,
+  AdditiveBlending,
+  DoubleSide,
+} from 'three'
 import { getAssetPath } from '@/lib/basePath'
 import { generateSymbolAtlas } from '@/lib/generateSymbolAtlas'
 import { getBass, getIsSwitching, getCurrentChannel, getBeatPhase } from '@/hooks/useAudioEngine'
@@ -168,8 +181,8 @@ interface ParticleSwarmProps {
 }
 
 export function ParticleSwarm({ hoveredNav }: ParticleSwarmProps) {
-  const meshRef = useRef<THREE.InstancedMesh>(null!)
-  const materialRef = useRef<THREE.ShaderMaterial>(null!)
+  const meshRef = useRef<InstancedMesh>(null!)
+  const materialRef = useRef<ShaderMaterial>(null!)
   const modelPath = getAssetPath('/logo.glb')
 
   // Animation state
@@ -183,11 +196,11 @@ export function ParticleSwarm({ hoveredNav }: ParticleSwarmProps) {
   const { scene } = useGLTF(modelPath, true)
 
   const { homePositions, velocities, symbolIndices, phases, particleCount } = useMemo(() => {
-    const points: THREE.Vector3[] = []
+    const points: Vector3[] = []
 
     scene.traverse((child) => {
-      if ((child as THREE.Mesh).isMesh) {
-        const mesh = child as THREE.Mesh
+      if ((child as Mesh).isMesh) {
+        const mesh = child as Mesh
         const geo = mesh.geometry
         const posAttr = geo.getAttribute('position')
 
@@ -196,7 +209,7 @@ export function ParticleSwarm({ hoveredNav }: ParticleSwarmProps) {
         const worldMatrix = mesh.matrixWorld
 
         for (let i = 0; i < posAttr.count; i++) {
-          const v = new THREE.Vector3(
+          const v = new Vector3(
             posAttr.getX(i),
             posAttr.getY(i),
             posAttr.getZ(i)
@@ -258,9 +271,9 @@ export function ParticleSwarm({ hoveredNav }: ParticleSwarmProps) {
   const atlasTexture = useMemo(() => {
     if (typeof window === 'undefined') return null
     const canvas = generateSymbolAtlas()
-    const tex = new THREE.CanvasTexture(canvas)
-    tex.minFilter = THREE.LinearFilter
-    tex.magFilter = THREE.LinearFilter
+    const tex = new CanvasTexture(canvas)
+    tex.minFilter = LinearFilter
+    tex.magFilter = LinearFilter
     return tex
   }, [])
 
@@ -278,23 +291,23 @@ export function ParticleSwarm({ hoveredNav }: ParticleSwarmProps) {
 
     geometry.setAttribute(
       'aHomePosition',
-      new THREE.InstancedBufferAttribute(homePositions, 3)
+      new InstancedBufferAttribute(homePositions, 3)
     )
     geometry.setAttribute(
       'aVelocity',
-      new THREE.InstancedBufferAttribute(velocities, 3)
+      new InstancedBufferAttribute(velocities, 3)
     )
     geometry.setAttribute(
       'aSymbolIndex',
-      new THREE.InstancedBufferAttribute(symbolIndices, 1)
+      new InstancedBufferAttribute(symbolIndices, 1)
     )
     geometry.setAttribute(
       'aPhase',
-      new THREE.InstancedBufferAttribute(phases, 1)
+      new InstancedBufferAttribute(phases, 1)
     )
 
     // Set instance matrices to identity (positions handled in shader)
-    const dummy = new THREE.Object3D()
+    const dummy = new Object3D()
     for (let i = 0; i < particleCount; i++) {
       dummy.position.set(0, 0, 0)
       dummy.updateMatrix()
@@ -316,7 +329,7 @@ export function ParticleSwarm({ hoveredNav }: ParticleSwarmProps) {
     const channel = getCurrentChannel()
 
     // Smooth bass
-    smoothBass.current = THREE.MathUtils.lerp(smoothBass.current, bass, 0.3)
+    smoothBass.current = MathUtils.lerp(smoothBass.current, bass, 0.3)
 
     // Entry animation: scattered -> aggregate over 3 seconds
     if (hasStarted && entryProgress.current < 1) {
@@ -340,7 +353,7 @@ export function ParticleSwarm({ hoveredNav }: ParticleSwarmProps) {
 
     // Smooth lerp to target
     const lerpSpeed = smoothBass.current > 0.5 || isSwitching ? 0.15 : 0.03
-    currentAggregation.current = THREE.MathUtils.lerp(
+    currentAggregation.current = MathUtils.lerp(
       currentAggregation.current,
       targetAggregation.current,
       lerpSpeed
@@ -374,14 +387,14 @@ export function ParticleSwarm({ hoveredNav }: ParticleSwarmProps) {
           uBass: { value: 0 },
           uAggregation: { value: 0 },
           uAtlas: { value: atlasTexture },
-          uChannelColor: { value: new THREE.Color('#cc0000') },
+          uChannelColor: { value: new Color('#cc0000') },
         }}
         vertexShader={swarmVertexShader}
         fragmentShader={swarmFragmentShader}
         transparent
         depthWrite={false}
-        blending={THREE.AdditiveBlending}
-        side={THREE.DoubleSide}
+        blending={AdditiveBlending}
+        side={DoubleSide}
       />
     </instancedMesh>
   )

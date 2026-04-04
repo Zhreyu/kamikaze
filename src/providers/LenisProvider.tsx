@@ -1,6 +1,6 @@
 'use client'
 
-import { createContext, useContext, useEffect, useRef, ReactNode } from 'react'
+import { createContext, useContext, useEffect, useRef, ReactNode, useState } from 'react'
 import Lenis from '@studio-freight/lenis'
 
 interface LenisContextValue {
@@ -23,8 +23,18 @@ interface LenisProviderProps {
 
 export function LenisProvider({ children }: LenisProviderProps) {
   const lenisRef = useRef<Lenis | null>(null)
+  const [isMobile, setIsMobile] = useState(false)
 
   useEffect(() => {
+    // Detect touch device - use native scroll on mobile for better performance
+    const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0
+    setIsMobile(isTouchDevice)
+
+    // Skip Lenis on mobile - native scroll is smoother
+    if (isTouchDevice) {
+      return
+    }
+
     const lenis = new Lenis({
       duration: 1.2,
       easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
@@ -32,7 +42,6 @@ export function LenisProvider({ children }: LenisProviderProps) {
       gestureOrientation: 'vertical',
       smoothWheel: true,
       wheelMultiplier: 1,
-      touchMultiplier: 2,
     })
 
     lenisRef.current = lenis
@@ -56,11 +65,26 @@ export function LenisProvider({ children }: LenisProviderProps) {
   }, [])
 
   const scrollTo = (target: string | number | HTMLElement, options = {}) => {
-    lenisRef.current?.scrollTo(target, {
-      offset: 0,
-      duration: 1.2,
-      ...options,
-    })
+    if (lenisRef.current) {
+      lenisRef.current.scrollTo(target, {
+        offset: 0,
+        duration: 1.2,
+        ...options,
+      })
+    } else {
+      // Fallback for mobile - use native smooth scroll
+      const element = typeof target === 'string'
+        ? document.querySelector(target)
+        : target instanceof HTMLElement
+          ? target
+          : null
+
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth' })
+      } else if (typeof target === 'number') {
+        window.scrollTo({ top: target, behavior: 'smooth' })
+      }
+    }
   }
 
   return (

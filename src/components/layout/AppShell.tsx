@@ -7,17 +7,29 @@ import { CursorProvider } from '@/providers/CursorProvider'
 import { TransitionProvider } from '@/providers/TransitionProvider'
 import { Navigation } from '@/components/layout/Navigation'
 import { Footer } from '@/components/layout/Footer'
-import { DepthLayers } from '@/components/canvas/DepthLayers'
 import { ScrollTracker } from '@/components/layout/ScrollTracker'
-import { TerminalAudioPlayer } from '@/components/audio/TerminalAudioPlayer'
 import { BootSequence } from '@/components/layout/BootSequence'
 import { FastBoot } from '@/components/layout/FastBoot'
-import { ScreenCorruption } from '@/components/effects/ScreenCorruption'
 import { FontLoader } from '@/components/layout/FontLoader'
 
-// Dynamic import for 3D scene (client-only, no SSR for WebGL)
+// Dynamic imports for performance - these don't block initial render
 const SigilScene3D = dynamic(
   () => import('@/components/canvas/SigilScene3D'),
+  { ssr: false }
+)
+
+const DepthLayers = dynamic(
+  () => import('@/components/canvas/DepthLayers').then(mod => ({ default: mod.DepthLayers })),
+  { ssr: false }
+)
+
+const ScreenCorruption = dynamic(
+  () => import('@/components/effects/ScreenCorruption').then(mod => ({ default: mod.ScreenCorruption })),
+  { ssr: false }
+)
+
+const TerminalAudioPlayer = dynamic(
+  () => import('@/components/audio/TerminalAudioPlayer').then(mod => ({ default: mod.TerminalAudioPlayer })),
   { ssr: false }
 )
 

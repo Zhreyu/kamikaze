@@ -5,20 +5,33 @@ import { useGLTF, useAnimations, Environment, ContactShadows, Html } from '@reac
 import { EffectComposer, Bloom, ChromaticAberration, Noise, Vignette } from '@react-three/postprocessing'
 import { BlendFunction } from 'postprocessing'
 import { useRef, useEffect, useMemo, useState, Suspense } from 'react'
-import * as THREE from 'three'
+import {
+  Group,
+  Mesh,
+  MeshStandardMaterial,
+  MeshBasicMaterial,
+  PointLight,
+  SpotLight,
+  Vector2,
+  Vector3,
+  Color,
+  MathUtils,
+  LoopRepeat,
+  AdditiveBlending,
+} from 'three'
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js'
 import { getAssetPath } from '@/lib/basePath'
 import { getScrollProgress, getScrollSection } from '@/hooks/useScrollStore'
 import { getGlitchIntensity } from '@/hooks/useSigilGlitch'
 import { getBass, getMids, getHighs, getIsSwitching, getCurrentChannel } from '@/hooks/useAudioEngine'
 
-// Configure drei's useGLTF to use Draco decoder from CDN
+// Configure drei's useGLTF to use local Draco decoder (faster than CDN)
 const dracoLoader = new DRACOLoader()
-dracoLoader.setDecoderPath('https://www.gstatic.com/draco/versioned/decoders/1.5.6/')
+dracoLoader.setDecoderPath(getAssetPath('/draco/'))
 dracoLoader.preload()
 
 // Set up the GLTF loader with Draco support
-useGLTF.setDecoderPath('https://www.gstatic.com/draco/versioned/decoders/1.5.6/')
+useGLTF.setDecoderPath(getAssetPath('/draco/'))
 
 // Navigation labels that float around the sigil
 const NAV_ITEMS = [
@@ -37,7 +50,7 @@ function NavLabel({ label, href, angle, distance, hoveredNav, setHoveredNav }: {
   hoveredNav: string | null
   setHoveredNav: (nav: string | null) => void
 }) {
-  const ref = useRef<THREE.Group>(null!)
+  const ref = useRef<Group>(null!)
   const isHovered = hoveredNav === label
 
   useFrame((state) => {
@@ -45,7 +58,7 @@ function NavLabel({ label, href, angle, distance, hoveredNav, setHoveredNav }: {
     const t = state.clock.getElapsedTime()
 
     // Position in a circle around the sigil
-    const rad = THREE.MathUtils.degToRad(angle + t * 5) // Slow orbit
+    const rad = MathUtils.degToRad(angle + t * 5) // Slow orbit
     ref.current.position.x = Math.cos(rad) * distance
     ref.current.position.z = Math.sin(rad) * distance
     ref.current.position.y = Math.sin(t * 2 + angle) * 0.3 // Subtle bob
@@ -83,7 +96,7 @@ function NavLabel({ label, href, angle, distance, hoveredNav, setHoveredNav }: {
 }
 
 function SigilModel({ hoveredNav }: { hoveredNav: string | null }) {
-  const group = useRef<THREE.Group>(null!)
+  const group = useRef<Group>(null!)
   const modelPath = getAssetPath('/logo.glb')
   const { mouse } = useThree()
 
@@ -96,7 +109,7 @@ function SigilModel({ hoveredNav }: { hoveredNav: string | null }) {
   const smoothEmissive = useRef(0)
 
   // Create materials for different states
-  const redChrome = useMemo(() => new THREE.MeshStandardMaterial({
+  const redChrome = useMemo(() => new MeshStandardMaterial({
     color: '#600000',
     emissive: '#400000',
     emissiveIntensity: 0.5,
@@ -104,7 +117,7 @@ function SigilModel({ hoveredNav }: { hoveredNav: string | null }) {
     roughness: 0.1,
   }), [])
 
-  const silverChrome = useMemo(() => new THREE.MeshStandardMaterial({
+  const silverChrome = useMemo(() => new MeshStandardMaterial({
     color: '#888888',
     emissive: '#222222',
     emissiveIntensity: 0.3,
@@ -116,8 +129,8 @@ function SigilModel({ hoveredNav }: { hoveredNav: string | null }) {
   const clonedScene = useMemo(() => {
     const clone = scene.clone()
     clone.traverse((child) => {
-      if ((child as THREE.Mesh).isMesh) {
-        const mesh = child as THREE.Mesh
+      if ((child as Mesh).isMesh) {
+        const mesh = child as Mesh
         mesh.material = redChrome.clone()
       }
     })
@@ -125,12 +138,12 @@ function SigilModel({ hoveredNav }: { hoveredNav: string | null }) {
   }, [scene, redChrome])
 
   // Store meshes for material updates
-  const meshesRef = useRef<THREE.Mesh[]>([])
+  const meshesRef = useRef<Mesh[]>([])
   useEffect(() => {
-    const meshes: THREE.Mesh[] = []
+    const meshes: Mesh[] = []
     clonedScene.traverse((child) => {
-      if ((child as THREE.Mesh).isMesh) {
-        meshes.push(child as THREE.Mesh)
+      if ((child as Mesh).isMesh) {
+        meshes.push(child as Mesh)
       }
     })
     meshesRef.current = meshes
@@ -143,7 +156,7 @@ function SigilModel({ hoveredNav }: { hoveredNav: string | null }) {
       const action = actions[animationNames[0]]
       if (action) {
         action.reset().play()
-        action.setLoop(THREE.LoopRepeat, Infinity)
+        action.setLoop(LoopRepeat, Infinity)
       }
     }
   }, [actions])
@@ -161,12 +174,12 @@ function SigilModel({ hoveredNav }: { hoveredNav: string | null }) {
     const mids = getMids()
 
     // Smooth the bass for less jerky movement
-    smoothBass.current = THREE.MathUtils.lerp(smoothBass.current, bass, 0.3)
+    smoothBass.current = MathUtils.lerp(smoothBass.current, bass, 0.3)
     const smoothedBass = smoothBass.current
 
     // Smooth mouse tracking
-    smoothMouse.current.x = THREE.MathUtils.lerp(smoothMouse.current.x, mouse.x, 0.1)
-    smoothMouse.current.y = THREE.MathUtils.lerp(smoothMouse.current.y, mouse.y, 0.1)
+    smoothMouse.current.x = MathUtils.lerp(smoothMouse.current.x, mouse.x, 0.1)
+    smoothMouse.current.y = MathUtils.lerp(smoothMouse.current.y, mouse.y, 0.1)
 
     // Base rotation - constant slow spin
     const baseRotationSpeed = 0.3
@@ -177,8 +190,8 @@ function SigilModel({ hoveredNav }: { hoveredNav: string | null }) {
     // Mouse-reactive tilt (the "lookAt" effect)
     const targetTiltX = smoothMouse.current.y * 0.4
     const targetTiltZ = -smoothMouse.current.x * 0.4
-    group.current.rotation.x = THREE.MathUtils.lerp(group.current.rotation.x, targetTiltX, 0.05)
-    group.current.rotation.z = THREE.MathUtils.lerp(group.current.rotation.z, targetTiltZ, 0.05)
+    group.current.rotation.x = MathUtils.lerp(group.current.rotation.x, targetTiltX, 0.05)
+    group.current.rotation.z = MathUtils.lerp(group.current.rotation.z, targetTiltZ, 0.05)
 
     // Breathing/float + audio pulse
     const breathe = Math.sin(t * 0.5) * 0.15
@@ -192,7 +205,7 @@ function SigilModel({ hoveredNav }: { hoveredNav: string | null }) {
     const targetScale = baseScale * scrollScale * audioScale
 
     group.current.scale.lerp(
-      new THREE.Vector3(targetScale, targetScale, targetScale),
+      new Vector3(targetScale, targetScale, targetScale),
       0.1
     )
 
@@ -217,13 +230,13 @@ function SigilModel({ hoveredNav }: { hoveredNav: string | null }) {
     const targetMaterial = section === 'contact' ? silverChrome : redChrome
     const targetEmissive = isSwitching ? 3 : 0.5 + smoothedBass * 2 // Flash bright on switch
 
-    smoothEmissive.current = THREE.MathUtils.lerp(smoothEmissive.current, targetEmissive, isSwitching ? 0.5 : 0.2)
+    smoothEmissive.current = MathUtils.lerp(smoothEmissive.current, targetEmissive, isSwitching ? 0.5 : 0.2)
 
     meshesRef.current.forEach((mesh) => {
-      const mat = mesh.material as THREE.MeshStandardMaterial
+      const mat = mesh.material as MeshStandardMaterial
       if (isSwitching) {
         // Flash channel color during switch
-        const channelColor = new THREE.Color(channel.color)
+        const channelColor = new Color(channel.color)
         mat.emissive.lerp(channelColor, 0.3)
         mat.emissiveIntensity = smoothEmissive.current
       } else {
@@ -244,7 +257,7 @@ function SigilModel({ hoveredNav }: { hoveredNav: string | null }) {
 
 // Strobe light that pulses with bass
 function StrobeLight() {
-  const lightRef = useRef<THREE.PointLight>(null!)
+  const lightRef = useRef<PointLight>(null!)
   const smoothIntensity = useRef(0)
 
   useFrame(() => {
@@ -274,8 +287,8 @@ function StrobeLight() {
 
 // Floor light that creates a "light leak" effect on bass hits
 function FloorLight() {
-  const lightRef = useRef<THREE.SpotLight>(null!)
-  const meshRef = useRef<THREE.Mesh>(null!)
+  const lightRef = useRef<SpotLight>(null!)
+  const meshRef = useRef<Mesh>(null!)
   const smoothIntensity = useRef(0)
 
   useFrame(() => {
@@ -295,7 +308,7 @@ function FloorLight() {
     lightRef.current.intensity = smoothIntensity.current * 8
 
     // Update floor glow mesh opacity
-    const mat = meshRef.current.material as THREE.MeshBasicMaterial
+    const mat = meshRef.current.material as MeshBasicMaterial
     mat.opacity = smoothIntensity.current * 0.4
   })
 
@@ -319,7 +332,7 @@ function FloorLight() {
           color="#cc0000"
           transparent
           opacity={0}
-          blending={THREE.AdditiveBlending}
+          blending={AdditiveBlending}
         />
       </mesh>
     </group>
@@ -337,7 +350,7 @@ function PostProcessing() {
         mipmapBlur
       />
       <ChromaticAberration
-        offset={new THREE.Vector2(0.003, 0.003)}
+        offset={new Vector2(0.003, 0.003)}
         blendFunction={BlendFunction.NORMAL}
         radialModulation={false}
         modulationOffset={0}

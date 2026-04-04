@@ -30,6 +30,11 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
+      <head>
+        {/* Preload 3D assets for faster loading */}
+        <link rel="preload" href="/draco/draco_decoder.wasm" as="fetch" crossOrigin="anonymous" />
+        <link rel="preload" href="/logo.glb" as="fetch" crossOrigin="anonymous" />
+      </head>
       <body className="bg-void text-white min-h-screen overflow-x-hidden">
         <AppShell>{children}</AppShell>
         <Analytics />

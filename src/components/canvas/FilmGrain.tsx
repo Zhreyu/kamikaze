@@ -24,6 +24,11 @@ export function FilmGrain() {
     <canvas
       ref={canvasRef}
       className="fixed inset-0 pointer-events-none z-[9999] opacity-[0.03]"
+      style={{
+        width: '100vw',
+        height: '100vh',
+        imageRendering: 'pixelated',
+      }}
       aria-hidden="true"
     />
   )

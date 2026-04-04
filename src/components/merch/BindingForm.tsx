@@ -171,7 +171,7 @@ export function BindingForm() {
             label="INPUT:// FREQUENCY"
             name="email"
             type="email"
-            placeholder="your.signal@frequency.ext"
+            placeholder="your.signal@email.com"
             value={email}
             onChange={(e) => {
               setEmail(e.target.value)

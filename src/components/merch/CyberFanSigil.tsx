@@ -3,23 +3,23 @@
 import { Canvas, useFrame } from '@react-three/fiber'
 import { useGLTF } from '@react-three/drei'
 import { useRef, useEffect, useMemo, useState, Suspense } from 'react'
-import * as THREE from 'three'
+import { Color, Group, Mesh, MeshStandardMaterial, MathUtils } from 'three'
 import { getAssetPath } from '@/lib/basePath'
 
-// Configure Draco decoder
-useGLTF.setDecoderPath('https://www.gstatic.com/draco/versioned/decoders/1.5.6/')
+// Configure Draco decoder (local for faster loading)
+useGLTF.setDecoderPath(getAssetPath('/draco/'))
 
 // Cached colors to avoid creating new objects every frame
-const ARTERIAL_RED = new THREE.Color('#CC0000')
-const SIGNAL_GREEN = new THREE.Color('#00ff41')
-const TEMP_COLOR = new THREE.Color()
+const ARTERIAL_RED = new Color('#CC0000')
+const SIGNAL_GREEN = new Color('#00ff41')
+const TEMP_COLOR = new Color()
 
 interface CyberFanModelProps {
   progress: number // 0-1 countdown progress
 }
 
 function CyberFanModel({ progress }: CyberFanModelProps) {
-  const group = useRef<THREE.Group>(null!)
+  const group = useRef<Group>(null!)
   const modelPath = getAssetPath('/cyberfan.glb')
 
   const { scene } = useGLTF(modelPath, true)
@@ -31,7 +31,7 @@ function CyberFanModel({ progress }: CyberFanModelProps) {
   // Create ritual materials - void black base with arterial red emission
   const ritualMaterial = useMemo(
     () =>
-      new THREE.MeshStandardMaterial({
+      new MeshStandardMaterial({
         color: '#0a0a0a', // void black
         emissive: '#CC0000', // arterial red
         emissiveIntensity: 0.3,
@@ -45,8 +45,8 @@ function CyberFanModel({ progress }: CyberFanModelProps) {
   const clonedScene = useMemo(() => {
     const clone = scene.clone()
     clone.traverse((child) => {
-      if ((child as THREE.Mesh).isMesh) {
-        const mesh = child as THREE.Mesh
+      if ((child as Mesh).isMesh) {
+        const mesh = child as Mesh
         mesh.material = ritualMaterial.clone()
       }
     })
@@ -54,12 +54,12 @@ function CyberFanModel({ progress }: CyberFanModelProps) {
   }, [scene, ritualMaterial])
 
   // Store meshes for material updates
-  const meshesRef = useRef<THREE.Mesh[]>([])
+  const meshesRef = useRef<Mesh[]>([])
   useEffect(() => {
-    const meshes: THREE.Mesh[] = []
+    const meshes: Mesh[] = []
     clonedScene.traverse((child) => {
-      if ((child as THREE.Mesh).isMesh) {
-        meshes.push(child as THREE.Mesh)
+      if ((child as Mesh).isMesh) {
+        meshes.push(child as Mesh)
       }
     })
     meshesRef.current = meshes
@@ -71,7 +71,7 @@ function CyberFanModel({ progress }: CyberFanModelProps) {
     const t = state.clock.getElapsedTime()
 
     // Smooth progress for lerping
-    smoothProgress.current = THREE.MathUtils.lerp(smoothProgress.current, progress, 0.05)
+    smoothProgress.current = MathUtils.lerp(smoothProgress.current, progress, 0.05)
 
     // Slow ritual rotation - speed increases with progress
     const rotationSpeed = 0.1 + smoothProgress.current * 0.2
@@ -88,14 +88,14 @@ function CyberFanModel({ progress }: CyberFanModelProps) {
     // Emissive intensity increases with progress
     const baseEmissive = 0.2 + smoothProgress.current * 0.8
     const targetEmissive = baseEmissive + pulse * smoothProgress.current * 0.5
-    smoothEmissive.current = THREE.MathUtils.lerp(smoothEmissive.current, targetEmissive, 0.1)
+    smoothEmissive.current = MathUtils.lerp(smoothEmissive.current, targetEmissive, 0.1)
 
     // Update materials - shift toward signal green as progress approaches 1
     // Use cached colors to avoid GC pressure
     TEMP_COLOR.copy(ARTERIAL_RED).lerp(SIGNAL_GREEN, smoothProgress.current * 0.3)
 
     meshesRef.current.forEach((mesh) => {
-      const mat = mesh.material as THREE.MeshStandardMaterial
+      const mat = mesh.material as MeshStandardMaterial
       mat.emissiveIntensity = smoothEmissive.current
       mat.emissive.lerp(TEMP_COLOR, 0.02)
     })
