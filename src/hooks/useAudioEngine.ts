@@ -177,13 +177,23 @@ export function toggle() {
 
 export function nextTrack() {
   if (state.mode === 'soundcloud' && scWidget) {
+    const wasPlaying = state.isPlaying
     scWidget.next()
+    // Ensure playback continues after skip
+    if (wasPlaying) {
+      setTimeout(() => scWidget.play(), 100)
+    }
   }
 }
 
 export function prevTrack() {
   if (state.mode === 'soundcloud' && scWidget) {
+    const wasPlaying = state.isPlaying
     scWidget.prev()
+    // Ensure playback continues after skip
+    if (wasPlaying) {
+      setTimeout(() => scWidget.play(), 100)
+    }
   }
 }
 

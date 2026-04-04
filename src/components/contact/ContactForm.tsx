@@ -7,20 +7,52 @@ import { TerminalButton } from '@/components/ui/TerminalButton'
 import { CornerBrackets } from '@/components/ui/CornerBrackets'
 import { GlitchSlice } from '@/components/effects/GlitchSlice'
 
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL
+
 export function ContactForm() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSubmitted, setIsSubmitted] = useState(false)
   const [isFormFocused, setIsFormFocused] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     setIsSubmitting(true)
+    setError(null)
 
-    // Simulate form submission
-    await new Promise((resolve) => setTimeout(resolve, 1500))
+    const formData = new FormData(e.currentTarget)
+    const data = {
+      name: formData.get('name') as string,
+      email: formData.get('email') as string,
+      subject: formData.get('subject') as string,
+      message: formData.get('message') as string,
+    }
 
-    setIsSubmitting(false)
-    setIsSubmitted(true)
+    try {
+      if (!SUPABASE_URL) {
+        throw new Error('SYSTEM_NOT_CONFIGURED')
+      }
+
+      const response = await fetch(`${SUPABASE_URL}/functions/v1/contact-form`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      })
+
+      const result = await response.json()
+
+      if (!response.ok || !result.success) {
+        throw new Error(result.message || 'TRANSMISSION_FAILED')
+      }
+
+      setIsSubmitted(true)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'TRANSMISSION_ERROR')
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   if (isSubmitted) {
@@ -91,7 +123,7 @@ export function ContactForm() {
         </GlitchSlice>
 
         <GlitchSlice delay={0.4}>
-          <div className="pt-4 flex justify-center">
+          <div className="pt-4 flex flex-col items-center gap-4">
             <TerminalButton
               loading={isSubmitting}
               success={isSubmitted}
@@ -99,6 +131,11 @@ export function ContactForm() {
             >
               TRANSMIT
             </TerminalButton>
+            {error && (
+              <div className="font-mono text-xs text-arterial animate-pulse">
+                [ERROR] {error}
+              </div>
+            )}
           </div>
         </GlitchSlice>
       </form>

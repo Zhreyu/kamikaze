@@ -113,86 +113,6 @@ function corruptString(str: string, intensity: number = 0.5): string {
     .join('')
 }
 
-// ============================================
-// CYBER BITS - Floating matrix-style particles
-// ============================================
-
-interface CyberBit {
-  id: number
-  char: string
-  x: number
-  y: number
-  opacity: number
-  speed: number
-}
-
-function CyberBits() {
-  const [bits, setBits] = useState<CyberBit[]>([])
-  const frameRef = useRef<number>(0)
-  const lastSpawnRef = useRef<number>(0)
-
-  useEffect(() => {
-    let bitId = 0
-
-    const animate = (time: number) => {
-      // Spawn new bits occasionally
-      if (time - lastSpawnRef.current > 200 && Math.random() < 0.3) {
-        lastSpawnRef.current = time
-        setBits((prev) => [
-          ...prev.slice(-15), // Keep max 15 bits
-          {
-            id: bitId++,
-            char: GLITCH_CHARS[Math.floor(Math.random() * 20)], // Mostly 0s and 1s
-            x: Math.random() * 100,
-            y: -10,
-            opacity: 0.3 + Math.random() * 0.4,
-            speed: 0.5 + Math.random() * 1.5,
-          },
-        ])
-      }
-
-      // Update bit positions
-      setBits((prev) =>
-        prev
-          .map((bit) => ({
-            ...bit,
-            y: bit.y + bit.speed,
-            opacity: bit.opacity * 0.99,
-          }))
-          .filter((bit) => bit.y < 120 && bit.opacity > 0.1)
-      )
-
-      frameRef.current = requestAnimationFrame(animate)
-    }
-
-    frameRef.current = requestAnimationFrame(animate)
-    return () => cancelAnimationFrame(frameRef.current)
-  }, [])
-
-  return (
-    <div className="absolute inset-0 overflow-hidden pointer-events-none">
-      {bits.map((bit) => {
-        const rand = Math.random()
-        const color = rand > 0.7 ? '#ef4444' : rand > 0.4 ? '#facc15' : '#4ade80'
-        return (
-          <span
-            key={bit.id}
-            className="absolute font-mono text-[8px]"
-            style={{
-              left: `${bit.x}%`,
-              top: `${bit.y}%`,
-              opacity: bit.opacity + 0.2,
-              color,
-              textShadow: `0 0 6px ${color}`,
-            }}
-          >
-            {bit.char}
-          </span>
-        )
-      })}
-    </div>
-  )
-}
 
 // ============================================
 // GLITCH LINE - Horizontal interference
@@ -482,8 +402,6 @@ export function DataStreamBar() {
         }}
       />
 
-      {/* Cyber bits (matrix rain) */}
-      <CyberBits />
 
       {/* Glitch lines */}
       <GlitchLines />

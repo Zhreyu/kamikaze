@@ -387,10 +387,13 @@ a:hover {
    TEXTURE OVERLAYS
    ============================================ */
 
-/* Global scanlines */
+/* Global scanlines - GPU accelerated via transform */
 .scanlines {
   position: fixed;
-  inset: 0;
+  top: -100px; /* Extend for seamless loop */
+  left: 0;
+  right: 0;
+  bottom: 0;
   pointer-events: none;
   z-index: 9998;
   background: repeating-linear-gradient(
@@ -401,11 +404,12 @@ a:hover {
     rgba(0, 0, 0, 0.15) 4px
   );
   animation: scanline-roll 30s linear infinite;
+  will-change: transform;
 }
 
 @keyframes scanline-roll {
-  0% { background-position-y: 0; }
-  100% { background-position-y: 100px; }
+  0% { transform: translateY(0); }
+  100% { transform: translateY(100px); } /* 100px = 25 pattern cycles, seamless */
 }
 
 /* ============================================

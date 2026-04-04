@@ -243,7 +243,7 @@ export function TerminalAudioPlayer() {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.9, y: 20 }}
             transition={{ duration: 0.3, ease: 'easeOut' }}
-            className="fixed bottom-4 left-4 z-50 w-72 border border-arterial/30 bg-void/95 font-mono"
+            className="fixed bottom-4 left-4 z-[110] w-72 border border-arterial/30 bg-void/95 font-mono"
             style={{ fontSize: '10px' }}
           >
           {/* Terminal header */}
@@ -355,7 +355,7 @@ export function TerminalAudioPlayer() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 40 }}
             transition={{ duration: 0.3, ease: 'easeOut' }}
-            className="fixed bottom-0 left-0 right-0 z-40 h-10 border-t border-arterial/40 bg-void/98 backdrop-blur-sm font-mono"
+            className="fixed bottom-0 left-0 right-0 z-[110] h-10 border-t border-arterial/40 bg-void/98 backdrop-blur-sm font-mono"
             style={{ fontSize: '10px' }}
           >
           <div className="h-full flex items-center px-4 gap-4">
