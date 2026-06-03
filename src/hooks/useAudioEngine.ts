@@ -77,6 +77,8 @@ const listeners: Set<() => void> = new Set()
 let beatPhase = 0
 let lastBeatTime = 0
 let scWidget: any = null
+let scIframe: HTMLIFrameElement | null = null
+let playRequestId = 0
 
 // ============================================
 // INITIALIZATION
@@ -95,7 +97,9 @@ export function initAudioEngine(): boolean {
 
 export function initSoundCloudWidget(iframe: HTMLIFrameElement) {
   if (!iframe || !window.SC?.Widget) return
+  if (scWidget && scIframe === iframe) return
 
+  scIframe = iframe
   scWidget = window.SC.Widget(iframe)
 
   scWidget.bind(window.SC.Widget.Events.READY, () => {
@@ -155,7 +159,7 @@ export function getCurrentChannel() {
 
 export function play() {
   if (state.mode === 'soundcloud' && scWidget) {
-    scWidget.play()
+    playSoundCloudWithRetries()
   } else {
     // Widget not ready yet - set pending flag
     pendingPlay = true
@@ -163,6 +167,7 @@ export function play() {
 }
 
 export function pause() {
+  playRequestId++
   if (state.mode === 'soundcloud' && scWidget) {
     scWidget.pause()
   }
@@ -182,7 +187,7 @@ export function nextTrack() {
     scWidget.next()
     // Ensure playback continues after skip
     if (wasPlaying) {
-      setTimeout(() => scWidget.play(), 100)
+      playSoundCloudWithRetries()
     }
   }
 }
@@ -193,8 +198,23 @@ export function prevTrack() {
     scWidget.prev()
     // Ensure playback continues after skip
     if (wasPlaying) {
-      setTimeout(() => scWidget.play(), 100)
+      playSoundCloudWithRetries()
     }
+  }
+}
+
+function playSoundCloudWithRetries() {
+  if (!scWidget) return
+
+  const requestId = ++playRequestId
+  scWidget.play()
+
+  for (let attempt = 1; attempt <= 4; attempt++) {
+    setTimeout(() => {
+      if (requestId === playRequestId && scWidget) {
+        scWidget.play()
+      }
+    }, attempt * 250)
   }
 }
 

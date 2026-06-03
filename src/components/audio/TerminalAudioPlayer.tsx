@@ -21,6 +21,24 @@ import {
 
 type PlayerMode = 'widget' | 'bar'
 
+const soundCloudPlayerOptions = {
+  color: '#CC0000',
+  hide_related: true,
+  show_comments: false,
+  show_user: false,
+  show_reposts: false,
+  show_teaser: false,
+  visual: false,
+}
+
+function playWidgetWithRetries(widget: any) {
+  widget.play()
+
+  for (let attempt = 1; attempt <= 4; attempt++) {
+    setTimeout(() => widget.play(), attempt * 250)
+  }
+}
+
 export function TerminalAudioPlayer() {
   const iframeRef = useRef<HTMLIFrameElement>(null)
   const widgetRef = useRef<any>(null)
@@ -34,8 +52,8 @@ export function TerminalAudioPlayer() {
   const [scApiLoaded, setScApiLoaded] = useState(false)
   const [scReady, setScReady] = useState(false)
   const [currentUrl, setCurrentUrl] = useState(CHANNELS[0].url)
-  const [isFading, setIsFading] = useState(false)
   const savedVolumeRef = useRef(70) // Store volume during fade
+  const resumeAfterLoadRef = useRef(false)
   const animationRef = useRef<number>(0)
 
   // Scroll detection - switch to bar mode when near footer
@@ -103,21 +121,20 @@ export function TerminalAudioPlayer() {
         setTrackTitle('READY // PRESS PLAY')
         initSoundCloudWidget(iframeRef.current!)
 
-        // Set initial volume
-        widget.setVolume(70)
-
-        // If we're coming back from a fade, restore volume and play
-        if (isFading) {
+        if (resumeAfterLoadRef.current) {
+          resumeAfterLoadRef.current = false
+          widget.setVolume(0)
           let vol = 0
           const fadeIn = setInterval(() => {
             vol += 10
             widget.setVolume(vol)
             if (vol >= savedVolumeRef.current) {
               clearInterval(fadeIn)
-              setIsFading(false)
-              widget.play()
+              playWidgetWithRetries(widget)
             }
           }, 50)
+        } else {
+          widget.setVolume(savedVolumeRef.current)
         }
       })
 
@@ -131,7 +148,7 @@ export function TerminalAudioPlayer() {
     }, 300)
 
     return () => clearTimeout(initWidget)
-  }, [scApiLoaded, currentUrl, isFading])
+  }, [scApiLoaded, currentUrl])
 
   // Subscribe to audio state changes
   useEffect(() => {
@@ -171,13 +188,40 @@ export function TerminalAudioPlayer() {
 
   // Handle channel switch with fade transition
   const handleChannelSwitch = useCallback((channelId: number) => {
+    if (channelId === state.currentChannel) {
+      setShowChannelSelector(false)
+      return
+    }
+
     const widget = widgetRef.current
     setShowChannelSelector(false)
+    const wasPlaying = state.isPlaying
+    const newUrl = switchChannel(channelId)
 
-    if (widget && state.isPlaying) {
+    const loadChannel = () => {
+      setScReady(false)
+      setTrackTitle('SWITCHING...')
+
+      if (!widget) {
+        resumeAfterLoadRef.current = wasPlaying
+        setCurrentUrl(newUrl)
+        return
+      }
+
+      resumeAfterLoadRef.current = wasPlaying
+      widget.load(newUrl, {
+        ...soundCloudPlayerOptions,
+        auto_play: wasPlaying,
+      })
+
+      if (wasPlaying) {
+        setTimeout(() => playWidgetWithRetries(widget), 750)
+      }
+    }
+
+    if (widget && wasPlaying) {
       // Save current volume and start fading
       savedVolumeRef.current = Math.round(state.volume * 100)
-      setIsFading(true)
 
       // Fade out
       let vol = savedVolumeRef.current
@@ -186,24 +230,16 @@ export function TerminalAudioPlayer() {
         widget.setVolume(Math.max(0, vol))
         if (vol <= 0) {
           clearInterval(fadeOut)
-          // Now switch the channel
-          const newUrl = switchChannel(channelId)
-          setCurrentUrl(newUrl)
-          setScReady(false) // Widget will reinitialize
-          setTrackTitle('SWITCHING...')
-          // Clear switching state after glitch effect
-          setTimeout(() => clearSwitching(), 300)
+          loadChannel()
         }
       }, 30)
     } else {
       // Not playing, just switch immediately
-      const newUrl = switchChannel(channelId)
-      setCurrentUrl(newUrl)
-      setScReady(false)
-      setTrackTitle('LOADING...')
-      setTimeout(() => clearSwitching(), 300)
+      loadChannel()
     }
-  }, [state.isPlaying, state.volume])
+
+    setTimeout(() => clearSwitching(), 300)
+  }, [state.currentChannel, state.isPlaying, state.volume])
 
   // Get current channel info
   const channel = getCurrentChannel()
