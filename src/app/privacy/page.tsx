@@ -72,7 +72,7 @@ const POLICY_SECTIONS = [
       '- Request data deletion',
       '- Unsubscribe from communications',
       '- Lodge a complaint with supervisory authorities',
-      'Contact enter@kamikaze.host for any requests.',
+      'Contact contact@kamikaze.host for any requests.',
     ],
   },
   {
@@ -153,10 +153,10 @@ export default function PrivacyPage() {
           <p className="font-mono text-xs text-white/50 leading-relaxed">
             Questions about your data? Contact us at{' '}
             <a
-              href="mailto:enter@kamikaze.host"
+              href="mailto:contact@kamikaze.host"
               className="text-arterial hover:text-white transition-colors"
             >
-              enter@kamikaze.host
+              contact@kamikaze.host
             </a>
           </p>
         </div>

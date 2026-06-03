@@ -228,7 +228,7 @@ export function TerminalAudioPlayer() {
       <iframe
         ref={iframeRef}
         src={embedUrl}
-        className="hidden"
+        className="absolute h-px w-px opacity-0 pointer-events-none"
         allow="autoplay"
         title="Audio Stream"
       />

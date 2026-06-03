@@ -147,7 +147,7 @@ Deno.serve(async (req) => {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            from: 'Kamikaze <uplink@kamikaze.host>',
+            from: 'Kamikaze <transmissions@kamikaze.host>',
             to: normalizedEmail,
             subject: '[ SIGNAL_RECEIVED ] // ACCESS_QUEUED',
             html: buildEmailHtml(serialKey),

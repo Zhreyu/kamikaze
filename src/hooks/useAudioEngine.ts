@@ -16,8 +16,9 @@ interface AudioEngineState {
   frequencyData: Uint8Array<ArrayBuffer>
 }
 
-// Shared playlist URL (replace individual channels later)
-const SHARED_PLAYLIST = 'https://soundcloud.com/neeraj-hari-839626007/sets/4-akedo-final'
+const HARD_TECHNO_SCHRANZ_PLAYLIST = 'https://soundcloud.com/ibliiiz/sets/underworld-1'
+const HARDGROOVE_PLAYLIST = 'https://soundcloud.com/ibliiiz/sets/vol-2-hardgroove'
+const HARDBOUNCE_PLAYLIST = 'https://soundcloud.com/ibliiiz/sets/240kmh-vol-3'
 
 // Channel definitions - each is a SoundCloud playlist
 export const CHANNELS = [
@@ -26,23 +27,23 @@ export const CHANNELS = [
     name: 'HARDGROOVE',
     code: '01',
     spm: 140,
-    url: SHARED_PLAYLIST,
+    url: HARDGROOVE_PLAYLIST,
     color: '#cc0000',
   },
   {
     id: 1,
-    name: 'INDUSTRIAL_BOUNCE',
+    name: 'HARDBOUNCE',
     code: '02',
     spm: 145,
-    url: SHARED_PLAYLIST,
+    url: HARDBOUNCE_PLAYLIST,
     color: '#ff4400',
   },
   {
     id: 2,
-    name: 'PUNK_TECHNO',
+    name: 'HARD_TECHNO_SCHRANZ',
     code: '03',
     spm: 150,
-    url: SHARED_PLAYLIST,
+    url: HARD_TECHNO_SCHRANZ_PLAYLIST,
     color: '#00ccff',
   },
   {
@@ -50,7 +51,7 @@ export const CHANNELS = [
     name: 'RAW_SIGNAL',
     code: '04',
     spm: 160,
-    url: SHARED_PLAYLIST,
+    url: HARD_TECHNO_SCHRANZ_PLAYLIST,
     color: '#ff00ff',
   },
 ]
