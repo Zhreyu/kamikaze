@@ -7,7 +7,7 @@ import clsx from 'clsx'
 
 export function Hero() {
   const sectionRef = useRef<HTMLElement>(null)
-  const titleRef = useRef<HTMLSpanElement>(null)
+  const titleRef = useRef<HTMLHeadingElement>(null)
   const [heroProgress, setHeroProgress] = useState(0)
   const [isVisible, setIsVisible] = useState(true)
   const [mouseDistance, setMouseDistance] = useState(0)
@@ -114,22 +114,20 @@ export function Hero() {
           }}
         >
           {/* Main title - dissolves on descend */}
-          <h1 className="font-ritual text-6xl md:text-8xl lg:text-9xl text-white text-center tracking-wider relative">
-            <span
-              ref={titleRef}
-              className="relative inline-block text-jitter"
-              data-text="KAMIKAZE"
-              style={{
-                letterSpacing: `${heroProgress * 0.35}em`,
-                textShadow: `
+          <h1
+            ref={titleRef}
+            className="font-ritual text-6xl md:text-8xl lg:text-9xl text-white text-center tracking-wider relative inline-block text-jitter m-0"
+            style={{
+              letterSpacing: `${heroProgress * 0.35}em`,
+              visibility: dissolveOpacity < 0.05 ? 'hidden' : 'visible',
+              textShadow: `
                   ${-chromaticOffset}px 0 0 rgba(255, 0, 0, ${0.7 * dissolveOpacity}),
                   ${chromaticOffset}px 0 0 rgba(0, 255, 255, ${0.7 * dissolveOpacity}),
                   0 0 ${20 + audioIntensity * 40}px rgba(204, 0, 0, ${(0.3 + audioIntensity * 0.5) * dissolveOpacity})
                 `,
-              }}
-            >
-              KAMIKAZE
-            </span>
+            }}
+          >
+            KAMIKAZE
           </h1>
 
           {/* Subtitle - Monospace */}
