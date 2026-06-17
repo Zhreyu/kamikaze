@@ -1,8 +1,6 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { initAudioEngine, play } from '@/hooks/useAudioEngine'
-import { playChirpSound } from '@/hooks/useSonicFeedback'
 import clsx from 'clsx'
 
 interface FastBootProps {
@@ -10,64 +8,45 @@ interface FastBootProps {
 }
 
 export function FastBoot({ onComplete }: FastBootProps) {
-  const [phase, setPhase] = useState<'prompt' | 'welcome' | 'done'>('prompt')
+  const [phase, setPhase] = useState<'loading' | 'welcome' | 'done'>('loading')
   const [glitchFrame, setGlitchFrame] = useState(0)
 
-  // Subtle flicker on prompt
   useEffect(() => {
-    if (phase !== 'prompt') return
+    if (phase !== 'loading') return
 
     const interval = setInterval(() => {
       setGlitchFrame((f) => (f + 1) % 10)
     }, 100)
 
-    return () => clearInterval(interval)
+    const welcomeTimer = setTimeout(() => setPhase('welcome'), 800)
+
+    return () => {
+      clearInterval(interval)
+      clearTimeout(welcomeTimer)
+    }
   }, [phase])
 
-  const handleClick = () => {
-    if (phase !== 'prompt') return
+  useEffect(() => {
+    if (phase !== 'welcome') return
 
-    // Initialize audio engine (unlocks AudioContext)
-    initAudioEngine()
-
-    // Play acknowledgment chirp
-    playChirpSound()
-
-    // Transition to welcome
-    setPhase('welcome')
-
-    // After brief flash, complete and start radio
-    setTimeout(() => {
-      play()
+    const doneTimer = setTimeout(() => {
       setPhase('done')
       onComplete()
     }, 600)
-  }
 
-  // Handle keyboard
-  useEffect(() => {
-    const handleKey = (e: KeyboardEvent) => {
-      if (e.key === 'Enter' || e.key === ' ') {
-        handleClick()
-      }
-    }
-
-    window.addEventListener('keydown', handleKey)
-    return () => window.removeEventListener('keydown', handleKey)
-  }, [phase])
+    return () => clearTimeout(doneTimer)
+  }, [phase, onComplete])
 
   if (phase === 'done') return null
 
   return (
     <div
       className={clsx(
-        'fixed inset-0 z-[100] bg-void flex items-center justify-center cursor-pointer',
+        'fixed inset-0 z-[100] bg-void flex items-center justify-center',
         'transition-all duration-500',
         phase === 'welcome' && 'opacity-0'
       )}
-      onClick={handleClick}
     >
-      {/* Scanlines */}
       <div
         className="absolute inset-0 pointer-events-none opacity-10"
         style={{
@@ -76,10 +55,8 @@ export function FastBoot({ onComplete }: FastBootProps) {
         }}
       />
 
-      {/* Prompt phase */}
-      {phase === 'prompt' && (
+      {phase === 'loading' && (
         <div className="relative">
-          {/* Flickering bar above text */}
           <div
             className={clsx(
               'absolute -top-4 left-0 right-0 h-px bg-arterial',
@@ -87,9 +64,7 @@ export function FastBoot({ onComplete }: FastBootProps) {
               glitchFrame % 3 === 0 ? 'opacity-100' : 'opacity-60'
             )}
           />
-
-          {/* Main prompt */}
-          <button
+          <div
             className={clsx(
               'font-mono text-sm tracking-widest transition-all duration-100',
               glitchFrame % 5 === 0 ? 'text-white' : 'text-arterial'
@@ -99,10 +74,8 @@ export function FastBoot({ onComplete }: FastBootProps) {
                 glitchFrame % 4 === 0 ? '2px 0 #00ffff, -2px 0 #ff00ff' : 'none',
             }}
           >
-            [ SIGNAL_RECOGNIZED // RESUME_UPLINK? ]
-          </button>
-
-          {/* Flickering bar below text */}
+            [ SIGNAL_RECOGNIZED // RESUME_UPLINK ]
+          </div>
           <div
             className={clsx(
               'absolute -bottom-4 left-0 right-0 h-px bg-arterial',
@@ -110,22 +83,15 @@ export function FastBoot({ onComplete }: FastBootProps) {
               glitchFrame % 4 === 0 ? 'opacity-100' : 'opacity-60'
             )}
           />
-
-          {/* Hint */}
-          <div className="absolute -bottom-10 left-1/2 -translate-x-1/2 font-mono text-[10px] text-white/50 whitespace-nowrap">
-            [ CLICK OR PRESS ENTER ]
-          </div>
         </div>
       )}
 
-      {/* Welcome phase - brief flash */}
       {phase === 'welcome' && (
         <div className="font-mono text-sm text-white tracking-widest animate-pulse">
           [ WELCOME BACK, OPERATIVE ]
         </div>
       )}
 
-      {/* Corner decorations */}
       <div className="absolute top-4 left-4 font-mono text-[10px] text-white/50">
         [FAST_BOOT]
       </div>

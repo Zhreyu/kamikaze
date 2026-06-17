@@ -58,7 +58,7 @@ export function MobileNav({
                 handleLinkClick(link.href)
               }}
               className={clsx(
-                'font-display text-4xl sm:text-6xl tracking-wider transition-colors',
+                'font-mono text-3xl sm:text-5xl tracking-wider transition-colors',
                 currentPath === link.href
                   ? 'text-red-bright'
                   : 'text-white hover:text-red-bright'

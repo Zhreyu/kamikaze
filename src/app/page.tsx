@@ -1,6 +1,5 @@
 import { Hero } from '@/components/home/Hero'
 import { Manifesto } from '@/components/home/Manifesto'
-import { TeaseCards } from '@/components/home/TeaseCards'
 import { PerspectiveGrid } from '@/components/canvas/PerspectiveGrid'
 import { TransmissionPanel } from '@/components/events/TransmissionPanel'
 
@@ -11,7 +10,6 @@ export default function HomePage() {
         <Hero />
         <TransmissionPanel />
         <Manifesto />
-        <TeaseCards />
       </div>
       <PerspectiveGrid />
     </div>

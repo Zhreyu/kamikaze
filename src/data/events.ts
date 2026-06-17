@@ -8,9 +8,10 @@ export interface Event {
   ticketUrl?: string
   isPast: boolean
   description?: string
-  isSecretLocation?: boolean // For events with hidden location reveal (click to decrypt)
-  isFullyRedacted?: boolean // For fully locked events (no access at all)
-  isDateHidden?: boolean // Hide the date completely
+  isSecretLocation?: boolean
+  isFullyRedacted?: boolean
+  isDateHidden?: boolean
+  tbdFields?: ('venue' | 'lineup' | 'date')[]
 }
 
 export const events: Event[] = [
@@ -24,7 +25,8 @@ export const events: Event[] = [
     ticketUrl: 'https://ra.co/events/kamikaze-override',
     isPast: false,
     description: 'The convention is camouflage. Beneath the dome, the network breathes. Coordinates burn clear at T−48.',
-    isSecretLocation: true, // Special flag for hacking sequence
+    isSecretLocation: true,
+    tbdFields: ['venue', 'lineup'],
   },
   {
     id: 'redacted-session-01',

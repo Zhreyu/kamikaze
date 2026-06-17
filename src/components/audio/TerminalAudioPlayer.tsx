@@ -80,10 +80,8 @@ export function TerminalAudioPlayer() {
 
   // Load SoundCloud Widget API script
   useEffect(() => {
-    // Check if already loaded
     if (window.SC?.Widget) {
       setScApiLoaded(true)
-      initAudioEngine()
       return
     }
 
@@ -92,7 +90,6 @@ export function TerminalAudioPlayer() {
     script.async = true
     script.onload = () => {
       setScApiLoaded(true)
-      initAudioEngine()
     }
     document.body.appendChild(script)
 
@@ -183,6 +180,9 @@ export function TerminalAudioPlayer() {
   }, [])
 
   const handlePlayPause = useCallback(() => {
+    if (!getAudioState().isInitialized) {
+      initAudioEngine()
+    }
     toggle()
   }, [])
 

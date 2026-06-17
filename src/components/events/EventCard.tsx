@@ -14,21 +14,13 @@ import { playErrorSound, playSubmitSound, playHoverSound } from '@/hooks/useSoni
 import { useIsMobile } from '@/hooks/useIsMobile'
 import clsx from 'clsx'
 
-// Glitch characters for the reveal effect
 const GLITCH_CHARS = '█▓▒░╔╗╚╝│─┌┐└┘?#@$%&*'
 
-// City lists for each attempt - scan through these before failing
-const ATTEMPT_CITIES = [
-  ['BERLIN', 'AMSTERDAM', 'LONDON', 'DETROIT'],
-  ['TOKYO', 'MUMBAI', 'TBILISI', 'KIEV'],
-  ['MELBOURNE', 'SAO_PAULO', 'LAGOS', 'CAIRO'],
+const SCAN_CITIES = [
+  'BERLIN', 'AMSTERDAM', 'LONDON', 'TOKYO', 'MUMBAI', 'TBILISI',
 ]
 
-const TRY_1_DENIED = 'DOME SIGNATURE LOCKED // NEM-01 ACTIVE // ACCESS REJECTED'
 const WATCHING_MESSAGE = 'THE DOME REGISTERED YOUR SCAN // STEP BACK OR COMMIT'
-const PARTIAL_LEAK_MESSAGE = 'LEAK CONFIRMED: SEPTEMBER // CITY: TRIVANDRUM // SUBSTRATE: STILL BURIED'
-
-const MAX_ATTEMPTS = 2
 
 interface EventCardProps {
   event: Event
@@ -40,19 +32,18 @@ export function EventCard({ event, index }: EventCardProps) {
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 })
   const [isHovered, setIsHovered] = useState(false)
   const [isProcessing, setIsProcessing] = useState(false)
-  const [hackAttempt, setHackAttempt] = useState(0)
   const [displayCity, setDisplayCity] = useState('')
-  const [hackStatus, setHackStatus] = useState<'idle' | 'denied' | 'compromised' | 'partial'>('idle')
+  const [hackStatus, setHackStatus] = useState<'idle' | 'scanning' | 'compromised' | 'partial'>('idle')
   const [statusMessage, setStatusMessage] = useState('')
   const [fragmentHint, setFragmentHint] = useState(false)
   const cardRef = useRef<HTMLDivElement>(null)
   const hackTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const decryptStartedRef = useRef(false)
   const isMobile = useIsMobile()
   const isSoldOut = !event.ticketUrl
   const isSecretLocation = event.isSecretLocation
   const isFullyRedacted = event.isFullyRedacted
 
-  // Initialize display city
   useEffect(() => {
     if (isSecretLocation && hackStatus === 'idle') {
       setDisplayCity('█'.repeat(event.city.length))
@@ -61,7 +52,64 @@ export function EventCard({ event, index }: EventCardProps) {
     }
   }, [event.city, isSecretLocation, hackStatus])
 
-  // Cleanup timeout on unmount; open decrypt panel when routed from fragment 01
+  const runDecryptSequence = useCallback(() => {
+    if (decryptStartedRef.current || hackStatus !== 'idle') return
+    decryptStartedRef.current = true
+    setIsProcessing(true)
+    setHackStatus('scanning')
+    triggerSigilGlitch(0.8, 400)
+    setDangerLevel(2)
+
+    const cityUpper = event.city.toUpperCase()
+    const cityLength = event.city.length
+    let cityIndex = 0
+    let phase: 'scramble' | 'show_city' | 'next' = 'scramble'
+    let scrambleFrames = 0
+
+    const scanInterval = setInterval(() => {
+      if (phase === 'scramble') {
+        scrambleFrames++
+        setDisplayCity(
+          Array(cityLength).fill(0).map(() =>
+            GLITCH_CHARS[Math.floor(Math.random() * GLITCH_CHARS.length)]
+          ).join('')
+        )
+        setStatusMessage(`SCANNING_NODE_${cityIndex + 1}...`)
+
+        if (scrambleFrames >= 6) {
+          scrambleFrames = 0
+          phase = 'show_city'
+        }
+      } else if (phase === 'show_city') {
+        const currentCity = SCAN_CITIES[cityIndex]
+        setDisplayCity(currentCity.slice(0, cityLength).padEnd(cityLength, '█'))
+        setStatusMessage(`TRYING: ${currentCity}...`)
+        phase = 'next'
+      } else if (phase === 'next') {
+        cityIndex++
+        if (cityIndex < SCAN_CITIES.length) {
+          phase = 'scramble'
+          triggerSigilGlitch(0.3, 100)
+        } else {
+          clearInterval(scanInterval)
+          setHackStatus('compromised')
+          setStatusMessage(WATCHING_MESSAGE)
+          triggerSigilGlitch(1.5, 800)
+          setDangerLevel(3)
+          playErrorSound()
+
+          hackTimeoutRef.current = setTimeout(() => {
+            setHackStatus('partial')
+            setDisplayCity(cityUpper)
+            setStatusMessage('')
+            setIsProcessing(false)
+            playSubmitSound()
+          }, 1500)
+        }
+      }
+    }, 120)
+  }, [event.city, hackStatus])
+
   useEffect(() => {
     if (isSecretLocation) {
       setFragmentHint(sessionStorage.getItem(FRAGMENT_01_SEEN_KEY) === '1')
@@ -71,6 +119,7 @@ export function EventCard({ event, index }: EventCardProps) {
         window.location.hash === `#${event.id}`
       ) {
         setIsExpanded(true)
+        requestAnimationFrame(() => runDecryptSequence())
       }
     }
     return () => {
@@ -78,112 +127,32 @@ export function EventCard({ event, index }: EventCardProps) {
         clearTimeout(hackTimeoutRef.current)
       }
     }
-  }, [event.id, isSecretLocation])
+  }, [event.id, isSecretLocation, runDecryptSequence])
 
-  // Format date - mask for secret/redacted events
   const getDisplayDate = () => {
-    if (isFullyRedacted) {
-      return '??.??.????'
-    }
-    if (isSecretLocation) {
-      return MASKED_TIMESTAMP
-    }
+    if (isFullyRedacted) return '??.??.????'
+    if (isSecretLocation && hackStatus !== 'partial') return MASKED_TIMESTAMP
+    if (isSecretLocation && hackStatus === 'partial') return formatEventDate(event.date)
     return formatEventDate(event.date)
   }
 
-  // Handle each ACQUIRE_ACCESS click - manual attempts
-  // Each attempt scans through 3-4 cities before failing
-  const handleSecretAccessClick = useCallback(() => {
-    if (hackStatus === 'partial' || hackStatus === 'compromised') return
-    if (isProcessing) return
-
-    const newAttempt = hackAttempt + 1
-    setHackAttempt(newAttempt)
-    setIsProcessing(true)
-    setHackStatus('denied')
-    triggerSigilGlitch(0.8, 400)
-
-    // Trigger danger level 2 on access attempt
-    setDangerLevel(2)
-
-    const cityUpper = event.city.toUpperCase()
-    const cityLength = event.city.length
-
-    // Get cities to scan for this attempt
-    const citiesToScan = ATTEMPT_CITIES[newAttempt - 1] || ATTEMPT_CITIES[0]
-    let cityIndex = 0
-    let phase: 'scramble' | 'show_city' | 'next' = 'scramble'
-    let scrambleFrames = 0
-
-    const scanInterval = setInterval(() => {
-      if (phase === 'scramble') {
-        // Scramble effect
-        scrambleFrames++
-        setDisplayCity(
-          Array(cityLength).fill(0).map(() =>
-            GLITCH_CHARS[Math.floor(Math.random() * GLITCH_CHARS.length)]
-          ).join('')
-        )
-        setStatusMessage(`SCANNING_NODE_${cityIndex + 1}...`)
-
-        if (scrambleFrames >= 8) {
-          scrambleFrames = 0
-          phase = 'show_city'
-        }
-      } else if (phase === 'show_city') {
-        // Show current city being "tried"
-        const currentCity = citiesToScan[cityIndex]
-        setDisplayCity(currentCity.slice(0, cityLength).padEnd(cityLength, '█'))
-        setStatusMessage(`TRYING: ${currentCity}...`)
-        phase = 'next'
-      } else if (phase === 'next') {
-        cityIndex++
-        if (cityIndex < citiesToScan.length) {
-          // Move to next city
-          phase = 'scramble'
-          triggerSigilGlitch(0.3, 100)
-        } else {
-          // Done scanning all cities - show failure
-          clearInterval(scanInterval)
-
-          if (newAttempt >= MAX_ATTEMPTS) {
-            // Final attempt - they're watching!
-            setHackStatus('compromised')
-            setStatusMessage(WATCHING_MESSAGE)
-            triggerSigilGlitch(1.5, 800)
-
-            // Critical danger + error sound
-            setDangerLevel(3)
-            playErrorSound()
-
-            // After dramatic pause, partial leak
-            hackTimeoutRef.current = setTimeout(() => {
-              setHackStatus('partial')
-              setDisplayCity(cityUpper)
-              setStatusMessage(PARTIAL_LEAK_MESSAGE)
-              setIsProcessing(false)
-
-              // Success sound on partial reveal
-              playSubmitSound()
-            }, 1500)
-          } else {
-            // Failed attempt - show denial
-            setStatusMessage(TRY_1_DENIED)
-            setDisplayCity('█'.repeat(cityLength))
-            setIsProcessing(false)
-            triggerSigilGlitch(0.5, 200)
-
-            // Error sound + danger level 2 on denial
-            playErrorSound()
-            setDangerLevel(2)
-          }
-        }
+  const handleCardClick = useCallback(() => {
+    if (isSecretLocation) {
+      if (!isExpanded) {
+        setIsExpanded(true)
+        requestAnimationFrame(() => runDecryptSequence())
+        return
       }
-    }, 150) // 150ms per frame for more dramatic effect
+      if (hackStatus === 'idle' && !isProcessing) {
+        runDecryptSequence()
+        return
+      }
+      setIsExpanded(false)
+      return
+    }
+    setIsExpanded(prev => !prev)
+  }, [isSecretLocation, isExpanded, hackStatus, isProcessing, runDecryptSequence])
 
-  }, [event.city, hackAttempt, hackStatus, isProcessing])
-
-  // Handle normal ACQUIRE_ACCESS - just go to ticket URL
   const handleNormalAccess = useCallback((e: React.MouseEvent) => {
     e.stopPropagation()
     if (event.ticketUrl) {
@@ -191,7 +160,6 @@ export function EventCard({ event, index }: EventCardProps) {
     }
   }, [event.ticketUrl])
 
-  // Track mouse within card for crosshair
   const handleMouseMove = useCallback((e: React.MouseEvent) => {
     if (!cardRef.current) return
     const rect = cardRef.current.getBoundingClientRect()
@@ -201,7 +169,6 @@ export function EventCard({ event, index }: EventCardProps) {
     })
   }, [])
 
-  // Alternate skew direction based on index - disabled on mobile
   const skewDirection = index % 2 === 0 ? -1.5 : 1.5
 
   const transmissionProgress = hackStatus === 'partial'
@@ -211,6 +178,11 @@ export function EventCard({ event, index }: EventCardProps) {
   const expandLabel = isSecretLocation
     ? (isExpanded ? 'COLLAPSE' : 'DECRYPT TRANSMISSION')
     : (isExpanded ? 'COLLAPSE' : 'EXPAND')
+
+  const formatLineup = (lineup: string[]) =>
+    lineup.map(a => a === 'TBA' ? 'More artists TBA' : a).join(' × ')
+
+  const isRevealed = hackStatus === 'partial'
 
   return (
     <div
@@ -223,24 +195,20 @@ export function EventCard({ event, index }: EventCardProps) {
         isHovered && !isMobile ? 'scale-[1.02]' : 'scale-100'
       )}
       style={{
-        // Disable skew on mobile for better responsiveness
         transform: isMobile ? 'none' : `skewY(${skewDirection}deg)`,
       }}
-      onClick={() => setIsExpanded(!isExpanded)}
+      onClick={handleCardClick}
       onMouseMove={handleMouseMove}
       onMouseEnter={() => {
         setIsHovered(true)
-        triggerSigilGlitch(0.8, 200) // Trigger 3D sigil shake
+        triggerSigilGlitch(0.8, 200)
         playHoverSound()
-
-        // Trigger danger level 1 on hover of classified events
         if (isFullyRedacted || isSecretLocation) {
           setDangerLevel(1)
         }
       }}
       onMouseLeave={() => setIsHovered(false)}
     >
-      {/* Torn edge top */}
       <div
         className="absolute -top-1 left-0 right-0 h-2 bg-void"
         style={{
@@ -255,7 +223,6 @@ export function EventCard({ event, index }: EventCardProps) {
         }}
       />
 
-      {/* Main card body - glass effect */}
       <div
         className={clsx(
           'relative border-l-4 border-arterial glass-card',
@@ -263,11 +230,9 @@ export function EventCard({ event, index }: EventCardProps) {
           isHovered && !isMobile ? 'glass-card-heavy border-l-8' : ''
         )}
         style={{
-          // Counter-skew content (disabled on mobile)
           transform: isMobile ? 'none' : `skewY(${-skewDirection}deg)`,
         }}
       >
-        {/* Crosshair cursor - desktop only */}
         {isHovered && !isMobile && (
           <div
             className="absolute pointer-events-none z-50 transition-opacity duration-150"
@@ -277,13 +242,9 @@ export function EventCard({ event, index }: EventCardProps) {
               transform: 'translate(-50%, -50%)',
             }}
           >
-            {/* Horizontal line */}
             <div className="absolute w-8 h-px bg-arterial left-1/2 top-1/2 -translate-x-1/2" />
-            {/* Vertical line */}
             <div className="absolute w-px h-8 bg-arterial left-1/2 top-1/2 -translate-y-1/2" />
-            {/* Center dot */}
             <div className="absolute w-2 h-2 bg-arterial rounded-full left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 animate-pulse" />
-            {/* Outer ring */}
             <div
               className={clsx(
                 'absolute w-12 h-12 border border-arterial/50 rounded-full',
@@ -295,14 +256,8 @@ export function EventCard({ event, index }: EventCardProps) {
           </div>
         )}
 
-        {/* Giant date - overlapping brutalist style (desktop only) */}
         {!isMobile && (
-          <div
-            className={clsx(
-              'absolute -left-4 md:-left-8 top-0 bottom-0 flex items-center',
-              'pointer-events-none select-none'
-            )}
-          >
+          <div className="absolute -left-4 md:-left-8 top-0 bottom-0 flex items-center pointer-events-none select-none">
             <span
               className={clsx(
                 'font-display text-[4rem] md:text-[6rem] leading-none',
@@ -320,17 +275,15 @@ export function EventCard({ event, index }: EventCardProps) {
           </div>
         )}
 
-        {/* Content - left aligned brutalist */}
         <div className="relative p-4 sm:p-6 md:p-8 md:pl-24">
-          {/* Date badge - small */}
           <div className="font-mono text-xs text-arterial mb-2 tracking-widest">
-            {getDisplayDate()} {'// '}
+            <span className={clsx(isRevealed && 'text-signal')}>{getDisplayDate()}</span>
+            {' // '}
             <span className={clsx(
               'transition-colors',
               isProcessing ? 'text-signal animate-pulse' :
-              hackStatus === 'denied' ? 'text-red-bright' :
               hackStatus === 'compromised' ? 'text-red-bright animate-pulse' :
-              hackStatus === 'partial' ? 'text-white' :
+              isRevealed ? 'text-signal' :
               'text-arterial'
             )}>
               {displayCity || (isSecretLocation ? '█'.repeat(event.city.length) : event.city.toUpperCase())}
@@ -342,12 +295,11 @@ export function EventCard({ event, index }: EventCardProps) {
               {getProgressBar(transmissionProgress)}
               <span className="block mt-1 text-white/50">
                 TRANSMISSION RECOVERED: {transmissionProgress}%
-                {hackStatus === 'partial' && ' // CITY VECTOR UNLOCKED'}
+                {isRevealed && ' // CITY VECTOR UNLOCKED'}
               </span>
             </div>
           )}
 
-          {/* Event name - huge */}
           <h3
             className={clsx(
               'font-display text-2xl sm:text-4xl md:text-6xl tracking-tight leading-none mb-4 sm:mb-6',
@@ -358,7 +310,6 @@ export function EventCard({ event, index }: EventCardProps) {
             {event.name}
           </h3>
 
-          {/* Meta stack */}
           {isFullyRedacted ? (
             <div className="space-y-1">
               <div className="font-mono text-sm">
@@ -377,107 +328,86 @@ export function EventCard({ event, index }: EventCardProps) {
                 <span className="text-white/50">SIGNAL://</span>
                 <span className="text-white/70 ml-2">ENCRYPTED</span>
               </div>
-              <div className="font-mono text-sm mt-2">
-                <span className="text-white/50">SET://</span>
-                <span className="text-white/50/60 ml-2">████████ × ██████ × ███████</span>
-              </div>
             </div>
           ) : (
             <div className="space-y-2">
               <div className="font-mono text-sm">
                 <span className="text-white/50">LOC://</span>
-                <span className="text-white/80 ml-2">{event.venue}</span>
+                <span className={clsx('ml-2', isRevealed ? 'text-signal' : 'text-white/80')}>
+                  {isRevealed ? event.city : event.venue}
+                </span>
               </div>
               <div className="font-mono text-sm">
                 <span className="text-white/50">SET://</span>
-                <span className="text-white/60 ml-2">{event.lineup.join(' × ')}</span>
+                <span className="text-white/60 ml-2">{formatLineup(event.lineup)}</span>
               </div>
             </div>
           )}
 
-          {/* Expanded content */}
           <div
             className={clsx(
               'overflow-hidden transition-all duration-500',
-              isExpanded ? 'max-h-64 opacity-100 mt-8' : 'max-h-0 opacity-0'
+              isExpanded ? 'max-h-96 opacity-100 mt-8' : 'max-h-0 opacity-0'
             )}
           >
             {event.description && (
-              <div className="font-mono text-sm text-white/70 mb-8 max-w-xl border-l-2 border-white/30/30 pl-4 space-y-3">
-                {isSecretLocation && (
-                  <p className="text-[10px] text-arterial tracking-widest">
-                    TRANSMISSION // FRAGMENT_02
-                  </p>
-                )}
+              <div className="font-mono text-sm text-white/70 mb-6 max-w-xl border-l-2 border-white/30/30 pl-4">
                 <p>{event.description}</p>
-                {isSecretLocation && hackStatus === 'idle' && (
-                  <p className="text-[10px] text-white/50">
-                    &gt;&gt;&gt; Run payload decrypt to recover city coordinates.
-                  </p>
+              </div>
+            )}
+
+            {statusMessage && (
+              <div className={clsx(
+                'font-mono text-xs tracking-widest border-l-2 pl-3 py-1 mb-4',
+                hackStatus === 'compromised' ? 'border-red-bright text-red-bright animate-pulse' :
+                'border-signal text-signal'
+              )}>
+                {statusMessage}
+              </div>
+            )}
+
+            {isRevealed && isSecretLocation && (
+              <div className="font-mono text-xs space-y-1.5 mb-6 border-t border-white/10 pt-4">
+                <p className="text-signal">✓ Date: {formatEventDate(event.date)}</p>
+                <p className="text-signal">✓ City: {event.city}</p>
+                {event.tbdFields?.includes('venue') && (
+                  <p className="text-white/50">○ Venue: Not announced yet</p>
+                )}
+                {event.tbdFields?.includes('lineup') && (
+                  <p className="text-white/50">○ Lineup: Partially confirmed</p>
                 )}
               </div>
             )}
 
-            {/* Fully redacted event - no access at all */}
             {isFullyRedacted ? (
               <div className="inline-block">
-                <TerminalButton disabled>
-                  [ACCESS DENIED]
-                </TerminalButton>
+                <TerminalButton disabled>[ACCESS DENIED]</TerminalButton>
               </div>
             ) : isSecretLocation ? (
-              <div className="space-y-3">
-                {/* Hacking status display */}
-                {statusMessage && (
-                  <div className={clsx(
-                    'font-mono text-xs tracking-widest border-l-2 pl-3 py-1',
-                    hackStatus === 'denied' ? 'border-red-bright text-red-bright' :
-                    hackStatus === 'compromised' ? 'border-red-bright text-red-bright animate-pulse' :
-                    hackStatus === 'partial' ? 'border-arterial text-white/70' :
-                    'border-signal text-signal'
-                  )}>
-                    <span className={hackStatus === 'compromised' ? 'animate-pulse' : ''}>
-                      {statusMessage}
-                    </span>
-                    {hackStatus === 'denied' && (
-                      <span className="text-white/50 ml-2">[{hackAttempt}/{MAX_ATTEMPTS}]</span>
-                    )}
-                  </div>
-                )}
-
-                {/* ACQUIRE_ACCESS / TRY_AGAIN button */}
+              isRevealed && event.ticketUrl ? (
                 <div onClick={(e) => e.stopPropagation()}>
-                  <TerminalButton
-                    onClick={handleSecretAccessClick}
-                    disabled={isProcessing || hackStatus === 'partial' || hackStatus === 'compromised'}
-                  >
-                    {isProcessing ? 'DECRYPTING...' :
-                     hackStatus === 'idle' ? 'DECRYPT PAYLOAD' :
-                     hackStatus === 'denied' ? 'RETRY DECRYPT_' :
-                     hackStatus === 'compromised' ? 'ABORTING...' :
-                     hackStatus === 'partial' ? 'PAYLOAD PARTIAL_' :
-                     'DECRYPT PAYLOAD'}
+                  <TerminalButton onClick={() => {
+                    if (event.ticketUrl) window.open(event.ticketUrl, '_blank')
+                  }}>
+                    ACQUIRE_ACCESS
                   </TerminalButton>
                 </div>
-              </div>
-            ) : isSoldOut ? (
-              <div className="inline-block">
-                <span className="font-mono text-white/50 line-through tracking-widest">
-                  [VOID] NO ENTRY
+              ) : isProcessing ? (
+                <span className="font-mono text-xs text-signal tracking-widest animate-pulse">
+                  DECRYPTING...
                 </span>
-              </div>
+              ) : null
+            ) : isSoldOut ? (
+              <span className="font-mono text-white/50 line-through tracking-widest">
+                [VOID] NO ENTRY
+              </span>
             ) : (
-              /* Normal event - direct ticket link */
-              <button
-                onClick={handleNormalAccess}
-                className="inline-block"
-              >
+              <button onClick={(e) => { e.stopPropagation(); handleNormalAccess(e) }} className="inline-block">
                 <TerminalButton>ACQUIRE_ACCESS</TerminalButton>
               </button>
             )}
           </div>
 
-          {/* Expand hint */}
           <div
             className={clsx(
               'absolute bottom-4 right-4 font-mono text-xs transition-all duration-300',
@@ -490,54 +420,30 @@ export function EventCard({ event, index }: EventCardProps) {
           </div>
         </div>
 
-        {/* Sold Out small badge */}
         {isSoldOut && (
-          <div
-            className={clsx(
-              'absolute top-4 right-4 font-mono text-xs text-arterial/60',
-              'border border-arterial/40 px-2 py-1',
-              'transform rotate-6'
-            )}
-          >
+          <div className="absolute top-4 right-4 font-mono text-xs text-arterial/60 border border-arterial/40 px-2 py-1 transform rotate-6">
             SOLD OUT
           </div>
         )}
 
-        {/* VOID stamp - big diagonal on expand */}
         {isSoldOut && isExpanded && (
-          <div
-            className={clsx(
-              'absolute inset-0 flex items-center justify-center',
-              'pointer-events-none overflow-hidden'
-            )}
-          >
-            <div
-              className={clsx(
-                'font-display text-[3rem] sm:text-[6rem] md:text-[10rem] text-arterial/20',
-                'border-4 sm:border-8 border-arterial/20 px-6 sm:px-12 py-2 sm:py-4',
-                'transform -rotate-12',
-                'animate-pulse'
-              )}
-            >
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none overflow-hidden">
+            <div className="font-display text-[3rem] sm:text-[6rem] md:text-[10rem] text-arterial/20 border-4 sm:border-8 border-arterial/20 px-6 sm:px-12 py-2 sm:py-4 transform -rotate-12 animate-pulse">
               VOID
             </div>
           </div>
         )}
 
-        {/* Glitch line on hover */}
         <div
           className={clsx(
             'absolute left-0 right-0 h-px bg-arterial',
             'transition-all duration-100',
             isHovered ? 'opacity-100' : 'opacity-0'
           )}
-          style={{
-            top: `${Math.random() * 100}%`,
-          }}
+          style={{ top: `${Math.random() * 100}%` }}
         />
       </div>
 
-      {/* Torn edge bottom */}
       <div
         className="absolute -bottom-1 left-0 right-0 h-2 bg-void"
         style={{

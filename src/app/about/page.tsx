@@ -2,6 +2,7 @@ import { ManifestoSection } from '@/components/about/ManifestoSection'
 import { ManifestoTexture } from '@/components/effects/ManifestoTexture'
 import { PerspectiveGrid } from '@/components/canvas/PerspectiveGrid'
 import { ScrambleText } from '@/components/effects/ScrambleText'
+import { ClientNavButton } from '@/components/layout/ClientNavButton'
 
 export const metadata = {
   title: 'MANIFESTO | KAMIKAZE',
@@ -78,12 +79,12 @@ export default function AboutPage() {
             <p className="font-mono text-sm text-white/70 mb-6">
               {'>'} READY_TO_TRANSMIT?
             </p>
-            <a
+            <ClientNavButton
               href="/artists"
-              className="inline-flex items-center justify-center px-8 py-4 min-h-[48px] border border-arterial/50 bg-arterial/10 font-mono text-sm tracking-widest text-arterial hover:bg-arterial/20 hover:border-arterial transition-all duration-200 focus:ring-2 focus:ring-arterial focus:outline-none"
+              className="inline-flex items-center justify-center px-8 py-4 min-h-[48px] border border-arterial/50 bg-arterial/10 font-mono text-sm tracking-widest text-arterial hover:bg-arterial/20 hover:border-arterial transition-all duration-200 focus:ring-2 focus:ring-arterial focus:outline-none disabled:opacity-50"
             >
               [ SUBMIT_YOUR_SIGNAL ]
-            </a>
+            </ClientNavButton>
           </div>
         </section>
       </div>

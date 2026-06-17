@@ -98,16 +98,8 @@ function GlitchText({ text, isVisible, delay }: { text: string; isVisible: boole
 }
 
 export function ContactConstellation() {
-  const [isRevealed, setIsRevealed] = useState(false)
+  const [isSigilHovered, setIsSigilHovered] = useState(false)
   const isMobile = useIsMobile()
-
-  // Auto-reveal on mobile after a short delay
-  useEffect(() => {
-    if (isMobile) {
-      const timeout = setTimeout(() => setIsRevealed(true), 500)
-      return () => clearTimeout(timeout)
-    }
-  }, [isMobile])
 
   // Calculate position based on spike index - reduced distance on mobile
   const getSpikePosition = (spikeIndex: number, distance: number) => {
@@ -129,20 +121,19 @@ export function ContactConstellation() {
       <div className="flex flex-col items-center gap-8 py-8">
         {/* Sigil - smaller on mobile */}
         <div className="relative">
-          <CyberSigil isActive={isRevealed} onHover={setIsRevealed} />
+          <CyberSigil isActive={isSigilHovered} onHover={setIsSigilHovered} />
         </div>
 
-        {/* Status indicator */}
         <div className="flex items-center gap-3">
           <div className={clsx(
             'w-2 h-2 animate-pulse',
-            isRevealed ? 'bg-signal' : 'bg-arterial/60'
+            isSigilHovered ? 'bg-signal' : 'bg-arterial/60'
           )} />
           <span className={clsx(
             'font-mono text-xs tracking-[0.3em]',
-            isRevealed ? 'text-signal' : 'text-white/50'
+            isSigilHovered ? 'text-signal' : 'text-white/70'
           )}>
-            {isRevealed ? 'UPLINK_ACTIVE' : 'AWAIT_INPUT'}
+            {isSigilHovered ? 'UPLINK_ACTIVE' : 'SIGNAL_PATH_OPEN'}
           </span>
         </div>
 
@@ -154,8 +145,7 @@ export function ContactConstellation() {
               className={clsx(
                 'relative bg-void/80 border border-white/20 px-4 py-4',
                 'hover:border-arterial/50 transition-all duration-300',
-                'transform',
-                isRevealed ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
+                'transform opacity-100 translate-y-0'
               )}
               style={{
                 transitionDelay: `${index * 100}ms`,
@@ -207,7 +197,7 @@ export function ContactConstellation() {
         <div
           className={clsx(
             'absolute w-px bg-gradient-to-b from-transparent via-white/20/30 to-transparent h-[200%] transition-opacity duration-700',
-            isRevealed ? 'opacity-100' : 'opacity-0'
+            isSigilHovered ? 'opacity-100' : 'opacity-30'
           )}
           style={{
             left: '20%',
@@ -218,7 +208,7 @@ export function ContactConstellation() {
         <div
           className={clsx(
             'absolute w-px bg-gradient-to-b from-transparent via-white/20/30 to-transparent h-[200%] transition-opacity duration-700',
-            isRevealed ? 'opacity-100' : 'opacity-0'
+            isSigilHovered ? 'opacity-100' : 'opacity-30'
           )}
           style={{
             right: '25%',
@@ -229,7 +219,7 @@ export function ContactConstellation() {
       </div>
 
       {/* The Sigil */}
-      <CyberSigil isActive={isRevealed} onHover={setIsRevealed} />
+      <CyberSigil isActive={isSigilHovered} onHover={setIsSigilHovered} />
 
       {/* Contact items at spike tips */}
       {CONTACT_ITEMS.map((item, index) => {
@@ -240,23 +230,20 @@ export function ContactConstellation() {
           <div
             key={item.label}
             className={clsx(
-              'absolute transition-all duration-500',
-              isRevealed ? 'opacity-100' : 'opacity-0 pointer-events-none'
+              'absolute transition-all duration-500 opacity-100'
             )}
             style={{
               left: '50%',
               top: '50%',
-              transform: isRevealed
-                ? `translate(calc(-50% + ${pos.x}px), calc(-50% + ${pos.y}px))`
-                : 'translate(-50%, -50%) scale(0.8)',
-              transitionDelay: isRevealed ? `${index * 100}ms` : '0ms',
+              transform: `translate(calc(-50% + ${pos.x}px), calc(-50% + ${pos.y}px))`,
+              transitionDelay: `${index * 100}ms`,
             }}
           >
             {/* Connecting wire from sigil to contact */}
             <div
               className={clsx(
                 'absolute w-8 h-px bg-arterial/40 transition-all duration-300',
-                isRevealed ? 'opacity-100' : 'opacity-0'
+                isSigilHovered ? 'opacity-100' : 'opacity-40'
               )}
               style={{
                 left: pos.x > 0 ? 'auto' : '100%',
@@ -284,11 +271,11 @@ export function ContactConstellation() {
                     [{item.label}]
                   </span>
                   <div className="text-sm text-white/80 group-hover:text-arterial transition-colors">
-                    <GlitchText
-                      text={item.value}
-                      isVisible={isRevealed}
-                      delay={glitchDelay}
-                    />
+                    {isSigilHovered ? (
+                      <GlitchText text={item.value} isVisible delay={glitchDelay} />
+                    ) : (
+                      <span className="font-mono">{item.value}</span>
+                    )}
                   </div>
                 </a>
               ) : (
@@ -297,11 +284,11 @@ export function ContactConstellation() {
                     [{item.label}]
                   </span>
                   <div className="text-sm text-white/80">
-                    <GlitchText
-                      text={item.value}
-                      isVisible={isRevealed}
-                      delay={glitchDelay}
-                    />
+                    {isSigilHovered ? (
+                      <GlitchText text={item.value} isVisible delay={glitchDelay} />
+                    ) : (
+                      <span className="font-mono">{item.value}</span>
+                    )}
                   </div>
                 </div>
               )}
@@ -316,32 +303,17 @@ export function ContactConstellation() {
         )
       })}
 
-      {/* Status indicator */}
-      <div
-        className={clsx(
-          'absolute bottom-0 left-1/2 -translate-x-1/2 transition-all duration-500',
-          isRevealed ? 'opacity-0 translate-y-4' : 'opacity-100 translate-y-0'
-        )}
-      >
+      <div className="absolute bottom-0 left-1/2 -translate-x-1/2">
         <div className="flex items-center gap-3">
-          <div className="w-2 h-2 bg-arterial/60 animate-pulse" />
-          <span className="font-mono text-xs text-white/50 tracking-[0.3em]">
-            AWAIT_INPUT
-          </span>
-        </div>
-      </div>
-
-      {/* Active state indicator */}
-      <div
-        className={clsx(
-          'absolute bottom-0 left-1/2 -translate-x-1/2 transition-all duration-500',
-          isRevealed ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4'
-        )}
-      >
-        <div className="flex items-center gap-3">
-          <div className="w-2 h-2 bg-signal animate-pulse" />
-          <span className="font-mono text-xs text-signal tracking-[0.3em]">
-            UPLINK_ACTIVE
+          <div className={clsx(
+            'w-2 h-2 animate-pulse',
+            isSigilHovered ? 'bg-signal' : 'bg-arterial/60'
+          )} />
+          <span className={clsx(
+            'font-mono text-xs tracking-[0.3em]',
+            isSigilHovered ? 'text-signal' : 'text-white/70'
+          )}>
+            {isSigilHovered ? 'UPLINK_ACTIVE' : 'SIGNAL_PATH_OPEN'}
           </span>
         </div>
       </div>

@@ -34,7 +34,6 @@ function GlitchTypeLine({
 
       const interval = setInterval(() => {
         if (index < text.length) {
-          // Occasionally insert glitch char then correct it
           if (Math.random() > 0.85) {
             const glitchChar = GLITCH_CHARS[Math.floor(Math.random() * GLITCH_CHARS.length)]
             setDisplayText(text.slice(0, index) + glitchChar)
@@ -69,74 +68,15 @@ function GlitchTypeLine({
   )
 }
 
-function StalledProgressBar() {
-  const [progress, setProgress] = useState(0)
-  const [isGlitching, setIsGlitching] = useState(false)
-
-  useEffect(() => {
-    const targetProgress = 3 + Math.random() * 12 // 3-15%
-
-    // Fill to target
-    const fillInterval = setInterval(() => {
-      setProgress(prev => {
-        if (prev >= targetProgress) {
-          clearInterval(fillInterval)
-          // Hold, then reset with glitch
-          setTimeout(() => {
-            setIsGlitching(true)
-            setTimeout(() => {
-              setIsGlitching(false)
-              setProgress(0)
-            }, 150)
-          }, 2000 + Math.random() * 2000)
-          return prev
-        }
-        return prev + 0.5
-      })
-    }, 50)
-
-    return () => clearInterval(fillInterval)
-  }, [progress === 0]) // Restart when reset to 0
-
-  return (
-    <div className="mt-6">
-      <div className="flex items-center justify-between mb-2">
-        <span className="font-mono text-[10px] text-white/40">ESTABLISHING_LINK</span>
-        <span className="font-mono text-[10px] text-arterial">{Math.round(progress)}%</span>
-      </div>
-      <div className="h-1 bg-white/10 overflow-hidden">
-        <div
-          className={`h-full transition-all duration-100 ${isGlitching ? 'bg-white' : 'bg-arterial'}`}
-          style={{
-            width: `${progress}%`,
-            boxShadow: isGlitching
-              ? '0 0 20px rgba(255, 255, 255, 0.8)'
-              : '0 0 10px rgba(204, 0, 0, 0.6)',
-            transform: isGlitching ? `translateX(${Math.random() * 10 - 5}px)` : 'none',
-          }}
-        />
-      </div>
-    </div>
-  )
-}
-
 export function DeadSignalsEmpty() {
   const [completedLines, setCompletedLines] = useState(0)
-  const [showProgressBar, setShowProgressBar] = useState(false)
 
   const handleLineComplete = useCallback(() => {
-    setCompletedLines(prev => {
-      const next = prev + 1
-      if (next >= TERMINAL_LINES.length) {
-        setTimeout(() => setShowProgressBar(true), 300)
-      }
-      return next
-    })
+    setCompletedLines(prev => prev + 1)
   }, [])
 
   return (
     <div className="relative border border-white/10 bg-black/40 overflow-hidden">
-      {/* Terminal header */}
       <div className="flex items-center gap-2 px-4 py-2 border-b border-white/10 bg-white/5">
         <div className="flex gap-1.5">
           <div className="w-2 h-2 rounded-full bg-arterial/60" />
@@ -148,7 +88,6 @@ export function DeadSignalsEmpty() {
         </span>
       </div>
 
-      {/* Terminal content */}
       <div className="p-6 space-y-3">
         {TERMINAL_LINES.map((line, index) => (
           <GlitchTypeLine
@@ -160,20 +99,20 @@ export function DeadSignalsEmpty() {
           />
         ))}
 
-        {/* Pending message */}
         {completedLines >= TERMINAL_LINES.length && (
-          <div className="flex items-center gap-2 font-mono text-xs mt-4 pt-4 border-t border-white/10">
-            <span className="text-white/30">&gt;</span>
-            <span className="text-white/50">AWAITING_FIRST_TRANSMISSION</span>
-            <span className="text-arterial animate-pulse">_</span>
+          <div className="flex flex-col gap-2 font-mono text-xs mt-4 pt-4 border-t border-white/10">
+            <div className="flex items-center gap-2">
+              <span className="text-white/30">&gt;</span>
+              <span className="text-white/50">AWAITING_FIRST_TRANSMISSION</span>
+              <span className="text-arterial animate-pulse">_</span>
+            </div>
+            <p className="text-white/40 text-[10px] pl-4">
+              Past events will appear here after transmission.
+            </p>
           </div>
         )}
-
-        {/* Stalled progress bar */}
-        {showProgressBar && <StalledProgressBar />}
       </div>
 
-      {/* Scanline overlay */}
       <div
         className="absolute inset-0 pointer-events-none opacity-5"
         style={{

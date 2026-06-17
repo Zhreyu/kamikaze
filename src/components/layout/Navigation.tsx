@@ -165,7 +165,7 @@ export function Navigation() {
                   onClick={() => handleNavClick(link.href)}
                   onMouseEnter={playHoverSound}
                   className={clsx(
-                    'relative font-display text-sm tracking-widest transition-all duration-300',
+                    'relative font-mono text-sm tracking-widest transition-all duration-300',
                     isActive
                       ? 'text-white scale-105'
                       : 'text-white/85 hover:text-white'

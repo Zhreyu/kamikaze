@@ -93,7 +93,7 @@ export function Hero() {
     <section
       ref={sectionRef}
       className="relative"
-      style={{ height: isMobile ? '100vh' : '500vh' }}
+      style={{ height: isMobile ? '100vh' : '200vh' }}
     >
       {/* Glitch tear line */}
       <div className="glitch-tear" />
@@ -140,6 +140,10 @@ export function Hero() {
             UNDERGROUND WILL NEVER DIE
           </p>
 
+          <p className="font-mono text-sm md:text-base text-white/90 text-center mt-8 max-w-md mx-auto leading-relaxed px-4">
+            Underground techno events. Curated ruptures. No VIP. No idols.
+          </p>
+
           {/* Audio level indicator */}
           {audioIntensity > 0 && (
             <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 flex gap-1">
@@ -184,20 +188,22 @@ export function Hero() {
         )}
 
         {/* Scroll indicator - hidden on mobile (no depth scrolling) */}
-        {!isMobile && heroProgress < 0.8 && (
-          <div className="absolute bottom-12 left-1/2 -translate-x-1/2">
-            <div className="flex flex-col items-center gap-3">
-              <span className="font-mono text-[10px] text-white/50 tracking-widest animate-pulse">
-                DESCEND
-              </span>
-              <div className="w-px h-16 bg-white/20 relative overflow-hidden">
-                <div
-                  className="w-full bg-arterial transition-all duration-100"
-                  style={{ height: `${heroProgress * 100}%` }}
-                />
-              </div>
+        {!isMobile && heroProgress < 0.85 && (
+          <button
+            type="button"
+            onClick={() => window.scrollBy({ top: window.innerHeight * 0.8, behavior: 'smooth' })}
+            className="absolute bottom-12 left-1/2 -translate-x-1/2 flex flex-col items-center gap-3 pointer-events-auto"
+          >
+            <span className="font-mono text-sm text-white tracking-[0.2em] border border-white/40 px-4 py-2 bg-white/5 hover:bg-white/10 transition-colors">
+              SCROLL TO EXPLORE
+            </span>
+            <div className="w-px h-12 bg-white/60 relative overflow-hidden">
+              <div
+                className="absolute bottom-0 w-full bg-white animate-pulse"
+                style={{ height: '30%' }}
+              />
             </div>
-          </div>
+          </button>
         )}
       </div>
 

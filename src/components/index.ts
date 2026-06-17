@@ -25,7 +25,6 @@ export { TornTextarea } from './ui/TornTextarea'
 // Home
 export { Hero } from './home/Hero'
 export { Manifesto } from './home/Manifesto'
-export { TeaseCards } from './home/TeaseCards'
 
 // Events
 export { EventCard } from './events/EventCard'
