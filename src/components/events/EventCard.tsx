@@ -1,10 +1,9 @@
 'use client'
 
 import { useState, useRef, useCallback, useEffect } from 'react'
-import { Event, formatEventDate } from '@/data/events'
+import { Event, formatEventDate, formatEventDatePartial, formatEventMonthYear } from '@/data/events'
 import {
   FRAGMENT_01_SEEN_KEY,
-  MASKED_TIMESTAMP,
   TRANSMISSION_PROGRESS,
   getProgressBar,
   isCityRevealed,
@@ -39,8 +38,10 @@ export function EventCard({ event, index }: EventCardProps) {
   const [hackStatus, setHackStatus] = useState<'idle' | 'scanning' | 'compromised' | 'partial'>('idle')
   const [statusMessage, setStatusMessage] = useState('')
   const [fragmentHint, setFragmentHint] = useState(false)
+  const [revealBurst, setRevealBurst] = useState(false)
   const cardRef = useRef<HTMLDivElement>(null)
   const hackTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const revealBurstTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const scanIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const decryptStartedRef = useRef(false)
   const hackStatusRef = useRef(hackStatus)
@@ -51,6 +52,7 @@ export function EventCard({ event, index }: EventCardProps) {
     return () => {
       if (scanIntervalRef.current) clearInterval(scanIntervalRef.current)
       if (hackTimeoutRef.current) clearTimeout(hackTimeoutRef.current)
+      if (revealBurstTimerRef.current) clearTimeout(revealBurstTimerRef.current)
     }
   }, [])
   const isMobile = useIsMobile()
@@ -72,8 +74,15 @@ export function EventCard({ event, index }: EventCardProps) {
     setDisplayCity(cityUpper)
     setStatusMessage('')
     setIsProcessing(false)
+    setRevealBurst(true)
     markCityRevealed()
     playSubmitSound()
+
+    if (revealBurstTimerRef.current) clearTimeout(revealBurstTimerRef.current)
+    revealBurstTimerRef.current = setTimeout(() => {
+      setRevealBurst(false)
+      revealBurstTimerRef.current = null
+    }, 8000)
   }, [event.city])
 
   const runDecryptSequence = useCallback(() => {
@@ -179,8 +188,7 @@ export function EventCard({ event, index }: EventCardProps) {
 
   const getDisplayDate = () => {
     if (isFullyRedacted) return '??.??.????'
-    if (isSecretLocation && hackStatus !== 'partial') return MASKED_TIMESTAMP
-    if (isSecretLocation && hackStatus === 'partial') return formatEventDate(event.date)
+    if (isSecretLocation) return formatEventDatePartial(event.date)
     return formatEventDate(event.date)
   }
 
@@ -345,7 +353,7 @@ export function EventCard({ event, index }: EventCardProps) {
               {getProgressBar(transmissionProgress)}
               <span className="block mt-1 text-white/50">
                 {EVENTS.detailsUnlocked(transmissionProgress)}
-                {isRevealed && ' — city found'}
+                {isRevealed && ' // city found'}
               </span>
             </div>
           )}
@@ -423,10 +431,15 @@ export function EventCard({ event, index }: EventCardProps) {
 
             {isRevealed && isSecretLocation && (
               <div className="font-mono text-xs space-y-1.5 mb-6 border-t border-white/10 pt-4">
-                <p className="text-signal">✓ Date: {formatEventDate(event.date)}</p>
-                <p className="text-signal font-medium" style={{ textShadow: '0 0 8px rgba(0, 255, 65, 0.35)' }}>
-                  ✓ City: {event.city}
-                </p>
+                <p className="text-signal">✓ Month: {formatEventMonthYear(event.date)}</p>
+                {revealBurst && (
+                  <p
+                    className="text-signal font-medium transition-opacity duration-700"
+                    style={{ textShadow: '0 0 8px rgba(0, 255, 65, 0.35)' }}
+                  >
+                    ✓ City: {event.city}
+                  </p>
+                )}
                 {event.tbdFields?.includes('venue') && (
                   <p className="text-white/50">○ Venue: Not announced yet</p>
                 )}
@@ -443,9 +456,9 @@ export function EventCard({ event, index }: EventCardProps) {
             ) : isSecretLocation ? (
               isRevealed ? (
                 <div onClick={(e) => e.stopPropagation()} className="space-y-2">
-                  <TerminalButton disabled>[ {EVENTS.ticketsDropSoon} ]</TerminalButton>
+                  <TerminalButton disabled>{EVENTS.bookNow}</TerminalButton>
                   <p className="font-mono text-[10px] text-white/50 tracking-wide">
-                    {EVENTS.ticketsDropSoonHint}
+                    {EVENTS.bookSoonHint}
                   </p>
                 </div>
               ) : isProcessing ? (
@@ -459,9 +472,9 @@ export function EventCard({ event, index }: EventCardProps) {
               </span>
             ) : (
               <div onClick={(e) => e.stopPropagation()} className="space-y-2">
-                <TerminalButton disabled>[ {EVENTS.ticketsDropSoon} ]</TerminalButton>
+                <TerminalButton disabled>{EVENTS.bookNow}</TerminalButton>
                 <p className="font-mono text-[10px] text-white/50 tracking-wide">
-                  {EVENTS.ticketsDropSoonHint}
+                  {EVENTS.bookSoonHint}
                 </p>
               </div>
             )}

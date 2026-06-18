@@ -24,7 +24,7 @@ export const events: Event[] = [
     lineup: ['KAMIKAZE COLLECTIVE', 'LOCAL FREQUENCIES', 'TBA'],
     ticketUrl: 'https://ra.co/events/kamikaze-override',
     isPast: false,
-    description: 'The convention is camouflage. Beneath the dome, the network breathes. Coordinates burn clear at T−48.',
+    description: 'A Kamikaze techno night. Venue, lineup, and tickets coming soon.',
     isSecretLocation: true,
     tbdFields: ['venue', 'lineup'],
   },
@@ -60,4 +60,21 @@ export function formatEventDate(dateStr: string): string {
     month: '2-digit',
     year: 'numeric',
   }).replace(/\//g, '.')
+}
+
+/** Day redacted — month and year only (e.g. XX.09.2026) */
+export function formatEventDatePartial(dateStr: string): string {
+  const date = new Date(dateStr)
+  const month = String(date.getUTCMonth() + 1).padStart(2, '0')
+  const year = date.getUTCFullYear()
+  return `XX.${month}.${year}`
+}
+
+export function formatEventMonthYear(dateStr: string): string {
+  const date = new Date(dateStr)
+  return date.toLocaleDateString('en-GB', {
+    month: 'long',
+    year: 'numeric',
+    timeZone: 'UTC',
+  })
 }
