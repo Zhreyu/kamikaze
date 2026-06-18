@@ -40,8 +40,19 @@ export function EventCard({ event, index }: EventCardProps) {
   const [statusMessage, setStatusMessage] = useState('')
   const [fragmentHint, setFragmentHint] = useState(false)
   const cardRef = useRef<HTMLDivElement>(null)
-  const hackTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const hackTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const scanIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const decryptStartedRef = useRef(false)
+  const hackStatusRef = useRef(hackStatus)
+  hackStatusRef.current = hackStatus
+
+  // Only clear timers on unmount — not when other effects re-run mid-decrypt
+  useEffect(() => {
+    return () => {
+      if (scanIntervalRef.current) clearInterval(scanIntervalRef.current)
+      if (hackTimeoutRef.current) clearTimeout(hackTimeoutRef.current)
+    }
+  }, [])
   const isMobile = useIsMobile()
   const isSoldOut = !event.ticketUrl
   const isSecretLocation = event.isSecretLocation
@@ -55,8 +66,20 @@ export function EventCard({ event, index }: EventCardProps) {
     }
   }, [event.city, isSecretLocation, hackStatus])
 
+  const finishReveal = useCallback(() => {
+    const cityUpper = event.city.toUpperCase()
+    setHackStatus('partial')
+    setDisplayCity(cityUpper)
+    setStatusMessage('')
+    setIsProcessing(false)
+    markCityRevealed()
+    playSubmitSound()
+  }, [event.city])
+
   const runDecryptSequence = useCallback(() => {
-    if (decryptStartedRef.current || hackStatus !== 'idle') return
+    if (decryptStartedRef.current) return
+    if (hackStatusRef.current !== 'idle') return
+
     decryptStartedRef.current = true
     setIsProcessing(true)
     setHackStatus('scanning')
@@ -69,7 +92,9 @@ export function EventCard({ event, index }: EventCardProps) {
     let phase: 'scramble' | 'show_city' | 'next' = 'scramble'
     let scrambleFrames = 0
 
-    const scanInterval = setInterval(() => {
+    if (scanIntervalRef.current) clearInterval(scanIntervalRef.current)
+
+    scanIntervalRef.current = setInterval(() => {
       if (phase === 'scramble') {
         scrambleFrames++
         setDisplayCity(
@@ -94,25 +119,25 @@ export function EventCard({ event, index }: EventCardProps) {
           phase = 'scramble'
           triggerSigilGlitch(0.3, 100)
         } else {
-          clearInterval(scanInterval)
+          if (scanIntervalRef.current) {
+            clearInterval(scanIntervalRef.current)
+            scanIntervalRef.current = null
+          }
           setHackStatus('compromised')
           setStatusMessage(WATCHING_MESSAGE)
           triggerSigilGlitch(1.5, 800)
           setDangerLevel(3)
           playErrorSound()
 
+          if (hackTimeoutRef.current) clearTimeout(hackTimeoutRef.current)
           hackTimeoutRef.current = setTimeout(() => {
-            setHackStatus('partial')
-            setDisplayCity(cityUpper)
-            setStatusMessage('')
-            setIsProcessing(false)
-            markCityRevealed()
-            playSubmitSound()
+            hackTimeoutRef.current = null
+            finishReveal()
           }, 1500)
         }
       }
     }, 120)
-  }, [event.city, hackStatus])
+  }, [event.city, finishReveal])
 
   useEffect(() => {
     if (!isSecretLocation) return
@@ -122,31 +147,35 @@ export function EventCard({ event, index }: EventCardProps) {
     if (isCityRevealed()) {
       setHackStatus('partial')
       setDisplayCity(event.city.toUpperCase())
+      setIsExpanded(true)
       decryptStartedRef.current = true
       return
     }
 
-    if (window.location.hash === `#${event.id}`) {
-      setIsExpanded(true)
-      requestAnimationFrame(() => runDecryptSequence())
-    }
-
-    const onHashChange = () => {
+    const tryAutoStart = () => {
       if (window.location.hash !== `#${event.id}`) return
-      if (isCityRevealed() || decryptStartedRef.current) return
+      if (decryptStartedRef.current || isCityRevealed()) return
       setIsExpanded(true)
       requestAnimationFrame(() => runDecryptSequence())
     }
 
-    window.addEventListener('hashchange', onHashChange)
-
-    return () => {
-      window.removeEventListener('hashchange', onHashChange)
-      if (hackTimeoutRef.current) {
-        clearTimeout(hackTimeoutRef.current)
-      }
-    }
+    tryAutoStart()
+    window.addEventListener('hashchange', tryAutoStart)
+    return () => window.removeEventListener('hashchange', tryAutoStart)
   }, [event.id, event.city, isSecretLocation, runDecryptSequence])
+
+  // Failsafe: if stuck after the scan (e.g. timer interrupted), complete the reveal
+  useEffect(() => {
+    if (hackStatus !== 'compromised') return
+
+    const failsafe = setTimeout(() => {
+      if (hackStatusRef.current === 'compromised') {
+        finishReveal()
+      }
+    }, 2000)
+
+    return () => clearTimeout(failsafe)
+  }, [hackStatus, finishReveal])
 
   const getDisplayDate = () => {
     if (isFullyRedacted) return '??.??.????'
@@ -166,6 +195,10 @@ export function EventCard({ event, index }: EventCardProps) {
         runDecryptSequence()
         return
       }
+      if (hackStatus === 'compromised' || (isProcessing && hackStatus === 'scanning')) {
+        finishReveal()
+        return
+      }
       if (hackStatus !== 'partial') {
         decryptStartedRef.current = false
       }
@@ -173,7 +206,7 @@ export function EventCard({ event, index }: EventCardProps) {
       return
     }
     setIsExpanded(prev => !prev)
-  }, [isSecretLocation, isExpanded, hackStatus, isProcessing, runDecryptSequence])
+  }, [isSecretLocation, isExpanded, hackStatus, isProcessing, runDecryptSequence, finishReveal])
 
   const handleNormalAccess = useCallback((e: React.MouseEvent) => {
     e.stopPropagation()
