@@ -27,7 +27,7 @@ export const artists: Artist[] = [
     location: 'Underground',
     bio: `The architect of sonic destruction. ibliiiz emerged from the depths of the underground scene with a singular mission—to dismantle the boundary between noise and transcendence.
 
-Every set is a ritual. Every track, an incantation. The dancefloor doesn't move to the music—it surrenders to it.
+Every set is a ritual. Every track, an incantation. The room doesn't move to the music—it surrenders to it.
 
 "I don't play for the crowd. I play through them."`,
     socials: {

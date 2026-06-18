@@ -24,7 +24,7 @@ export const events: Event[] = [
     lineup: ['KAMIKAZE COLLECTIVE', 'LOCAL FREQUENCIES', 'TBA'],
     ticketUrl: 'https://ra.co/events/kamikaze-override',
     isPast: false,
-    description: 'A Kamikaze techno night. Venue, lineup, and tickets coming soon.',
+    description: 'Venue, lineup, and tickets coming soon.',
     isSecretLocation: true,
     tbdFields: ['venue', 'lineup'],
   },

@@ -78,7 +78,7 @@ export function Footer() {
       {/* NO VIP Warning Banner - Marquee Glitch */}
       <div className="relative bg-arterial/5 border-y border-arterial/20 py-3">
         <MarqueeGlitch
-          text="[!] WARNING: NO VIP. NO BACKSTAGE. ONE SOUL. ONE TICKET. ONE DANCEFLOOR."
+          text="[!] WARNING: NO VIP. NO BACKSTAGE. ONE SOUL. ONE TICKET. ONE ROOM."
           className="font-mono text-[10px] sm:text-xs tracking-widest text-arterial"
           speed={40}
           glitchInterval={2500}

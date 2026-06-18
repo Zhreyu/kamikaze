@@ -19,7 +19,7 @@ export const manifesto: MotoPanel[] = [
   },
   {
     id: 4,
-    statement: "The dancefloor is a warzone. The DJ is munitions.",
+    statement: "The room is a warzone. The DJ is munitions.",
   },
   {
     id: 5,

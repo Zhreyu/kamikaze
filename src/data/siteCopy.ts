@@ -22,11 +22,11 @@ export const META = {
   about: {
     title: 'ABOUT | Kamikaze',
     description:
-      'How Kamikaze started — independent techno events built for the dancefloor.',
+      'How Kamikaze started. Independent techno experiences built around sound.',
   },
   events: {
     title: 'EVENTS | Kamikaze',
-    description: 'Upcoming techno nights and past events from Kamikaze.',
+    description: 'Upcoming techno experiences and past events from Kamikaze.',
   },
   contact: {
     title: 'CONTACT | Kamikaze',
@@ -46,7 +46,7 @@ export const HERO = {
 
 export const EVENTS = {
   pageTitle: 'EVENTS',
-  tagline: 'Nights we\'re building. Past ones live in the archive.',
+  tagline: 'Experiences we\'re building. Past ones live in the archive.',
   upcoming: 'UPCOMING EVENTS',
   past: 'PAST EVENTS',
   viewDetails: 'VIEW DETAILS',
@@ -74,7 +74,7 @@ export const ARTISTS = {
   subtitle: 'Send us your best work. SoundCloud links only.',
   divider: 'We review every demo. No guarantees — just an honest listen.',
   footerNote:
-    'Keep it unreleased if you can. Tell us your city. If it fits a night we\'re building, we\'ll reach out.',
+    'Keep it unreleased if you can. Tell us your city. If it fits what we\'re building, we\'ll reach out.',
   uploadSection: 'SUBMIT YOUR MUSIC',
   uploadButton: 'UPLOAD DEMO',
   uploadSuccess: 'Demo received. We will be in touch.',
@@ -112,7 +112,7 @@ export const ABOUT = {
   ctaPrompt: 'Think you fit the room?',
   ctaButton: 'SUBMIT YOUR MUSIC',
   loading: 'Loading...',
-  attribution: '— Kamikaze Collective // EST. 2026',
+  attribution: 'Kamikaze Collective // EST. 2026',
   texturePhrase: 'SOUND FIRST',
 } as const
 
@@ -128,7 +128,7 @@ export const ABOUT_STORY: StoryBlock[] = [
   { type: 'body', text: '' },
   {
     type: 'body',
-    text: 'Kamikaze began the way most underground scenes do — a few people at the same parties, tired of the same problems. Bottle service creeping in. Lineups built for photos, not the floor. Nights that felt more like networking than dancing.',
+    text: 'Kamikaze began the way most underground scenes do. A few people in the same rooms, tired of the same problems. Bottle service creeping in. Lineups built for photos, not the music. Nights that felt more like networking than dancing.',
   },
   {
     type: 'body',
@@ -139,18 +139,18 @@ export const ABOUT_STORY: StoryBlock[] = [
   { type: 'body', text: '' },
   {
     type: 'body',
-    text: 'We produce independent techno events — focused rooms, intentional programming, and sound treated as the priority. We book on merit, take demos through the site, and keep lineups tight enough that the floor can actually move.',
+    text: 'We produce independent techno experiences. Focused rooms, intentional programming, and sound treated as the priority. We book on merit, take demos through the site, and keep lineups tight enough that the crowd can actually move.',
   },
   {
     type: 'body',
-    text: 'Curation over scale. Smaller capacity. Proper monitoring. A crowd that came to listen, not to be seen.',
+    text: 'Curation over scale. Limited capacity. Proper monitoring. A crowd that came to listen, not to be seen.',
   },
   { type: 'body', text: '' },
   { type: 'heading', text: 'WHAT WE WON\'T DO.' },
   { type: 'body', text: '' },
   {
     type: 'body',
-    text: 'We don\'t sell hierarchy at the door. No VIP tables, no bottle-service tiers, no second-class access to the room you already paid for. One ticket means one floor — it\'s in the footer because it\'s the rule, not a slogan.',
+    text: 'We don\'t sell hierarchy at the door. No VIP tables, no bottle-service tiers, no second-class access to the room you already paid for. One ticket means one room. It\'s in the footer because it\'s the rule, not a slogan.',
   },
   {
     type: 'body',
@@ -164,7 +164,7 @@ export const ABOUT_STORY: StoryBlock[] = [
   { type: 'body', text: '' },
   {
     type: 'body',
-    text: 'We\'re not a label or an agency. We\'re a collective that throws parties we\'d show up to ourselves.',
+    text: 'We\'re not a label or an agency. We\'re a collective that runs techno experiences we\'d show up to ourselves.',
   },
 ]
 
@@ -232,12 +232,12 @@ export const EVENT_HINT = {
 
 export const ABOUT_HOME = {
   eyebrow: 'WHO WE ARE',
-  title: 'WE THROW THE NIGHTS WE WISH EXISTED',
-  body: 'A small collective building honest techno parties — fair doors, real lineups, and a dancefloor that matters more than the guest list.',
+  title: 'WE BUILD THE ROOMS WE WISH EXISTED',
+  body: 'A collective building honest techno experiences. Fair doors, real lineups, and a room that matters more than the guest list.',
   pillars: [
     {
       label: 'EVENTS',
-      text: 'Upcoming nights, lineups, and tickets.',
+      text: 'Upcoming experiences, lineups, and tickets.',
       href: '/events',
     },
     {

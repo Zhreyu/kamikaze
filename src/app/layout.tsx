@@ -6,7 +6,7 @@ import '@/styles/globals.css'
 export const metadata: Metadata = {
   title: 'Kamikaze | The Room Is The Headliner',
   description:
-    'Independent techno events. Curated lineups, fair access, one dancefloor.',
+    'Independent techno events. Curated lineups, fair access, one room.',
   keywords: ['techno', 'rave', 'underground', 'electronic music', 'events', 'kamikaze'],
   openGraph: {
     title: 'Kamikaze',
