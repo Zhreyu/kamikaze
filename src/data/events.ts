@@ -1,99 +1,55 @@
-export interface Event {
-  id: string
-  name: string
-  date: string
-  venue: string
-  city: string
-  lineup: string[]
-  /** Optional artist slugs for CRT / rich lineup UI */
-  lineupArtistSlugs?: string[]
+export type Event = {
+  slug: string
+  rite: number
+  date: string // 'YYYY-MM-DD', India time
+  name?: string
+  city?: string
+  venue?: string
+  lineup?: string[] // artist slugs
   ticketUrl?: string
-  isPast: boolean
-  description?: string
-  isSecretLocation?: boolean
-  isFullyRedacted?: boolean
-  isDateHidden?: boolean
-  /** Homepage featured event — only one should be true */
-  featured?: boolean
-  /** Optional cover art for events page card */
-  coverImage?: string
-  tbdFields?: ('venue' | 'lineup' | 'date')[]
+  recap?: { line: string; lineHot: string; story: string }
 }
 
+// Newest first. A field left unset is sealed (not announced yet): never fill one in with a guess.
 export const events: Event[] = [
+  { slug: 'rite-002', rite: 2, date: '2026-12-31' },
   {
-    id: 'kamikaze-override',
+    slug: 'override',
+    rite: 1,
     name: 'OVERRIDE',
     date: '2026-09-05',
-    venue: 'Venue TBA',
     city: 'Trivandrum',
-    lineup: ['SIREN', 'IBLIIIZ', 'ANSHE', 'JUNVON', 'OPEN SLOT'],
-    /** Artist slugs for CRT channel surf — order = channel order */
-    lineupArtistSlugs: ['siren', 'ibliiiz', 'anshe', 'junvon', 'open-slot'],
-    ticketUrl:
-      'https://whatsaround.app/home/events/kamikaze-presents-override-born-beneath-the-sound',
-    isPast: false,
-    featured: true,
-    coverImage: '/events/override-cover.jpg',
-    description: 'Peak pressure in Trivandrum. Venue TBA — tickets live.',
-    isSecretLocation: false,
-    tbdFields: ['venue'],
-  },
-  {
-    id: 'redacted-session-01',
-    name: '[REDACTED SESSION]',
-    date: '2025-05-17',
-    venue: 'UNKNOWN',
-    city: 'UNKNOWN',
-    lineup: ['█████████', '███████', '██████'],
-    isPast: true,
-    description:
-      'You are not authorized to view this transmission. Clearance required. Signal locked until further notice.',
-    isFullyRedacted: true,
+    lineup: ['siren', 'ibliiiz', 'anshe', 'junvon'],
+    recap: {
+      line: 'Planned for 250.',
+      lineHot: '500 came.',
+      story:
+        'We built OVERRIDE for 250 people. 500 of you came through the door. A dome in Trivandrum, one room, no VIP. The response was immaculate, and we are still not over it. This is what it looked like from inside.',
+    },
   },
 ]
 
-export function getUpcomingEvents(): Event[] {
-  return events.filter((e) => !e.isPast)
-}
+/** Countdown target: the first minute of the day in India. */
+export const startsAt = (e: Event) => Date.parse(`${e.date}T00:00:00+05:30`)
 
-/** Single homepage feature — OVERRIDE */
-export function getFeaturedEvent(): Event | undefined {
-  return events.find((e) => e.featured && !e.isPast) ?? getUpcomingEvents()[0]
-}
+/** Computed from the date, never set by hand. Call it in the browser for anything that must flip without a rebuild. */
+export const isPast = (e: Event, now = Date.now()) => now > Date.parse(`${e.date}T23:59:59+05:30`)
 
-export function getPastEvents(): Event[] {
-  return events.filter((e) => e.isPast)
-}
+/** The soonest event that has not happened yet. */
+export const nextEvent = () => events.filter((e) => !isPast(e)).sort((a, b) => a.date.localeCompare(b.date))[0] as Event | undefined
 
-export function getEventById(id: string): Event | undefined {
-  return events.find((e) => e.id === id)
-}
+/** Finished events, most recent first. */
+export const pastEvents = () => events.filter((e) => isPast(e)).sort((a, b) => b.date.localeCompare(a.date))
 
-export function formatEventDate(dateStr: string): string {
-  const date = new Date(dateStr)
-  return date
-    .toLocaleDateString('en-GB', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-    })
-    .replace(/\//g, '.')
-}
+export const getEvent = (slug: string) => events.find((e) => e.slug === slug)
 
-/** Day redacted — month and year only (e.g. XX.09.2026) */
-export function formatEventDatePartial(dateStr: string): string {
-  const date = new Date(dateStr)
-  const month = String(date.getUTCMonth() + 1).padStart(2, '0')
-  const year = date.getUTCFullYear()
-  return `XX.${month}.${year}`
-}
+export const riteLabel = (e: Event) => `Rite ${String(e.rite).padStart(3, '0')}`
 
-export function formatEventMonthYear(dateStr: string): string {
-  const date = new Date(dateStr)
-  return date.toLocaleDateString('en-GB', {
-    month: 'long',
-    year: 'numeric',
-    timeZone: 'UTC',
-  })
+const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+
+/** '2026-12-31' -> 'Thu 31 Dec 2026' (CSS uppercases it). Pure arithmetic on the calendar date: no locale, no time zone drift. */
+export function fmtDate(iso: string): string {
+  const [y, m, d] = iso.split('-').map(Number)
+  return `${DAYS[new Date(Date.UTC(y, m - 1, d)).getUTCDay()]} ${String(d).padStart(2, '0')} ${MONTHS[m - 1]} ${y}`
 }

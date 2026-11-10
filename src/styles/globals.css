@@ -2,640 +2,363 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ============================================
-   FONTS — Archivo / IBM Plex via next/font (layout.tsx CSS vars).
-   SD Cyberpunk City — FontLoader.tsx (correct basePath).
-   ============================================ */
-
-/* ============================================
-   CSS VARIABLES
-   ============================================ */
-
-:root,
-[data-theme='pacific'] {
-  /* Core colors — RGB channels for Tailwind opacity modifiers */
-  --black: #000000;
+/* Lights off: black room, bone type, one red. Values mirror the approved design canvas. */
+:root {
   --void: #0a0a0a;
-  --void-rgb: 10 10 10;
-  --white: #efefef;
-  --grey-dark: #3a3a3a;
-  --grey-mid: #555555;
-  --ash: #1a1818;
-
-  /* Poster / homepage — Pacific Punk (blood / bone) */
-  --k-void: #0a0a0a;
-  --k-warm: #121010;
-  --k-bone: #f1ede4;
-  --k-bone-print: #e4dfd4;
-  --k-bone-2: rgba(241, 237, 228, 0.7);
-  --k-bone-3: rgba(241, 237, 228, 0.45);
-  --k-red: #b30e12;
-  --k-red-deep: #8c1114;
-  --k-red-hanko: #a61216;
-  --k-hair: rgba(241, 237, 228, 0.1);
-  --k-waveform: rgba(241, 237, 228, 0.35);
-  --k-accent: #b30e12;
-  --k-wordmark: #e4dfd4;
-  --k-grid: transparent;
-
-  /* Sun disc / thermal aura (Pacific: deep reds) */
-  --k-sun-inner: #2a0808;
-  --k-sun-mid: #1a0505;
-  --k-sun-outer: #080202;
-  --k-sun-bloom: rgba(26, 5, 5, 0.04);
-  --k-thermal-core: #e01a17;
-  --k-thermal-mid: #b30e12;
-  --k-thermal-edge: #5c080c;
-  --k-thermal-void: #1a0505;
-
-  /* Accent - blood */
-  --blood: #8b0000;
-  --blood-rgb: 139 0 0;
-  --arterial: #cc0000;
-  --arterial-rgb: 204 0 0;
-
-  /* Organic corruption */
-  --bruise: #1a0a1a;
-  --infection: #0a1a0a;
-
-  /* Signal colors */
-  --signal: #00ff41;
-
-  /* Typography scale */
-  --text-hero: clamp(4rem, 15vw, 10rem);
-  --text-display: clamp(2.5rem, 8vw, 5rem);
-  --text-heading: clamp(1.5rem, 4vw, 2.5rem);
-  --text-body: 1rem;
-  --text-caption: 0.75rem;
-  --text-micro: 0.625rem;
-
-  /* Tracking */
-  --tracking-tight: -0.02em;
-  --tracking-wide: 0.1em;
-  --tracking-wider: 0.2em;
-
-  /* Scroll progress (set via JS) */
-  --scroll-progress: 0;
+  --bone: #efefef;
+  --dim: rgba(239, 239, 239, 0.7);
+  --red: #cc0000;
+  --red-hi: #e00000;
+  --hot: #ff3b30;
+  --hair: rgba(239, 239, 239, 0.16);
+  --line: rgba(239, 239, 239, 0.4);
+  --ease: cubic-bezier(0.16, 1, 0.3, 1);
+  --gutter: clamp(20px, 2.8vw, 40px);
+  --nav-h: 64px;
+  --split: -2px 0 0 rgba(255, 0, 0, 0.7), 2px 0 0 rgba(0, 255, 255, 0.55);
 }
 
-/* Heatmap — thermal / surveillance: indigo void + heat spectrum accents */
-[data-theme='heatmap'] {
-  --black: #04040e;
-  --void: #07071a;
-  --void-rgb: 7 7 26;
-  --white: #e8ecf4;
-  --ash: #0a0a1c;
-
-  --k-void: #07071a;
-  --k-warm: #0c0c24;
-  --k-bone: #e8ecf4;
-  --k-bone-print: #0a0a12;
-  --k-bone-2: rgba(232, 236, 244, 0.72);
-  --k-bone-3: rgba(232, 236, 244, 0.45);
-  /* Meta accents read as lime/yellow (moodboard) */
-  --k-red: #d4ff3a;
-  --k-red-deep: #b8e000;
-  --k-red-hanko: #ffe14a;
-  --k-hair: rgba(90, 220, 200, 0.14);
-  --k-waveform: rgba(255, 225, 74, 0.5);
-  --k-accent: #d4ff3a;
-  --k-wordmark: #0a0a12;
-  --k-grid: rgba(70, 210, 180, 0.09);
-
-  /* Thermal aura behind wordmark */
-  --k-sun-inner: #ffe14a;
-  --k-sun-mid: #ff6a1a;
-  --k-sun-outer: #1a1048;
-  --k-sun-bloom: rgba(255, 120, 40, 0.35);
-  --k-thermal-core: #ffe14a;
-  --k-thermal-mid: #ff6a1a;
-  --k-thermal-edge: #e01a7a;
-  --k-thermal-void: #0a0820;
-
-  --blood: #ff4d1a;
-  --blood-rgb: 255 77 26;
-  --arterial: #ffcc00;
-  --arterial-rgb: 255 204 0;
-
-  --bruise: #0a0a22;
-  --infection: #061818;
-  --signal: #d4ff3a;
-}
-
-/* ============================================
-   BASE STYLES
-   ============================================ */
-
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
-
-html {
-  scroll-behavior: auto;
-}
-
-body {
-  background-color: var(--void);
-  color: var(--white);
-  font-family: var(--font-ibm-plex-mono), 'IBM Plex Mono', ui-monospace, monospace;
-  font-size: var(--text-body);
-  line-height: 1.6;
-  overflow-x: hidden;
-  min-height: 100vh;
-  min-height: 100dvh;
-  transition: background-color 280ms ease, color 280ms ease;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  body {
-    transition: none;
-  }
-}
-
-@media (max-width: 767px) {
+@layer base {
   html {
-    -webkit-overflow-scrolling: touch;
-    overscroll-behavior-y: none;
+    background: var(--void);
+    color-scheme: dark;
+    overflow-x: clip;
+    scrollbar-color: var(--red) var(--void);
+    scrollbar-width: thin;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+  body {
+    min-height: 100dvh;
+    overflow-x: hidden; /* browsers without overflow: clip */
+    overflow-x: clip; /* hidden would make body a scroll container and break position: sticky everywhere */
+    background: var(--void);
+    color: var(--bone);
+    font: 400 16px/1.55 var(--font-archivo), Arial, sans-serif;
+    caret-color: var(--hot);
+    -webkit-font-smoothing: antialiased;
+    -webkit-tap-highlight-color: transparent;
+  }
+  ::selection {
+    background: var(--red);
+    color: var(--bone);
+  }
+  :focus-visible {
+    outline: 2px solid var(--hot);
+    outline-offset: 3px;
+  }
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+  a,
+  button,
+  input,
+  label,
+  summary {
+    touch-action: manipulation;
+  }
+  button {
+    -webkit-user-select: none;
+    user-select: none;
+  }
+  /* content sits above the fixed 3D canvas (z 0) and below the fixed overlays (z 6) */
+  main,
+  footer {
+    position: relative;
+    z-index: 1;
   }
 }
 
-/* ============================================
-   TYPOGRAPHY
-   ============================================ */
-
-.font-display {
-  font-family: 'CyberpunkCity', var(--font-archivo-black), 'Archivo Black', sans-serif;
-  font-weight: 400;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  line-height: 1;
-}
-
-.font-mono {
-  font-family: var(--font-ibm-plex-mono), 'IBM Plex Mono', ui-monospace, monospace;
-  letter-spacing: var(--tracking-wide);
-}
-
-/* CyberpunkCity for ritual headlines */
-.font-ritual {
-  font-family: 'CyberpunkCity', var(--font-archivo-black), 'Archivo Black', sans-serif;
-  font-weight: 400;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  line-height: 1.1;
-}
-
-/* Hero text with chromatic aberration */
-.text-hero {
-  font-size: var(--text-hero);
-  text-shadow:
-    -3px 0 0 rgba(255, 0, 0, 0.4),
-    3px 0 0 rgba(0, 255, 255, 0.4);
-}
-
-/* Corrupted text effect */
-.text-corrupted {
-  text-shadow:
-    -2px 0 0 rgba(255, 0, 0, 0.6),
-    2px 0 0 rgba(0, 255, 255, 0.6);
-  animation: text-glitch 4s ease-in-out infinite;
-}
-
-@keyframes text-glitch {
-  0%, 90%, 100% {
-    text-shadow: -2px 0 0 rgba(255, 0, 0, 0.6), 2px 0 0 rgba(0, 255, 255, 0.6);
+@layer components {
+  /* ---- type voices ---- */
+  .rit {
+    font-family: var(--font-rit), var(--font-archivo), sans-serif;
+    font-weight: 400;
+    text-transform: uppercase;
+    line-height: 0.9;
+    letter-spacing: 0.04em;
+    text-shadow: var(--split);
   }
-  92% {
-    text-shadow: 3px 0 0 rgba(255, 0, 0, 0.8), -3px 0 0 rgba(0, 255, 255, 0.8);
+  .mono {
+    font: 500 12px/1.5 var(--font-mono), ui-monospace, Menlo, monospace;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
   }
-  94% {
-    text-shadow: -1px 2px 0 rgba(255, 0, 0, 0.6), 1px -2px 0 rgba(0, 255, 255, 0.6);
+  .num {
+    font-family: var(--font-archivo), Arial, sans-serif;
+    font-stretch: 125%;
+    font-weight: 900;
+    text-transform: uppercase;
+    line-height: 0.95;
+    letter-spacing: -0.01em;
+    font-variant-numeric: tabular-nums;
   }
-  96% {
-    text-shadow: 2px 1px 0 rgba(255, 0, 0, 0.8), -2px -1px 0 rgba(0, 255, 255, 0.8);
+  .dim {
+    color: var(--dim);
+  }
+  .hot {
+    color: var(--hot);
+  }
+  /* inline link inside running text (privacy, about) */
+  .link {
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 3px;
+  }
+
+  /* ---- layout ---- */
+  .wrap {
+    padding-inline: var(--gutter);
+  }
+
+  /* ---- controls ---- */
+  .cta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    min-height: 54px;
+    padding: 0 20px;
+    background: var(--red);
+    color: var(--bone);
+    border: 0;
+    cursor: pointer;
+    clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px));
+    transition: background-color 0.2s, transform 0.3s var(--ease);
+  }
+  .cta svg {
+    flex: none;
+    width: 16px;
+    height: 16px;
+  }
+  .cta:active {
+    transform: scale(0.98);
+  }
+  .cta:disabled,
+  .cta[aria-disabled='true'] {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  .ghost {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    min-height: 52px;
+    padding: 0 20px;
+    background: none;
+    color: var(--bone);
+    border: 1px solid var(--line);
+    cursor: pointer;
+    transition: background-color 0.2s, color 0.2s;
+  }
+  .ghost:active {
+    background: var(--bone);
+    color: var(--void);
+  }
+  .ghost:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  .field {
+    width: 100%;
+    height: 54px;
+    padding: 0 14px;
+    background: rgba(10, 10, 10, 0.7);
+    color: var(--bone);
+    border: 1px solid var(--line);
+    border-radius: 0;
+    font: 400 16px var(--font-archivo), Arial, sans-serif; /* 16px: iOS does not zoom on focus */
+    appearance: none;
+  }
+  .field::placeholder {
+    color: rgba(239, 239, 239, 0.6);
+  }
+  .field:focus-visible {
+    border-color: var(--hot);
+    outline-offset: 0;
+  }
+  .field[aria-invalid='true'] {
+    border-color: var(--hot);
+  }
+
+  /* ---- pieces ---- */
+  /* row with a hairline above: nav lists, facts, artist rows. Add border-b border-hair on the last one. */
+  .rowlink {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    min-height: 52px;
+    border-top: 1px solid var(--hair);
+  }
+  /* bordered block with two hot corner brackets (top-left, bottom-right) */
+  .frame {
+    position: relative;
+    padding: 20px;
+    border: 1px solid var(--hair);
+    background: rgba(10, 10, 10, 0.72);
+  }
+  .frame::before,
+  .frame::after {
+    content: '';
+    position: absolute;
+    width: 18px;
+    height: 18px;
+    border: 2px solid var(--hot);
+    pointer-events: none;
+  }
+  .frame::before {
+    top: -2px;
+    left: -2px;
+    border-right: 0;
+    border-bottom: 0;
+  }
+  .frame::after {
+    right: -2px;
+    bottom: -2px;
+    border-left: 0;
+    border-top: 0;
+  }
+  .chip {
+    display: inline-block;
+    margin-right: 10px;
+    padding: 3px 9px;
+    background: var(--red);
+    color: var(--bone);
+  }
+  /* the sealed (not yet announced) value */
+  .bar {
+    position: relative;
+    display: block;
+    height: 18px;
+    background: #2a2020;
+    overflow: hidden;
+  }
+  .bar::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(100deg, transparent 40%, rgba(255, 59, 48, 0.45) 50%, transparent 60%);
+    transform: translateX(-100%);
+    animation: bar-sweep 3.4s var(--ease) infinite;
+  }
+  /* dark fade under text that sits on a photo */
+  .scrim {
+    position: absolute;
+    inset: auto 0 0 0;
+    height: 62%;
+    background: linear-gradient(to top, rgba(10, 10, 10, 0.96), rgba(10, 10, 10, 0));
+    pointer-events: none;
+  }
+  .cover {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .photo-grid {
+    display: grid;
+    grid-auto-flow: dense;
+    gap: 4px;
+  }
+  .photo-grid > * {
+    overflow: hidden;
+    background: #000;
+  }
+  .photo-grid .tall {
+    grid-row: span 2;
+  }
+  .photo-grid .big {
+    grid-column: span 2;
+    grid-row: span 2;
+  }
+
+  /* ---- 3D sigil handoff: the still image and its ring fade once the live scene has drawn a frame ---- */
+  [data-sigil-still],
+  [data-sigil-hide] {
+    transition: opacity 0.6s ease;
+  }
+  .sigil-live :is([data-sigil-still], [data-sigil-hide]) {
+    opacity: 0;
+  }
+  /* headings wrapped in <Reveal>: hidden only when JS is running */
+  .js .reveal {
+    clip-path: inset(-10% 100% -10% 0);
+    transform: translateX(-24px);
+    transition: clip-path 1.2s var(--ease), transform 1.2s var(--ease);
+  }
+  .js .reveal.in {
+    clip-path: inset(-10% -20% -10% 0);
+    transform: none;
+  }
+
+  /* ---- fixed full-viewport overlays (mounted once in the root layout) ---- */
+  .fx {
+    position: fixed;
+    inset: 0;
+    z-index: 6;
+    pointer-events: none;
+  }
+  .fx-vig {
+    background: radial-gradient(ellipse at center, transparent 55%, rgba(0, 0, 0, 0.6) 100%);
+  }
+  .fx-scan {
+    background: repeating-linear-gradient(0deg, transparent 0 2px, rgba(0, 0, 0, 0.22) 2px 4px);
+    opacity: 0.5;
+  }
+  .fx-grain {
+    inset: -50%;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.5'/%3E%3C/svg%3E");
+    opacity: 0.09;
+    animation: grain 0.5s steps(4) infinite;
   }
 }
 
-/* Heavy chromatic aberration for hero text */
-.text-chromatic {
-  position: relative;
-  text-shadow:
-    -4px 0 0 rgba(255, 0, 0, 0.5),
-    4px 0 0 rgba(0, 255, 255, 0.5),
-    0 0 40px rgba(204, 0, 0, 0.5);
+@keyframes bar-sweep {
+  60%,
+  100% {
+    transform: translateX(100%);
+  }
+}
+@keyframes grain {
+  25% {
+    transform: translate(-2%, 2%);
+  }
+  50% {
+    transform: translate(2%, -1%);
+  }
+  75% {
+    transform: translate(-1%, -2%);
+  }
 }
 
-.text-chromatic::before,
-.text-chromatic::after {
-  content: attr(data-text);
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
+/* hover only where a real pointer exists: no sticky hover on touch */
+@media (hover: hover) and (pointer: fine) {
+  .cta:hover {
+    background: var(--red-hi);
+    transform: translateY(-2px);
+  }
+  .ghost:hover {
+    background: var(--bone);
+    color: var(--void);
+  }
 }
-
-.text-chromatic::before {
-  color: #ff0000;
-  animation: chromatic-red 3s ease-in-out infinite;
-  mix-blend-mode: screen;
-  opacity: 0.5;
-}
-
-.text-chromatic::after {
-  color: #00ffff;
-  animation: chromatic-cyan 3s ease-in-out infinite reverse;
-  mix-blend-mode: screen;
-  opacity: 0.5;
-}
-
-@keyframes chromatic-red {
-  0%, 100% { transform: translate(-3px, 0); }
-  25% { transform: translate(-5px, 2px); }
-  50% { transform: translate(-2px, -1px); }
-  75% { transform: translate(-4px, 1px); }
-}
-
-@keyframes chromatic-cyan {
-  0%, 100% { transform: translate(3px, 0); }
-  25% { transform: translate(5px, -2px); }
-  50% { transform: translate(2px, 1px); }
-  75% { transform: translate(4px, -1px); }
-}
-
-/* Intense jitter on hover - CSS var controlled */
-.text-jitter {
-  --jitter-x: 0;
-  --jitter-y: 0;
-  animation: jitter 0.1s infinite;
-}
-
-@keyframes jitter {
-  0% { transform: translate(calc(var(--jitter-x) * 1px), calc(var(--jitter-y) * 1px)); }
-  25% { transform: translate(calc(var(--jitter-x) * -0.5px), calc(var(--jitter-y) * 0.5px)); }
-  50% { transform: translate(calc(var(--jitter-x) * 0.5px), calc(var(--jitter-y) * -0.5px)); }
-  75% { transform: translate(calc(var(--jitter-x) * -1px), calc(var(--jitter-y) * -0.5px)); }
-}
-
-/* RGB split effect - increases with distance from center */
-.rgb-split {
-  position: relative;
-}
-
-.rgb-split::before {
-  content: attr(data-text);
-  position: absolute;
-  top: 0;
-  left: -2px;
-  color: #ff0000;
-  opacity: 0.7;
-  mix-blend-mode: screen;
-  clip-path: polygon(0 0, 100% 0, 100% 45%, 0 45%);
-}
-
-.rgb-split::after {
-  content: attr(data-text);
-  position: absolute;
-  top: 0;
-  left: 2px;
-  color: #00ffff;
-  opacity: 0.7;
-  mix-blend-mode: screen;
-  clip-path: polygon(0 55%, 100% 55%, 100% 100%, 0 100%);
-}
-
-/* Glitch tear line */
-.glitch-tear {
-  position: fixed;
-  left: 0;
-  right: 0;
-  height: 2px;
-  background: linear-gradient(90deg, transparent 0%, var(--arterial) 20%, #00ffff 50%, var(--arterial) 80%, transparent 100%);
-  opacity: 0;
-  z-index: 9997;
-  animation: tear-flash 8s linear infinite;
-}
-
-@keyframes tear-flash {
-  0%, 95%, 100% { opacity: 0; top: 50%; }
-  96% { opacity: 1; top: 30%; }
-  97% { opacity: 0.8; top: 70%; }
-  98% { opacity: 1; top: 20%; }
-  99% { opacity: 0; top: 80%; }
-}
-
-/* ============================================
-   CUSTOM CURSOR
-   ============================================ */
-
-html, body {
-  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23EFEFEF' stroke-width='1'%3E%3Cline x1='12' y1='0' x2='12' y2='10'/%3E%3Cline x1='12' y1='14' x2='12' y2='24'/%3E%3Cline x1='0' y1='12' x2='10' y2='12'/%3E%3Cline x1='14' y1='12' x2='24' y2='12'/%3E%3C/svg%3E") 12 12, crosshair;
-}
-
-a, button, [role="button"], .cursor-pointer {
-  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23CC0000' stroke-width='1.5'%3E%3Cline x1='12' y1='0' x2='12' y2='10'/%3E%3Cline x1='12' y1='14' x2='12' y2='24'/%3E%3Cline x1='0' y1='12' x2='10' y2='12'/%3E%3Cline x1='14' y1='12' x2='24' y2='12'/%3E%3Ccircle cx='12' cy='12' r='4'/%3E%3C/svg%3E") 12 12, pointer;
-}
-
-/* ============================================
-   SELECTION
-   ============================================ */
-
-::selection {
-  background-color: var(--blood);
-  color: var(--white);
-}
-
-/* ============================================
-   SCROLLBAR
-   ============================================ */
-
-::-webkit-scrollbar {
-  width: 4px;
-}
-
-::-webkit-scrollbar-track {
-  background: var(--void);
-}
-
-::-webkit-scrollbar-thumb {
-  background: var(--blood);
-}
-
-* {
-  scrollbar-width: thin;
-  scrollbar-color: var(--blood) var(--void);
-}
-
-/* ============================================
-   FOCUS STATES
-   ============================================ */
-
-*:focus-visible {
-  outline: 1px solid var(--arterial);
-  outline-offset: 2px;
-}
-
-/* ============================================
-   LINKS
-   ============================================ */
-
-a {
-  color: inherit;
-  text-decoration: none;
-  transition: color 0.15s ease;
-}
-
-a:hover {
-  color: var(--arterial);
-}
-
-/* ============================================
-   REDUCED MOTION
-   ============================================ */
 
 @media (prefers-reduced-motion: reduce) {
+  .fx-grain,
+  .bar::after {
+    animation: none;
+  }
+  .js .reveal {
+    clip-path: none;
+    transform: none;
+  }
   *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
+  ::before,
+  ::after {
     transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
-
-  .film-grain,
-  .scanlines,
-  .glitch-tear {
-    display: none;
-  }
-}
-
-/* ============================================
-   MOBILE PERFORMANCE OPTIMIZATIONS
-   Disable expensive effects on mobile/touch devices
-   ============================================ */
-
-@media (max-width: 768px), (hover: none) {
-  /* Disable backdrop-blur on mobile - major GPU saver */
-  .glass-card,
-  .glass-card-heavy {
-    backdrop-filter: none !important;
-    -webkit-backdrop-filter: none !important;
-    background: rgba(0, 0, 0, 0.85) !important;
-  }
-
-  /* Disable chromatic aberration pseudo-elements on mobile */
-  .text-chromatic::before,
-  .text-chromatic::after {
-    display: none !important;
-  }
-
-  /* Simplify text-corrupted effect */
-  .text-corrupted {
-    animation: none !important;
-    text-shadow: none !important;
-  }
-
-  /* Disable scanlines animation */
-  .scanlines {
-    animation: none !important;
-  }
-
-  /* Disable perspective grid transform animations */
-  .perspective-grid::before {
-    animation: none !important;
-    transform: rotateX(75deg) !important;
-  }
-}
-
-/* ============================================
-   DEPTH LAYERS
-   ============================================ */
-
-/* Fog layer - thickens as you scroll */
-.fog-layer {
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: 50;
-  background:
-    radial-gradient(ellipse 100% 60% at 50% 100%,
-      rgba(10, 10, 10, 0.9) 0%,
-      transparent 70%
-    ),
-    radial-gradient(ellipse 100% 60% at 50% 0%,
-      rgba(10, 10, 10, 0.7) 0%,
-      transparent 50%
-    );
-  opacity: calc(0.3 + var(--scroll-progress, 0) * 0.4);
-  mix-blend-mode: multiply;
-}
-
-/* Vignette that tightens */
-.vignette {
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: 55;
-  box-shadow: inset 0 0 200px 80px rgba(0, 0, 0, 0.9);
-}
-
-/* Red corner bleed */
-.vignette-bleed {
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: 54;
-  background:
-    radial-gradient(ellipse at 0% 0%, rgba(139,0,0,0.12) 0%, transparent 50%),
-    radial-gradient(ellipse at 100% 100%, rgba(139,0,0,0.12) 0%, transparent 50%);
-}
-
-/* ============================================
-   TEXTURE OVERLAYS
-   ============================================ */
-
-/* Global scanlines - GPU accelerated via transform */
-.scanlines {
-  position: fixed;
-  top: -100px; /* Extend for seamless loop */
-  left: 0;
-  right: 0;
-  bottom: 0;
-  pointer-events: none;
-  z-index: 9998;
-  background: repeating-linear-gradient(
-    0deg,
-    transparent 0px,
-    transparent 2px,
-    rgba(0, 0, 0, 0.22) 2px,
-    rgba(0, 0, 0, 0.22) 4px
-  );
-  animation: scanline-roll 30s linear infinite;
-  will-change: transform;
-}
-
-@keyframes scanline-roll {
-  0% { transform: translateY(0); }
-  100% { transform: translateY(100px); } /* 100px = 25 pattern cycles, seamless */
-}
-
-/* ============================================
-   PERSPECTIVE GRID
-   ============================================ */
-
-.perspective-grid {
-  position: fixed;
-  bottom: 0;
-  left: -50%;
-  width: 200%;
-  height: 50vh;
-  perspective: 800px;
-  perspective-origin: 50% 0%;
-  z-index: -10;
-  pointer-events: none;
-}
-
-.perspective-grid::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background-image:
-    linear-gradient(rgba(139, 0, 0, 0.2) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(139, 0, 0, 0.2) 1px, transparent 1px);
-  background-size: 60px 60px;
-  transform: rotateX(75deg) translateY(calc(var(--scroll-progress, 0) * -100px));
-  transform-origin: 50% 100%;
-  mask-image: linear-gradient(to top, rgba(0,0,0,0.5) 0%, transparent 60%);
-  -webkit-mask-image: linear-gradient(to top, rgba(0,0,0,0.5) 0%, transparent 60%);
-}
-
-/* ============================================
-   UTILITY CLASSES
-   ============================================ */
-
-/* Glass card effect for floating over 3D sigil */
-.glass-card {
-  background: rgba(0, 0, 0, 0.4);
-  backdrop-filter: blur(4px) brightness(0.5);
-  -webkit-backdrop-filter: blur(4px) brightness(0.5);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-}
-
-.glass-card-heavy {
-  background: rgba(0, 0, 0, 0.6);
-  backdrop-filter: blur(8px) brightness(0.4);
-  -webkit-backdrop-filter: blur(8px) brightness(0.4);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-}
-
-/* Skewed container for aggressive layout */
-.skew-container {
-  transform: skewY(-3deg);
-}
-
-.skew-container > * {
-  transform: skewY(3deg); /* Counter-skew content */
-}
-
-.text-shadow-glow {
-  text-shadow: 0 0 20px currentColor;
-}
-
-.border-torn {
-  clip-path: polygon(
-    0% 0%, 2% 100%, 5% 98%, 8% 100%, 12% 97%, 15% 100%, 20% 99%,
-    25% 100%, 30% 98%, 35% 100%, 40% 97%, 45% 100%, 50% 99%,
-    55% 100%, 60% 98%, 65% 100%, 70% 97%, 75% 100%, 80% 99%,
-    85% 100%, 90% 98%, 95% 100%, 98% 97%, 100% 100%, 100% 0%
-  );
-}
-
-/* Aggressive reveal animation */
-.reveal-up {
-  animation: reveal-up 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-
-@keyframes reveal-up {
-  0% {
-    opacity: 0;
-    transform: translateY(60px) skewY(2deg);
-    filter: blur(4px);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0) skewY(0);
-    filter: blur(0);
-  }
-}
-
-/* Blink animation */
-.animate-blink {
-  animation: blink 1s step-end infinite;
-}
-
-@keyframes blink {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0; }
-}
-
-/* Surveillance corner brackets */
-.surveillance-frame {
-  position: relative;
-}
-
-.surveillance-frame::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border: 1px solid rgba(204, 0, 0, 0.3);
-  clip-path: polygon(
-    0 0, 20px 0, 20px 1px, 1px 1px, 1px 20px, 0 20px,
-    0 calc(100% - 20px), 1px calc(100% - 20px), 1px calc(100% - 1px), 20px calc(100% - 1px), 20px 100%, 0 100%,
-    100% 100%, calc(100% - 20px) 100%, calc(100% - 20px) calc(100% - 1px), calc(100% - 1px) calc(100% - 1px), calc(100% - 1px) calc(100% - 20px), 100% calc(100% - 20px),
-    100% 20px, calc(100% - 1px) 20px, calc(100% - 1px) 1px, calc(100% - 20px) 1px, calc(100% - 20px) 0, 100% 0
-  );
-  pointer-events: none;
 }

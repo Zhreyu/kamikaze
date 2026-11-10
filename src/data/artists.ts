@@ -1,192 +1,87 @@
-export interface Artist {
-  id: string
-  name: string
+import { mediaUrl } from '@/data/content'
+
+export type Artist = {
   slug: string
-  photo: string
-  /**
-   * CSS object-position for CRT hero / channel thumbs.
-   * Prefer faces in frame — default in UI is `center 18%`.
-   */
-  crtFocus?: string
-  bio: string
-  /** Short CRT dossier copy — keep ~2 lines so the rail never scrolls */
-  blurb?: string
-  tagline: string
-  taglineJa?: string
-  location: string
-  /** Dossier fields for CRT / profile UI */
-  origin?: string
-  genre?: string
-  activeSince?: string
-  socials: {
-    instagram?: string
-    soundcloud?: string
-    bandcamp?: string
-    spotify?: string
-  }
-  mixes: {
-    title: string
-    url: string
-    platform: 'soundcloud' | 'youtube' | 'mixcloud'
-    /** Optional cover art path under /public */
-    cover?: string
-  }[]
-  /**
-   * Open-call / competition slot — CRT + profile become a mix submission CTA
-   * instead of a normal artist dossier.
-   */
-  isOpenCall?: boolean
-  /** Override primary CTA href (defaults to /artists for open-call) */
-  ctaHref?: string
-  ctaLabel?: string
+  name: string // Title case; CSS uppercases display type
+  styled: string // as the artist writes it: running text and the portrait alt
+  photo: string // the 1600w portrait; an 800w file sits beside it (see portraitSrcSet)
+  focus?: string // CSS object-position
+  origin: string // profile + home rows
+  tag: string // artists grid tile
+  genre: string
+  bio: string[] // paragraphs
+  instagram?: string
+  soundcloud?: string
 }
 
+// Everyone who has played a Kamikaze room, in billing order. Real bookings only: no placeholders.
 export const artists: Artist[] = [
   {
-    id: 'siren',
-    name: 'SIREN',
     slug: 'siren',
-    photo: '/artists/siren.jpg',
-    crtFocus: 'center 12%',
-    location: 'Belgium',
-    origin: 'India → Belgium',
-    genre: 'Hard Groove / Techno',
-    activeSince: '—',
-    bio: `SIREN333 is a rising force in the global hard-groove wave — originally from India, now based in Belgium. Fast, percussive techno with a hypnotic low-end signature: tension, release, and zero soft exits.
-
-She’s shared decks with names like Charlotte de Witte, Ben Klock, Indira Paganotto, and Lily Palmer, hitting stages including Awakenings, Decibel Outdoor, and DGTL India, with sets broadcast on HÖR Berlin and Rinse FM. Releases include the Throttle and Error EPs. On OVERRIDE she holds Channel 01 — the red channel opens the night.`,
-    blurb:
-      'SIREN333 — India → Belgium. Hard groove, Awakenings / Decibel / DGTL. Channel 01 — the red channel.',
-    tagline: 'red channel // no soft exits',
-    socials: {
-      instagram: 'https://instagram.com/siren333_',
-      soundcloud: 'https://soundcloud.com/siren333-music',
-    },
-    mixes: [
-      {
-        title: 'SIREN333 // SoundCloud',
-        url: 'https://soundcloud.com/siren333-music',
-        platform: 'soundcloud',
-      },
+    name: 'Siren',
+    styled: 'SIREN',
+    photo: '/artists/siren-1600.webp',
+    focus: 'center 18%',
+    origin: 'India to Belgium',
+    tag: 'Belgium',
+    genre: 'Hard groove / techno',
+    bio: [
+      'SIREN333 is a rising force in the global hard-groove wave, originally from India, now based in Belgium. Fast, percussive techno with a hypnotic low-end signature: tension, release, and zero soft exits.',
+      'She has shared decks with names like Charlotte de Witte, Ben Klock, Indira Paganotto and Lily Palmer, hitting stages including Awakenings, Decibel Outdoor and DGTL India, with sets broadcast on HÖR Berlin and Rinse FM. Releases include the Throttle and Error EPs.',
     ],
+    instagram: 'https://instagram.com/siren333_',
+    soundcloud: 'https://soundcloud.com/siren333-music',
   },
   {
-    id: '1',
-    name: 'IBLIIIZ',
     slug: 'ibliiiz',
-    photo: '/artists/ibliiiz.png',
-    crtFocus: 'center 8%',
-    location: 'Underground',
-    origin: 'Underground',
-    genre: 'Hard Techno / Schranz',
-    activeSince: '—',
-    bio: `Driven by a lifelong passion for music, our resident artist ibliiiz has been immersed in sound at every stage of life. Constantly evolving while staying true to one thing—'speed'—they embody the true meaning of Kamikaze: an all-out assault on sound. Through carefully selected elements, relentless energy, and uncompromising pace, they deliver the signature Kamikaze experience—explosive, immersive, and built to leave a lasting impact.`,
-    blurb:
-      'IBLIIIZ — Kamikaze resident. Speed, schranz, all-out assault on sound. Channel 02.',
-    tagline: 'this for the ones who never belonged',
-    taglineJa: '属せなかった者たちへ',
-    socials: {
-      instagram: 'https://instagram.com/ibliiiz',
-      soundcloud: 'https://soundcloud.com/ibliiiz',
-    },
-    mixes: [
-      {
-        title: 'KAMIKAZE × IBLIIIZ — IMPACT 001',
-        url: 'https://soundcloud.com/ibliiiz/kamikaze-x-ibliiiz-impact-001',
-        platform: 'soundcloud',
-        cover: '/artists/ibliiiz-impact-001.png',
-      },
+    name: 'Ibliiiz',
+    styled: 'IBLIIIZ',
+    photo: '/artists/ibliiiz-1600.webp',
+    origin: 'Kamikaze resident',
+    tag: 'Resident',
+    genre: 'Hard techno / schranz',
+    bio: [
+      'IBLIIIZ is our resident, playing hard techno and schranz. The sound keeps changing. The speed does not.',
+      'They have been immersed in sound at every stage of life. Every selection is picked with care and played without letting up. It is the pace we mean when we say Kamikaze. Their mix for us is Impact 001.',
     ],
+    instagram: 'https://instagram.com/ibliiiz',
+    soundcloud: 'https://soundcloud.com/ibliiiz',
   },
   {
-    id: 'anshe',
-    name: 'ANSHE',
     slug: 'anshe',
-    photo: '/artists/anshe.jpg',
-    // Landscape plate — bias up so face stays in the CRT glass
-    crtFocus: '58% 22%',
-    location: 'India',
+    name: 'Anshe',
+    styled: "AN'SHE",
+    photo: '/artists/anshe-1600.webp',
+    focus: 'center 30%',
     origin: 'India',
-    genre: 'Hard Techno',
-    activeSince: '2018',
-    bio: `AN’SHE (Priyanka Das) is a hard-techno operator built for peak pressure — precise, unsentimental, and locked to the floor. Her sets favour relentless pacing over soft landings: acid edges, industrial weight, and selections that keep bodies committed past the point of polite exit.
-
-On the road she runs a strict NXS2 brief (DJM + linked CDJs), treating every booth like a sealed transmission. For OVERRIDE she arrives as Channel 03 — locked pressure in the middle of the night.`,
-    blurb:
-      'AN’SHE (Priyanka Das) — hard techno, peak pressure, zero soft landings. Channel 03 for OVERRIDE.',
-    tagline: 'signal locked // pressure incoming',
-    socials: {
-      instagram: 'https://instagram.com/anshemusic',
-      soundcloud: 'https://soundcloud.com/anshemusic',
-    },
-    mixes: [
-      {
-        title: 'AN’SHE // SoundCloud',
-        url: 'https://soundcloud.com/anshemusic',
-        platform: 'soundcloud',
-      },
+    tag: 'India',
+    genre: 'Hard techno',
+    bio: [
+      "AN'SHE plays hard techno built for peak pressure. Precise and unsentimental, locked to the floor.",
+      'Her sets favour relentless pacing over soft landings. Acid edges and industrial weight, with selections that keep bodies committed past the point of polite exit.',
     ],
+    instagram: 'https://instagram.com/anshemusic',
+    soundcloud: 'https://soundcloud.com/anshemusic',
   },
   {
-    id: 'junvon',
-    name: 'JUNVON',
     slug: 'junvon',
-    photo: '/artists/junvon.jpg',
-    crtFocus: 'center 15%',
-    location: 'Trivandrum',
-    origin: 'Trivandrum, India',
-    genre: 'Peak-Time Techno',
-    activeSince: '—',
-    bio: `The underground spirit of our city is known for hypnotic, peak-time sets and an unmatched instinct for reading the room. With a sharp awareness of every shift in energy, he knows exactly when to take control, catching crowds off guard with perfectly timed selections and seamless execution.
-
-Blending deep grooves, driving rhythms, and peak-time intensity, JUNVON doesn’t just play music, he shapes the night into an immersive journey, leaving audiences wanting more long after the final track.`,
-    blurb:
-      'JUNVON — Trivandrum. Hypnotic peak-time, room reader, underground spirit. Channel 04.',
-    tagline: 'read the room // take control',
-    socials: {
-      instagram: 'https://www.instagram.com/junvon_/',
-    },
-    mixes: [],
-  },
-  {
-    id: 'open-slot',
-    name: 'COMPETITION WINNER',
-    slug: 'open-slot',
-    photo: '/artists/open-slot.png',
-    location: 'Trivandrum',
-    origin: 'Open call',
-    genre: 'Your frequency',
-    activeSince: 'TBD',
-    isOpenCall: true,
-    ctaHref: '/artists',
-    ctaLabel: 'SEND YOUR MIX →',
-    bio: `Do you have what it takes to open our night?
-
-Send us your mix and you might be the one to open this legendary night — OVERRIDE, Trivandrum. We’re looking for an opener who can hold pressure, read the room, and earn the first hour.
-
-No VIP. No backstage. One soul. One ticket. One room. Upload a SoundCloud link through the artists page and we’ll listen.`,
-    blurb:
-      'Open call — send your mix. You might open OVERRIDE. Channel 05.',
-    tagline: 'do you have what it takes // open the night',
-    socials: {},
-    mixes: [],
+    name: 'Junvon',
+    styled: 'JUNVON',
+    photo: '/artists/junvon-1600.webp',
+    focus: 'center 25%',
+    origin: 'Trivandrum',
+    tag: 'Trivandrum',
+    genre: 'Peak-time techno',
+    bio: [
+      'JUNVON plays hypnotic, peak-time techno out of Trivandrum. OVERRIDE was in his own city.',
+      'He reads the room: every shift in energy, and the moment to take control. Deep grooves and driving rhythms, with selections timed to catch a crowd off guard.',
+    ],
+    instagram: 'https://www.instagram.com/junvon_/',
   },
 ]
 
-export function getArtistBySlug(slug: string): Artist | undefined {
-  return artists.find((a) => a.slug === slug)
-}
+export const getArtist = (slug: string) => artists.find((a) => a.slug === slug)
 
-export function getArtistByName(name: string): Artist | undefined {
-  const key = name.trim().toLowerCase()
-  return artists.find((a) => a.name.toLowerCase() === key || a.slug === key)
-}
-
-export function getAllArtistSlugs(): string[] {
-  return artists.map((a) => a.slug)
-}
-
-/** Lineup artists only — excludes open-call / competition slots */
-export function getRosterArtists(): Artist[] {
-  return artists.filter((a) => !a.isOpenCall)
-}
+/** srcset for a built-in portrait ('/artists/<slug>-1600.webp' has an -800 sibling). undefined for anything else: an admin upload is one file. */
+export const portraitSrcSet = (src: string) =>
+  /^\/artists\/[\w-]+-1600\.webp$/.test(src) ? `${mediaUrl(src.replace('-1600.', '-800.'))} 800w, ${mediaUrl(src)} 1600w` : undefined

@@ -1,40 +1,34 @@
 import type { Metadata, Viewport } from 'next'
-import { Analytics } from '@vercel/analytics/next'
-import { Archivo, Archivo_Black, IBM_Plex_Mono } from 'next/font/google'
-import { AppShell } from '@/components/layout/AppShell'
-import '@/styles/globals.css'
+import localFont from 'next/font/local'
 import Script from 'next/script'
+import { Analytics } from '@vercel/analytics/next'
+import Cursor from '@/components/Cursor'
+import Dock from '@/components/Dock'
+import Footer from '@/components/Footer'
+import Nav from '@/components/Nav'
+import { SigilCanvas } from '@/components/sigil/SigilCanvas'
+import { fmtDate, nextEvent } from '@/data/events'
+import { basePath, getAssetPath } from '@/lib/basePath'
+import { DEPLOY_URL } from '@/lib/site'
+import '@/styles/globals.css'
 
-// Match next.config.js — GitHub Pages serves under /kamikaze
-const assetBase = process.env.NEXT_PUBLIC_BASE_PATH ?? ''
-
-// Self-hosted at build time — no runtime Google Fonts CSS round-trips.
-// Preload display + body only; Archivo Black is secondary brand face.
-const archivo = Archivo({
-  subsets: ['latin'],
-  weight: ['400', '700', '900'],
-  display: 'swap',
+// All three faces are local files: the build never talks to Google.
+const rit = localFont({ src: '../../public/sdcyberpunkcitydemo/SDCyberPunkCityDemo.otf', variable: '--font-rit', display: 'swap' })
+const archivo = localFont({
+  src: '../fonts/Archivo-Variable.woff2',
   variable: '--font-archivo',
-  adjustFontFallback: true,
-  preload: true,
-})
-
-const archivoBlack = Archivo_Black({
-  subsets: ['latin'],
-  weight: '400',
   display: 'swap',
-  variable: '--font-archivo-black',
-  adjustFontFallback: true,
-  preload: false,
+  weight: '400 900',
+  declarations: [{ prop: 'font-stretch', value: '62% 125%' }], // the width axis: .num sets font-stretch 125%
 })
-
-const ibmPlexMono = IBM_Plex_Mono({
-  subsets: ['latin'],
-  weight: ['400', '500'],
+const mono = localFont({
+  src: [
+    { path: '../fonts/IBMPlexMono-400.woff2', weight: '400' },
+    { path: '../fonts/IBMPlexMono-500.woff2', weight: '500' },
+  ],
+  variable: '--font-mono',
   display: 'swap',
-  variable: '--font-ibm-plex-mono',
-  adjustFontFallback: true,
-  preload: true,
+  adjustFontFallback: false,
 })
 
 export const viewport: Viewport = {
@@ -42,77 +36,64 @@ export const viewport: Viewport = {
   initialScale: 1,
   viewportFit: 'cover',
   themeColor: '#0a0a0a',
+  colorScheme: 'dark',
 }
+
+// Metadata is fixed at build time: rebuild after an event passes.
+const next = nextEvent()
 
 export const metadata: Metadata = {
-  title: 'Kamikaze | The Room Is The Headliner',
-  description:
-    'Independent techno events. Curated lineups, fair access, one room.',
-  keywords: ['techno', 'rave', 'underground', 'electronic music', 'events', 'kamikaze'],
+  metadataBase: new URL(DEPLOY_URL),
+  title: { default: 'Kamikaze / The room is the headliner', template: '%s / Kamikaze' },
+  description: next
+    ? `Kamikaze is an independent techno collective in India. Next date: ${fmtDate(next.date)}, venue sealed. The first one was planned for 250. 500 came.`
+    : 'Kamikaze is an independent techno collective in India. One ticket, one room. The first one, OVERRIDE, was planned for 250. 500 came.',
   openGraph: {
-    title: 'Kamikaze',
-    description: 'Independent techno events. The room is the headliner.',
     type: 'website',
+    siteName: 'Kamikaze',
+    url: './',
+    // a plain file in public/, resolved against metadataBase (which already carries the base path)
+    images: [{ url: '/og.jpg', width: 1200, height: 630, alt: 'Kamikaze. The room is the headliner.' }],
   },
+  twitter: { card: 'summary_large_image' },
   icons: {
     icon: [
-      {
-        url: `${assetBase}/favicon/favicon-32x32.png`,
-        sizes: '32x32',
-        type: 'image/png',
-      },
-      {
-        url: `${assetBase}/favicon/favicon-16x16.png`,
-        sizes: '16x16',
-        type: 'image/png',
-      },
+      { url: getAssetPath('/favicon/favicon-32x32.png'), sizes: '32x32', type: 'image/png' },
+      { url: getAssetPath('/favicon/favicon-16x16.png'), sizes: '16x16', type: 'image/png' },
     ],
-    shortcut: `${assetBase}/favicon/favicon-32x32.png`,
-    apple: {
-      url: `${assetBase}/favicon/apple-touch-icon.png`,
-      sizes: '180x180',
-    },
+    apple: { url: getAssetPath('/favicon/apple-touch-icon.png'), sizes: '180x180' },
   },
-  manifest: `${assetBase}/favicon/site.webmanifest`,
+  manifest: getAssetPath('/favicon/site.webmanifest'),
 }
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html
-      lang="en"
-      data-theme="pacific"
-      className={`${archivo.variable} ${archivoBlack.variable} ${ibmPlexMono.variable}`}
-    >
+    // suppressHydrationWarning: scripts add classes to <html> (js, sigil-live) that React did not render
+    <html lang="en" className={`${rit.variable} ${archivo.variable} ${mono.variable}`} suppressHydrationWarning>
       <head>
-        {/* Apply stored theme before paint to avoid Pacific→Heatmap flash */}
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `(function(){try{var t=localStorage.getItem('k-theme');if(t==='heatmap'||t==='pacific')document.documentElement.setAttribute('data-theme',t);}catch(e){}})();`,
-          }}
-        />
-        {/* Third-party pixel — defer past LCP / hydration */}
-        <Script id="meta-pixel" strategy="lazyOnload">
-          {`
-          !function(f,b,e,v,n,t,s)
-          {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
-          n.callMethod.apply(n,arguments):n.queue.push(arguments)};
-          if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
-          n.queue=[];t=b.createElement(e);t.async=!0;
-          t.src=v;s=b.getElementsByTagName(e)[0];
-          s.parentNode.insertBefore(t,s)}(window, document,'script',
-          'https://connect.facebook.net/en_US/fbevents.js');
-          fbq('init', '2234042430703510');
-          fbq('track', 'PageView');
-        `}
-        </Script>
+        <script dangerouslySetInnerHTML={{ __html: `document.documentElement.classList.add('js')` }} />
       </head>
-      <body className="bg-void text-white min-h-screen overflow-x-hidden font-mono">
-        <AppShell>{children}</AppShell>
-        <Analytics />
+      <body>
+        <SigilCanvas />
+        <a id="skip" href="#main" className="mono sr-only focus:not-sr-only focus:fixed focus:left-3 focus:top-3 focus:z-30 focus:bg-bone focus:px-4 focus:py-3 focus:text-void">
+          Skip to content
+        </a>
+        <div className="fx fx-vig" aria-hidden="true" />
+        <div className="fx fx-scan" aria-hidden="true" />
+        <div className="fx fx-grain" aria-hidden="true" />
+        <Cursor />
+        <Nav />
+        <main id="main" className="pt-[calc(var(--nav-h)+env(safe-area-inset-top,0px))]">
+          {children}
+        </main>
+        <Footer />
+        <Dock />
+        {/* Vercel serves the analytics script; on GitHub Pages the request can only 404 */}
+        {!basePath && <Analytics />}
+        {/* Meta Pixel, after everything else. Later page views are sent from Nav on route change. */}
+        <Script id="meta-pixel" strategy="lazyOnload">
+          {`!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');fbq('init','2234042430703510');fbq('track','PageView');`}
+        </Script>
       </body>
     </html>
   )

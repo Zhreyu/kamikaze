@@ -39,8 +39,11 @@ next-env.d.ts
 CLAUDE.md
 .implementation_plan.md
 
-# Press kit dumps (large; curated assets live in public/artists)
-.agent/presskits/
+# Local agent workspace: screenshots, press kit dumps, tooling (hundreds of MB)
+.agent/
+
+# Supabase CLI link cache
+supabase/.temp/
 
 
 .env*

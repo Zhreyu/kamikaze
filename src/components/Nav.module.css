@@ -1,0 +1,55 @@
+/* desktop links: quiet until hovered, bone on the page you are on */
+.link {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+  color: var(--dim);
+  transition: color 0.2s;
+}
+.link[aria-current='page'] {
+  color: var(--bone);
+}
+@media (hover: hover) and (pointer: fine) {
+  .link:hover {
+    color: var(--bone);
+  }
+}
+
+/* phone menu: a full-screen sheet under the bar (brand and Menu/Close stay on top of it) */
+.menu {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  padding: calc(var(--nav-h) + env(safe-area-inset-top, 0px) + 16px) var(--gutter) calc(28px + env(safe-area-inset-bottom, 0px));
+  background: var(--void);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  visibility: hidden; /* also takes the links out of the tab order */
+  opacity: 0;
+  transition: opacity 0.25s ease, visibility 0s 0.25s;
+}
+.menu.open {
+  visibility: visible;
+  opacity: 1;
+  transition: opacity 0.25s ease;
+}
+/* links and the button rise in one after another (--d is each one's delay); closing is instant under the fade */
+.item {
+  opacity: 0;
+  transform: translateY(18px);
+}
+.open .item {
+  opacity: 1;
+  transform: none;
+  transition: opacity 0.5s var(--ease) var(--d, 0s), transform 0.5s var(--ease) var(--d, 0s);
+}
+.big {
+  padding: 6px 0;
+  font-size: 14vw;
+  line-height: 1;
+}
+.big:active {
+  opacity: 0.6;
+}

@@ -1,50 +1,38 @@
+import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
-import { getArtistBySlug, getAllArtistSlugs } from '@/data/artists'
-import { ArtistPageContent } from '@/components/artists/ArtistPageContent'
-import { ArtistHeader } from '@/components/artists/ArtistHeader'
-import { PerspectiveGrid } from '@/components/canvas/PerspectiveGrid'
+import { artists, getArtist } from '@/data/artists'
+import { events, fmtDate } from '@/data/events'
 
-interface ArtistPageProps {
-  params: Promise<{ slug: string }>
+type Props = { params: Promise<{ slug: string }> }
+
+export const generateStaticParams = () => artists.map((a) => ({ slug: a.slug }))
+
+// Search and share descriptions (copy deck). The "Played" part is built from the event data.
+const about: Record<string, [lead: string, tail: string]> = {
+  siren: ['SIREN333. Hard groove and techno, from India, now based in Belgium.', ', {city}.'],
+  ibliiiz: ['IBLIIIZ is the Kamikaze resident. Hard techno and schranz, built on speed.', '. Hear the mix, Impact 001.'],
+  anshe: ["AN'SHE plays hard techno with acid edges and industrial weight. From India.", ', {city}.'],
+  junvon: ['JUNVON plays hypnotic, peak-time techno out of Trivandrum.', ', in his own city.'],
 }
 
-export function generateStaticParams() {
-  return getAllArtistSlugs().map((slug) => ({ slug }))
-}
-
-export async function generateMetadata({ params }: ArtistPageProps) {
-  const { slug } = await params
-  const artist = getArtistBySlug(slug)
-  if (!artist) return { title: 'Artist Not Found' }
-
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const artist = getArtist((await params).slug)
+  if (!artist) return {}
+  const played = events.find((e) => e.recap && e.lineup?.includes(artist.slug))
+  const [lead, tail] = about[artist.slug] ?? [`${artist.styled}. ${artist.genre}.`, '.']
   return {
-    title: `${artist.name} | KAMIKAZE`,
-    description: artist.tagline || artist.bio.split('\n')[0],
+    title: artist.name.toUpperCase(),
+    description: played ? `${lead} Played ${played.name}, ${fmtDate(played.date)}${tail.replace('{city}', played.city ?? '')}` : lead,
+    alternates: { canonical: `/artists/${artist.slug}/` },
   }
 }
 
-export default async function ArtistPage({ params }: ArtistPageProps) {
-  const { slug } = await params
-  const artist = getArtistBySlug(slug)
-
-  if (!artist) {
-    notFound()
-  }
-
+export default async function ArtistPage({ params }: Props) {
+  const artist = getArtist((await params).slug)
+  if (!artist) notFound()
   return (
-    <div className="relative min-h-screen bg-void">
-      {/* Persistent noise overlay */}
-      <div
-        className="fixed inset-0 pointer-events-none opacity-[0.03] z-50"
-        style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")`,
-        }}
-      />
-
-      <ArtistHeader artist={artist} />
-      <ArtistPageContent artist={artist} />
-
-      <PerspectiveGrid />
+    <div className="wrap">
+      <h1 className="rit">{artist.name}</h1>
     </div>
   )
 }
