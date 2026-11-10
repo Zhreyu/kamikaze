@@ -1,0 +1,91 @@
+/* The recap player's tube: only what utilities cannot express (pseudo-element scanlines, the static flash). Values from the prototype. */
+.glass {
+  position: relative;
+  aspect-ratio: 5 / 4;
+  margin-inline: -6px;
+  overflow: hidden;
+  background: #000;
+  border-radius: 16px / 14px;
+  box-shadow: 0 0 0 6px #161212, 0 0 0 7px var(--hair), 0 30px 60px -30px rgba(204, 0, 0, 0.6);
+  touch-action: pan-y; /* the glass takes sideways swipes; the page keeps vertical scroll */
+  -webkit-user-select: none;
+  user-select: none;
+}
+.glass img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: contrast(1.12) saturate(1.2);
+}
+.glass::before,
+.glass::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+}
+.glass::before {
+  background: repeating-linear-gradient(0deg, transparent 0 2px, rgba(0, 0, 0, 0.32) 2px 4px), radial-gradient(ellipse at center, transparent 52%, rgba(0, 0, 0, 0.75) 100%);
+}
+.glass::after {
+  box-shadow: inset 0 0 90px rgba(0, 0, 0, 0.85), inset 2px 0 0 rgba(255, 0, 0, 0.25), inset -2px 0 0 rgba(0, 255, 255, 0.2);
+}
+
+/* one burst of static per frame change: the element is remounted (keyed) so the animation restarts */
+.noise {
+  position: absolute;
+  inset: -20%;
+  z-index: 3;
+  opacity: 0;
+  pointer-events: none;
+  background-color: #101010;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.4' numOctaves='2'/%3E%3CfeColorMatrix values='0 0 0 9 -4 0 0 0 9 -4 0 0 0 9 -4 0 0 0 0 1'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  animation: static 0.3s steps(6) forwards;
+}
+@keyframes static {
+  0% {
+    opacity: 0.95;
+  }
+  25% {
+    opacity: 0.95;
+    transform: translate(6%, -5%);
+  }
+  50% {
+    opacity: 0.9;
+    transform: translate(-4%, 3%);
+  }
+  75% {
+    opacity: 0.85;
+    transform: translate(3%, 5%);
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+.osd {
+  position: absolute;
+  z-index: 4;
+  left: 14px;
+  padding: 3px 8px;
+  background: rgba(10, 10, 10, 0.78);
+}
+
+@media (min-width: 900px) {
+  .glass {
+    aspect-ratio: 16 / 10;
+    margin-inline: 0;
+    border-radius: 26px / 22px;
+    box-shadow: 0 0 0 10px #161212, 0 0 0 11px var(--hair), 0 44px 90px -34px rgba(204, 0, 0, 0.6);
+  }
+  .osd {
+    left: 20px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .noise {
+    display: none;
+  }
+}

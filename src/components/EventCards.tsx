@@ -9,7 +9,7 @@ import Countdown from './Countdown'
 
 /** A fact that is not announced yet: the redacted bar, with words for screen readers. */
 const Sealed = ({ width }: { width: number }) => (
-  <span className="bar" style={{ width }}>
+  <span className="bar max-w-full" style={{ width }}>
     <span className="sr-only">Not announced yet</span>
   </span>
 )
@@ -46,7 +46,7 @@ export function UpNext({ event, variant, className = '' }: { event: Event; varia
           {facts.map(([label, value], i) => (
             <div key={label} className={`rowlink justify-start ${i === facts.length - 1 ? 'border-b border-hair' : ''}`}>
               <dt className="mono dim w-[84px] shrink-0">{label}</dt>
-              <dd>{value}</dd>
+              <dd className="min-w-0 flex-1">{value}</dd>
             </div>
           ))}
         </dl>
@@ -55,7 +55,7 @@ export function UpNext({ event, variant, className = '' }: { event: Event; varia
         to={startsAt(event)}
         label={`Time until ${fmtDate(event.date)}`}
         zeroLabel={`${riteLabel(event)} is today`}
-        className={`grid-cols-4 gap-[10px] text-[44px] md:grid-cols-[repeat(4,auto)] md:justify-start md:gap-7 ${home ? 'md:text-[64px]' : 'md:text-[56px]'}`}
+        className={`grid-cols-4 gap-[10px] text-[min(10.4vw,44px)] md:grid-cols-[repeat(4,auto)] md:justify-start md:gap-7 ${home ? 'md:text-[64px]' : 'md:text-[56px]'}`}
       />
       {home ? (
         <>
@@ -97,8 +97,8 @@ export function PastCard({ event, variant, id, className = '' }: { event: Event;
         decoding="async"
         className={`cover ${home ? 'h-[220px]' : 'h-[240px]'} md:h-[300px]`}
       />
-      {/* 15.4vw = the canvas 60px at 390: the name stays inside the card on any phone (the 68px on the events board is cut off at 390) */}
-      <span className={`rit break-words px-[18px] md:px-7 md:text-[min(5.8vw,84px)] ${home ? 'text-[min(15.4vw,60px)]' : 'text-[min(15.4vw,68px)]'}`}>{event.name}</span>
+      {/* the canvas 60/68px wraps OVERRIDE inside the card at 390: 13.2vw keeps it on one line on any phone */}
+      <span className="rit break-words px-[18px] text-[min(13.2vw,52px)] md:px-7 md:text-[min(5.8vw,84px)]">{event.name}</span>
       <span className="mono px-[18px] md:px-7">
         <span className="hot">{riteLabel(event)}</span> / {fmtDate(event.date)}
         {event.city && ` / ${event.city}`}

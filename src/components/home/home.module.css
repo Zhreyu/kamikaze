@@ -1,0 +1,88 @@
+/* Home-only motion. Everything is visible without JS and under reduced motion: the hidden states live inside the media query. */
+
+@keyframes letter {
+  from {
+    opacity: 0;
+    transform: translateY(70%);
+    filter: blur(14px);
+  }
+}
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+}
+
+.wm span {
+  display: inline-block;
+}
+
+/* Who played rows (md+) */
+.nm {
+  transition: opacity 0.25s, transform 0.45s var(--ease);
+}
+.peek {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 8;
+  width: 300px;
+  height: 400px;
+  pointer-events: none;
+}
+.peekIn {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  opacity: 0;
+  visibility: hidden;
+  outline: 1px solid var(--hot);
+  background: #000;
+}
+.peekIn::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(0deg, transparent 0 2px, rgba(0, 0, 0, 0.28) 2px 4px);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  /* hero entrance: the wordmark letters rise out of a blur, then the rest steps in. CSS, so it runs before hydration. */
+  .wm span {
+    animation: letter 1.1s var(--ease) backwards;
+    animation-delay: calc(var(--i) * 60ms);
+  }
+  .rise {
+    animation: rise 0.9s var(--ease) backwards;
+    animation-delay: calc(var(--i) * 70ms + 450ms);
+  }
+  /* the slam is pinned and scrubbed by Slam.tsx: give it the full screen before the script runs so nothing below jumps */
+  :global(.js) .slamIn {
+    display: flex;
+    align-items: center;
+    min-height: 100svh;
+    overflow: hidden;
+  }
+  :global(.js) .slamIn p {
+    transform-origin: left center;
+    will-change: transform, opacity, filter;
+  }
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .rows:hover .row:not(:hover) .nm {
+    opacity: 0.5;
+    text-shadow: none;
+  }
+  .row:hover {
+    background: linear-gradient(90deg, rgba(204, 0, 0, 0.16), transparent 60%);
+  }
+  .row:hover .nm {
+    transform: translateX(20px);
+  }
+}
+.row:focus-visible {
+  background: linear-gradient(90deg, rgba(204, 0, 0, 0.16), transparent 60%);
+}

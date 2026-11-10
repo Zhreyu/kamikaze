@@ -1,0 +1,68 @@
+/* The pass card and its stage. Sizes are the design canvas (phone) and the prototype (desktop). */
+.stage {
+  display: grid;
+  place-items: center;
+  perspective: 1100px;
+}
+.card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 300px;
+  height: 466px;
+  padding: 20px;
+  background: #160606;
+  border: 1px solid var(--hot);
+  clip-path: polygon(0 0, calc(100% - 24px) 0, 100% 24px, 100% 100%, 24px 100%, 0 calc(100% - 24px));
+}
+@media (min-width: 900px) {
+  .stage {
+    padding-block: 28px; /* room for the tilt */
+  }
+  .card {
+    width: 340px;
+    height: 529px;
+    padding: 22px;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  /* a mouse tilts it (Pass.tsx writes --rx / --ry); the transition does the easing */
+  @media (hover: hover) and (pointer: fine) {
+    .card {
+      transform: rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+      transition: transform 0.5s var(--ease);
+    }
+  }
+  /* no mouse: it sways slowly on its own */
+  @media (hover: none), (pointer: coarse) {
+    .card {
+      animation: sway 6s ease-in-out infinite alternate;
+    }
+  }
+  /* the number landing on the card */
+  .arrive {
+    animation: arrive 0.8s var(--ease) backwards;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .card {
+    animation: none;
+  }
+}
+
+@keyframes sway {
+  from {
+    transform: rotateY(-12deg) rotateX(4deg);
+  }
+  to {
+    transform: rotateY(12deg) rotateX(-4deg);
+  }
+}
+@keyframes arrive {
+  from {
+    opacity: 0;
+    transform: translateY(40%);
+    filter: blur(8px);
+  }
+}

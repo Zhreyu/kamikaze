@@ -9,19 +9,24 @@ import { getAssetPath } from '@/lib/basePath'
 type St = { x: number; y: number; s: number; solid: number; wire: number; pts: number; face: number; ring: number }
 const st = (x: number, y: number, s: number, solid: number, wire: number, pts: number, face: number, ring: number): St => ({ x, y, s, solid, wire, pts, face, ring })
 
-/** data-sigil="<key>" -> [phone (<900px), desktop]. Values are the prototype's, verbatim (index.html:473-480). */
+/** data-sigil="<key>" -> [phone (<900px), desktop]. Values start from the prototype's (index.html:473-480); the ones that
+ *  differ say why. Wherever no station element is on screen the sigil is off: that is the default for every page and section.
+ *  `ghost` is an opt-in faint point cloud for a section with no running text or form in it (a title band, the 404). */
 const PRESETS: Record<string, [St, St]> = {
   off:     [st(0, 0, 1, 0, 0, 0, 1, 0),        st(0, 0, 1, 0, 0, 0, 1, 0)],
+  ghost:   [st(0, .08, 1.9, 0, 0, .03, 1, 0),  st(.52, 0, 1.5, 0, 0, .07, 1, 0)],
   hero:    [st(0, .1, 1, 1, 0, 0, 0, 1),       st(0, .02, 1, 1, 0, 0, 0, 1)],
-  slam:    [st(0, 0, 2.6, 0, 0, .4, 1, 0),     st(0, 0, 2.3, 0, 0, .55, 1, 0)],
+  slam:    [st(0, 0, 2.6, 0, 0, .16, 1, 0),    st(0, 0, 2.3, 0, 0, .28, 1, 0)],     // prototype .4 / .55: washed out the half-opacity slam lines
   up:      [st(0, 0, 1.1, 0, .06, 0, .8, .2),  st(.66, .52, .42, 1, 0, 0, 0, 1)],
-  recap:   [st(0, 0, 2.2, 0, 0, .08, 1, 0),    st(0, 0, 2.2, 0, 0, .14, 1, 0)],
+  recap:   [st(0, 0, 2.2, 0, 0, .03, 1, 0),    st(0, 0, 2.2, 0, 0, .06, 1, 0)],     // prototype .08 / .14: readable behind the recap story text
   artists: [st(0, 0, 1, 0, .05, 0, .5, 0),     st(.3, 0, .95, 0, .2, 0, .3, .5)],
   word:    [st(0, 0, 1.2, 0, 0, .07, 1, 0),    st(-.56, 0, 1.1, 0, .1, .3, .6, .4)],
-  pass:    [st(0, -.5, .95, 0, .1, 0, 1, .5),  st(.5, 0, 1.02, .55, .3, 0, 1, 1)],
-  footer:  [st(0, -.2, 1.5, 0, .08, .1, 1, 0), st(0, -.2, 1.5, 0, .08, .1, 1, 0)],
+  pass:    [st(0, -.5, .95, 0, .025, 0, 1, .25), st(.56, 0, .9, .4, .12, 0, 1, .8)],   // prototype .1 wire / .55 solid + .3 wire: too bright behind the form, the heading and the footer links
+  // prototype: wire .08, pts .1 under a footer painted rgba(10,10,10,.86). This footer is transparent, so the dimming is done here.
+  footer:  [st(0, -.2, 1.5, 0, .012, .03, 1, 0), st(0, -.2, 1.5, 0, .012, .03, 1, 0)],
 }
 const KEYS = Object.keys(PRESETS.off[0]) as (keyof St)[]
+const dark = (s: St): St => ({ ...s, solid: 0, wire: 0, pts: 0, ring: 0 })   // same place and size, invisible: fades do not drift
 
 // Calibration knobs
 const BEAT = 60 / 144        // 144 BPM
@@ -82,26 +87,36 @@ export async function mountSigil(canvas: HTMLCanvasElement): Promise<() => void>
   scene.add(key, rim, new THREE.AmbientLight(0xffffff, .25))
 
   // ---- stations: every [data-sigil] element in the document, re-read on resize / route change / layout growth
-  let stations: { c: number; st: St }[] = [], hw = 1, hh = 1, base = 1
+  // sy and vh are cached here and in the scroll listener: the frame loop reads no layout
+  let stations: { c: number; st: St }[] = [], hw = 1, hh = 1, base = 1, sy = scrollY, vh = innerHeight
   const measure = () => {
-    const vh = innerHeight, cw = canvas.clientWidth, ch = canvas.clientHeight, m = innerWidth >= 900 ? 1 : 0
+    sy = scrollY; vh = innerHeight
+    const cw = canvas.clientWidth, ch = canvas.clientHeight, m = innerWidth >= 900 ? 1 : 0
     const els = [...document.querySelectorAll<HTMLElement>('[data-sigil]')]
       .map((el) => { const r = el.getBoundingClientRect(), top = r.top + scrollY; return { el, top, h: r.height, c: top + Math.min(r.height, vh) / 2 } })
       .filter((e) => e.h > 0).sort((a, b) => a.c - b.c)
-    if (els[0]) els[0].c = vh / 2   // first station is exact at scrollY 0 (prototype :484)
-    stations = els.flatMap(({ el, top, h, c }) => {
+    // A station holds while its element is on screen. Where none is, the sigil is off.
+    const out: typeof stations = []
+    let end = -Infinity   // scroll centre at which the previous element has left the screen
+    if (els[0] && els[0].top <= vh / 2) els[0].c = vh / 2   // first station is exact at scrollY 0 (prototype :484)
+    for (const { el, top, h, c } of els) {
       let s = (PRESETS[el.dataset.sigil ?? ''] ?? PRESETS.off)[m]
       const a = el.querySelector<HTMLElement>('[data-sigil-still]')?.getBoundingClientRect()
       if (a?.width) {   // land on the still this station replaces, so the still -> live swap does not jump
         const ay = a.top + scrollY + a.height / 2 - (c - vh / 2)   // its viewport y when this station is centred
         s = { ...s, x: (a.left + a.width / 2) / cw * 2 - 1, y: 1 - ay / ch * 2, s: a.width * STILL_FILL / ch * hh / base }
       }
-      return h > vh * 1.5 ? [{ c, st: s }, { c: top + h - vh / 2, st: s }] : [{ c, st: s }]   // long sections hold their state (prototype :483)
-    })
+      if (top - vh / 2 > end) { if (out.length) out.push({ c: end, st: dark(out[out.length - 1].st) }); out.push({ c: top - vh / 2, st: dark(s) }) }
+      out.push({ c, st: s })
+      if (h > vh * 1.5) out.push({ c: top + h - vh / 2, st: s })   // long sections hold their state (prototype :483)
+      end = Math.max(end, top + h + vh / 2)
+    }
+    if (out.length) out.push({ c: Math.max(end, out[out.length - 1].c + 1), st: dark(out[out.length - 1].st) })
+    stations = out
   }
   const target = (): St => {
     if (!stations.length) return PRESETS.off[0]
-    const sc = scrollY + innerHeight / 2; let i = 0
+    const sc = sy + vh / 2; let i = 0
     while (i < stations.length - 2 && sc > stations[i + 1].c) i++
     const a = stations[i], b = stations[i + 1] ?? a
     let t = Math.min(1, Math.max(0, (sc - a.c) / (b.c - a.c || 1))); t = t * t * (3 - 2 * t)
@@ -116,24 +131,33 @@ export async function mountSigil(canvas: HTMLCanvasElement): Promise<() => void>
   }
   size()
 
-  let kick = 0, mx = 0, my = 0, rot = 0, vel = 0, lastY = scrollY, last = performance.now(), n = 0, live = false
+  let kick = 0, mx = 0, my = 0, rot = 0, vel = 0, lastY = sy, last = performance.now(), n = 0, live = false, blank = false, lost = false
   const ac = new AbortController(), on = { signal: ac.signal, passive: true }
   const ro = new ResizeObserver((es) => (es.some((e) => e.target === canvas) ? size() : measure()))
   ro.observe(canvas); ro.observe(document.body)
   addEventListener('sigil:measure', measure, on)
+  addEventListener('scroll', () => { sy = scrollY }, on)
   addEventListener('sigil:kick', () => { kick = 1 }, on)
   document.addEventListener('mouseover', (e) => { const c = (e.target as Element).closest?.('[data-kick]'); if (c && !c.contains(e.relatedTarget as Node | null)) kick = 1 }, on)
   if (!coarse) addEventListener('pointermove', (e) => { mx = e.clientX / innerWidth * 2 - 1; my = e.clientY / innerHeight * 2 - 1 }, on)
-  const stop = () => { renderer.setAnimationLoop(null); root.classList.remove('sigil-live') }
+  const stop = () => { lost = true; renderer.setAnimationLoop(null); root.classList.remove('sigil-live') }
   canvas.addEventListener('webglcontextlost', stop, on)   // no restore: the still takes over for the rest of the visit
 
-  const S: St = { ...target(), solid: 0, pts: 1, s: 2.8, ring: 0 }   // intro: a point cloud condenses into the sigil (prototype :535)
-  renderer.setAnimationLoop((now: number) => {
+  // Intro: fade in where the station (the hero still) already is, settling from 6% larger. ~0.5s, no point cloud over the wordmark.
+  const t0 = target(), S: St = { ...dark(t0), s: t0.s * 1.06 }
+  renderer.compile(scene, cam)   // shaders build here, not inside the first visible frames
+  const frame = (now: number) => {
     if (root.dataset.sigilPause !== undefined) { last = now; return }   // full-screen overlays set <html data-sigil-pause>
-    if (coarse && S.solid < .01 && n++ % 2) return   // ponytail: ghost states run at half rate on phones; delete if profiling says it is not needed
+    if (coarse && S.solid < .01 && n++ % 2) return   // phones: ghost and off states run at half rate; the solid, beat-driven sigil keeps every frame
     const d = Math.min(.05, (now - last) / 1000), time = now / 1000, tg = target(), k = 1 - Math.pow(.0015, d); last = now
     for (const p of KEYS) S[p] += (tg[p] - S[p]) * k
-    vel += ((scrollY - lastY) / Math.max(d, .001) - vel) * .1; lastY = scrollY
+    vel += ((sy - lastY) / Math.max(d, .001) - vel) * .1; lastY = sy
+    const vis = S.solid + S.wire + S.pts
+    if (vis < .01 && S.ring < .01) {   // off: draw one empty frame, then do nothing until a station brings it back
+      if (!blank) { renderer.clear(); blank = true }
+      return
+    }
+    blank = false
     rot += d * (.35 + Math.min(4, Math.abs(vel) / 500))
     const near = Math.round(rot / (Math.PI * 2)) * Math.PI * 2
     spin.rotation.y = rot + (near - rot) * S.face
@@ -146,10 +170,13 @@ export async function mountSigil(canvas: HTMLCanvasElement): Promise<() => void>
     ringM.opacity = (.5 + .35 * beat) * S.ring; rings.visible = S.ring > .01; rings.children[0].rotation.z = time * .08; rings.children[1].rotation.z = -time * .05
     key.intensity = 90 + beat * 80 + kick * 160
     for (let i = 0; i < EN; i++) { ep[i * 3 + 1] += es[i] * d; if (ep[i * 3 + 1] > 3.2) ep[i * 3 + 1] = -3.2 }
-    eg.attributes.position.needsUpdate = true
+    eg.attributes.position.needsUpdate = true; emberM.opacity = .7 * Math.min(1, vis * 2)   // embers go quiet with the sigil
     renderer.render(scene, cam)
     if (!live) { live = true; root.classList.add('sigil-live') }   // CSS fades [data-sigil-still] out
-  })
+  }
+  renderer.setAnimationLoop(frame)
+  // rAF already sleeps in a hidden tab; this also covers webviews that keep ticking in the background
+  document.addEventListener('visibilitychange', () => { if (!lost) renderer.setAnimationLoop(document.hidden ? null : frame) }, on)
 
   return () => {
     stop(); ac.abort(); ro.disconnect()

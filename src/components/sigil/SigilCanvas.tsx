@@ -14,6 +14,10 @@ export function SigilCanvas() {
     if (matchMedia('(prefers-reduced-motion: reduce)').matches || nav.connection?.saveData || (nav.deviceMemory ?? 8) < 4) return
     let dispose: (() => void) | undefined, dead = false, timer = 0
     const boot = async () => {
+      // Probe first: without WebGL2 (three r164 needs it) nothing is downloaded and nothing is logged. The still stays.
+      const gl = document.createElement('canvas').getContext('webgl2')
+      if (!gl) return
+      gl.getExtension('WEBGL_lose_context')?.loseContext()
       try {
         const { mountSigil } = await import('./scene')
         if (dead || !ref.current) return

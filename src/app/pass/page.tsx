@@ -1,6 +1,8 @@
 import type { Metadata } from 'next'
-import { fmtDate, nextEvent } from '@/data/events'
+import Pass from '@/components/pass/Pass'
+import { fmtDate, nextEvent, riteLabel } from '@/data/events'
 
+// Fixed at build time on a static export: rebuild after an event passes.
 const next = nextEvent()
 
 export const metadata: Metadata = {
@@ -11,10 +13,6 @@ export const metadata: Metadata = {
   alternates: { canonical: '/pass/' },
 }
 
-export default function Pass() {
-  return (
-    <div className="wrap">
-      <h1 className="rit">Take the pass</h1>
-    </div>
-  )
+export default function PassPage() {
+  return <Pass rite={next && riteLabel(next)} date={next && fmtDate(next.date)} />
 }
