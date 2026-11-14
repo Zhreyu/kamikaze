@@ -1,0 +1,17 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "broken-image",
+        "value": "*",
+        "files": [
+          "src/components/FlashLayer.tsx"
+        ],
+        "createdAt": "2026-11-14T14:22:08.395Z",
+        "reason": "runtime-set flash image: src is assigned on fire (design: the flash layer starts empty)"
+      }
+    ]
+  }
+}

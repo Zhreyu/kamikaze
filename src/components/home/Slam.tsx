@@ -22,6 +22,8 @@ export default function Slam() {
       lines.forEach((line, i) => {
         tl.fromTo(line, { opacity: 0, scale: 2.4, filter: 'blur(16px)' }, { opacity: 1, scale: 1, filter: 'blur(0px)', duration: 1, ease: 'expo.out' }, i)
         tl.call(() => void window.dispatchEvent(new Event('sigil:kick')), undefined, i + 0.2)
+        // the last line ("One room") fires a real OVERRIDE photo behind the word — the screenshot moment
+        if (i === LINES.length - 1) tl.call(() => void window.dispatchEvent(new Event('kamikaze:flash')), undefined, i + 0.35)
         if (i) tl.to(lines[i - 1], { opacity: 0.5, duration: 0.5 }, i)
       })
       tl.to({}, { duration: 0.6 }) // hold the last line before the pin lets go

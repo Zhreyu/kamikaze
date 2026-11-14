@@ -1,5 +1,6 @@
 'use client'
 import { useEffect, useMemo, useState } from 'react'
+import { SUPABASE_ANON_KEY } from '@/lib/supabase'
 import { pad4, toCsv, type Db } from './util'
 
 type Soul = { number: number; email: string; whatsapp: string | null; city: string | null; referred_by: number | null; created_at: string; referrals: number }
@@ -7,6 +8,28 @@ type Loaded = { rows: Soul[]; total: number; referred: number }
 
 const CAP = 1000
 const when = (iso: string) => new Date(iso).toLocaleString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })
+
+// ponytail: no backend in this build (no anon key) -> a fixed demo set so the tab is reviewable. Real deploys set the key and hit Supabase.
+const DEMO = !SUPABASE_ANON_KEY
+const demoData = (): Loaded => {
+  const cities = ['Bangalore', 'Mumbai', 'Delhi', 'Goa', 'Pune', 'Hyderabad', 'Chennai', null]
+  const names = ['aditi', 'rohan', 'kabir', 'meera', 'arjun', 'zara', 'dev', 'ira', 'veer', 'nisha', 'sahil', 'tara', 'yash', 'anya', 'raghav']
+  const rows: Soul[] = []
+  for (let n = 42; n >= 1; n--) {
+    const name = names[n % names.length]
+    const refd = n > 1 && n % 3 === 0 ? ((n * 7) % (n - 1)) + 1 : null // some came through a referral
+    rows.push({
+      number: n,
+      email: `${name}${n}@${n % 2 ? 'gmail.com' : 'proton.me'}`,
+      whatsapp: n % 4 ? `+91 9${String(100000000 + n * 918273).slice(0, 9)}` : null,
+      city: cities[n % cities.length],
+      referred_by: refd,
+      referrals: n % 5 === 0 ? (n % 11) + 1 : 0, // a handful of real referrers for the leaderboard
+      created_at: new Date(Date.parse('2026-11-01T18:00:00+05:30') + (42 - n) * 36e5).toISOString(),
+    })
+  }
+  return { rows, total: rows.length, referred: rows.filter((r) => r.referred_by != null).length }
+}
 
 // Below md every row is a small block (number + date, email, WhatsApp + city, then two labelled counts); from md it is a plain table.
 const td = 'md:border-t md:border-hair md:px-3 md:py-2.5 md:align-top'
@@ -18,6 +41,7 @@ export default function Passes({ db }: { db: Db }) {
   const [filter, setFilter] = useState('')
 
   useEffect(() => {
+    if (DEMO) return setData(demoData())
     let live = true
     // ponytail: one fetch of the newest 1000 rows; paginate (and move the filter and the top list to the server) when the list outgrows it
     Promise.all([

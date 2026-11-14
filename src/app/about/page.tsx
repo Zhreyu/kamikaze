@@ -14,7 +14,7 @@ const h2 = 'rit text-[38px] md:text-[min(5vw,64px)]'
 
 export default function About() {
   return (
-    <div data-sigil="off">
+    <div data-sigil="bg">
       <div className="md:wrap md:grid md:grid-cols-12 md:items-stretch md:gap-x-10 md:pb-24">
         {/* md+: title at the top of the left column, the opening pinned to its foot, the photo filling the right */}
         <section className="wrap flex flex-col gap-[14px] pb-7 pt-4 md:col-span-6 md:justify-between md:gap-16 md:px-0 md:pb-0 md:pt-10">

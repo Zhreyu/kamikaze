@@ -48,7 +48,7 @@ export default async function ArtistPage({ params }: Props) {
   return (
     // phone: full-bleed portrait with the name over its scrim. md+: portrait (sticky) beside the name and text.
     <article
-      data-sigil="off"
+      data-sigil="bg"
       className="relative md:grid md:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] md:grid-rows-[auto_1fr] md:gap-x-[clamp(40px,6vw,96px)] md:px-[var(--gutter)] md:pt-12"
     >
       {/* capped at 520px: the smallest portrait file is 723px wide and must not be blown up */}

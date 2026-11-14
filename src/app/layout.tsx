@@ -7,6 +7,7 @@ import Dock from '@/components/Dock'
 import Footer from '@/components/Footer'
 import Nav from '@/components/Nav'
 import { SigilCanvas } from '@/components/sigil/SigilCanvas'
+import FlashLayer from '@/components/FlashLayer'
 import { fmtDate, nextEvent } from '@/data/events'
 import { basePath, getAssetPath } from '@/lib/basePath'
 import { DEPLOY_URL } from '@/lib/site'
@@ -75,6 +76,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body>
         <SigilCanvas />
+        <FlashLayer />
         <a id="skip" href="#main" className="mono sr-only focus:not-sr-only focus:fixed focus:left-3 focus:top-3 focus:z-30 focus:bg-bone focus:px-4 focus:py-3 focus:text-void">
           Skip to content
         </a>

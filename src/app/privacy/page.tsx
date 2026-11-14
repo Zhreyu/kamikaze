@@ -93,7 +93,7 @@ const withMail = (text: string) => {
 
 export default function Privacy() {
   return (
-    <div data-sigil="off" className="wrap pb-10 pt-4 md:pb-24 md:pt-10">
+    <div data-sigil="bg" className="wrap pb-10 pt-4 md:pb-24 md:pt-10">
       <h1 className="rit pl-[0.13em] text-[min(18vw,80px)] md:text-[min(11vw,160px)]">Privacy</h1>
       <p className="mt-5 max-w-[65ch] md:mt-10 md:text-[20px]">What this site collects, where it is kept and how to get it deleted.</p>
       <p className="mono dim mt-3">{UPDATED}</p>

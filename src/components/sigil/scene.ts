@@ -15,15 +15,19 @@ const st = (x: number, y: number, s: number, solid: number, wire: number, pts: n
 const PRESETS: Record<string, [St, St]> = {
   off:     [st(0, 0, 1, 0, 0, 0, 1, 0),        st(0, 0, 1, 0, 0, 0, 1, 0)],
   ghost:   [st(0, .08, 1.9, 0, 0, .03, 1, 0),  st(.52, 0, 1.5, 0, 0, .07, 1, 0)],
+  // faint chrome mark parked behind the inner pages (about, artists, contact, privacy, 404) so none is pure black. Low enough to read running text over; desktop offsets right to fill the empty column.
+  bg:      [st(0, .05, 1.5, .12, .1, 0, 1, 0),  st(.5, 0, 1.35, .22, .12, 0, 1, 0)],
   hero:    [st(0, .1, 1, 1, 0, 0, 0, 1),       st(0, .02, 1, 1, 0, 0, 0, 1)],
-  slam:    [st(0, 0, 2.6, 0, 0, .16, 1, 0),    st(0, 0, 2.3, 0, 0, .28, 1, 0)],     // prototype .4 / .55: washed out the half-opacity slam lines
-  up:      [st(0, 0, 1.1, 0, .06, 0, .8, .2),  st(.66, .52, .42, 1, 0, 0, 0, 1)],
+  // "descent" plan: on phone the mark must grow/shrink through every section, not vanish. The old phone slam/up/pass were solid 0 (invisible).
+  slam:    [st(0, 0, 2.4, .55, 0, 0, 0, 0),    st(0, 0, 2.3, 0, 0, .28, 1, 0)],     // phone: translucent chrome swells behind the slam lines (text always paints over the canvas)
+  up:      [st(.5, .46, .42, 1, 0, 0, 0, 0),   st(.66, .52, .42, 1, 0, 0, 0, 1)],   // phone: small cold solid mark in the corner (was invisible wire)
   recap:   [st(0, 0, 2.2, 0, 0, .03, 1, 0),    st(0, 0, 2.2, 0, 0, .06, 1, 0)],     // prototype .08 / .14: readable behind the recap story text
   artists: [st(0, 0, 1, 0, .05, 0, .5, 0),     st(.3, 0, .95, 0, .2, 0, .3, .5)],
   word:    [st(0, 0, 1.2, 0, 0, .07, 1, 0),    st(-.56, 0, 1.1, 0, .1, .3, .6, .4)],
-  pass:    [st(0, -.5, .95, 0, .025, 0, 1, .25), st(.56, 0, .9, .4, .12, 0, 1, .8)],   // prototype .1 wire / .55 solid + .3 wire: too bright behind the form, the heading and the footer links
+  pass:    [st(0, -.3, .95, .4, 0, 0, 1, 0),   st(.56, 0, .9, .4, .12, 0, 1, .8)],   // phone: re-inflates and snaps face-front behind "Take the pass" ("you've arrived")
   // prototype: wire .08, pts .1 under a footer painted rgba(10,10,10,.86). This footer is transparent, so the dimming is done here.
-  footer:  [st(0, -.2, 1.5, 0, .012, .03, 1, 0), st(0, -.2, 1.5, 0, .012, .03, 1, 0)],
+  // desktop offsets the faint mark to the right to fill the empty space beside the outlined wordmark.
+  footer:  [st(0, -.2, 1.5, 0, .02, .04, 1, 0),  st(.52, -.12, 1.25, .05, .06, 0, 1, 0)],
 }
 const KEYS = Object.keys(PRESETS.off[0]) as (keyof St)[]
 const dark = (s: St): St => ({ ...s, solid: 0, wire: 0, pts: 0, ring: 0 })   // same place and size, invisible: fades do not drift
@@ -67,20 +71,7 @@ export async function mountSigil(canvas: HTMLCanvasElement): Promise<() => void>
   const g = new THREE.Group(), spin = new THREE.Group()
   const solid = new THREE.Mesh(geo, chrome), wire = new THREE.Mesh(geo, wireM), pts = new THREE.Points(geo, ptsM)
   spin.add(solid, wire, pts); g.add(spin); scene.add(g)
-
-  const ringM = new THREE.LineBasicMaterial({ color: 0xff3b30, transparent: true, opacity: .5 }), rings = new THREE.Group()
-  ;[1.22, 1.3].forEach((r, k) => {   // k=0: closed circle r=1.22 (240 segments); k=1: 72 radial ticks r=1.30..1.35
-    const p: number[] = [], n = k ? 72 : 240
-    for (let i = 0; i < n; i++) { const a = i / n * Math.PI * 2, a2 = k ? a : (i + 1) / n * Math.PI * 2, r2 = k ? r + .05 : r; p.push(Math.cos(a) * r, Math.sin(a) * r, 0, Math.cos(a2) * r2, Math.sin(a2) * r2, 0) }
-    rings.add(new THREE.LineSegments(new THREE.BufferGeometry().setAttribute('position', new THREE.Float32BufferAttribute(p, 3)), ringM))
-  })
-  g.add(rings)
-
-  const EN = 260, ep = new Float32Array(EN * 3), es = new Float32Array(EN)
-  for (let i = 0; i < EN; i++) { ep[i * 3] = (Math.random() - .5) * 9; ep[i * 3 + 1] = (Math.random() - .5) * 6; ep[i * 3 + 2] = (Math.random() - .5) * 4 - 1; es[i] = .1 + Math.random() * .35 }
-  const eg = new THREE.BufferGeometry().setAttribute('position', new THREE.BufferAttribute(ep, 3))
-  const emberM = new THREE.PointsMaterial({ color: 0xff2a1f, size: .022, transparent: true, opacity: .7, depthWrite: false, blending: THREE.AdditiveBlending })
-  scene.add(new THREE.Points(eg, emberM))
+  // ponytail: rings (outline circle + ticks) and the drifting embers removed per design call; St.ring left dead, ignored in the frame loop.
 
   const key = new THREE.PointLight(0xff1a10, 90, 0, 2); key.position.set(0, 4, 5)
   const rim = new THREE.PointLight(0x00e5ff, 14, 0, 2); rim.position.set(-5, -2, -3)
@@ -153,7 +144,7 @@ export async function mountSigil(canvas: HTMLCanvasElement): Promise<() => void>
     for (const p of KEYS) S[p] += (tg[p] - S[p]) * k
     vel += ((sy - lastY) / Math.max(d, .001) - vel) * .1; lastY = sy
     const vis = S.solid + S.wire + S.pts
-    if (vis < .01 && S.ring < .01) {   // off: draw one empty frame, then do nothing until a station brings it back
+    if (vis < .01) {   // off: draw one empty frame, then do nothing until a station brings it back
       if (!blank) { renderer.clear(); blank = true }
       return
     }
@@ -167,10 +158,7 @@ export async function mountSigil(canvas: HTMLCanvasElement): Promise<() => void>
     const beat = Math.exp(-((time % BEAT) / BEAT) * 5) * S.solid
     g.scale.setScalar(base * S.s * (1 + .045 * beat))
     chrome.opacity = S.solid; solid.visible = S.solid > .01; wireM.opacity = S.wire; wire.visible = S.wire > .01; ptsM.opacity = S.pts; pts.visible = S.pts > .01
-    ringM.opacity = (.5 + .35 * beat) * S.ring; rings.visible = S.ring > .01; rings.children[0].rotation.z = time * .08; rings.children[1].rotation.z = -time * .05
     key.intensity = 90 + beat * 80 + kick * 160
-    for (let i = 0; i < EN; i++) { ep[i * 3 + 1] += es[i] * d; if (ep[i * 3 + 1] > 3.2) ep[i * 3 + 1] = -3.2 }
-    eg.attributes.position.needsUpdate = true; emberM.opacity = .7 * Math.min(1, vis * 2)   // embers go quiet with the sigil
     renderer.render(scene, cam)
     if (!live) { live = true; root.classList.add('sigil-live') }   // CSS fades [data-sigil-still] out
   }
@@ -181,7 +169,7 @@ export async function mountSigil(canvas: HTMLCanvasElement): Promise<() => void>
   return () => {
     stop(); ac.abort(); ro.disconnect()
     scene.traverse((o) => { (o as THREE.Mesh).geometry?.dispose() })
-    ;[chrome, wireM, ptsM, ringM, emberM].forEach((mat) => mat.dispose())
+    ;[chrome, wireM, ptsM].forEach((mat) => mat.dispose())
     env.dispose(); renderer.dispose()
   }
 }

@@ -3,11 +3,10 @@ import Link from 'next/link'
 import Arrow from '@/components/Arrow'
 import { PastCard, UpNext } from '@/components/EventCards'
 import Reveal from '@/components/Reveal'
-import Readout from '@/components/home/Readout'
 import Slam from '@/components/home/Slam'
 import WhoPlayed from '@/components/home/WhoPlayed'
 import s from '@/components/home/home.module.css'
-import { fmtDate, nextEvent, pastEvents, riteLabel, startsAt } from '@/data/events'
+import { fmtDate, nextEvent, pastEvents, riteLabel } from '@/data/events'
 import { getAssetPath } from '@/lib/basePath'
 
 export const metadata: Metadata = {
@@ -36,24 +35,14 @@ export default function Home() {
   const last = pastEvents().find((e) => e.recap)
   return (
     <>
-      {/* --s is the sigil still's box: it shrinks on short screens so it never sits under the date */}
+      {/* --s is the sigil still's box. Phone: the mark sits in flow and the date overlaps its lower third, so the first screen clusters
+          into one band with no dead gap. Desktop: the mark is absolute behind the huge wordmark and the date sits lower-left beside it. */}
       <section
         data-sigil="hero"
-        className="wrap relative flex min-h-[calc(100svh-var(--nav-h)-env(safe-area-inset-top,0px))] flex-col justify-between gap-8 pb-7 [--s:min(300px,77vw,calc(100svh-500px))] md:pb-10 md:pt-2 md:[--s:min(480px,calc(100svh-340px))]"
+        className="wrap relative flex flex-col pb-7 pt-2 [--s:min(230px,58vw,calc(100svh-620px))] max-md:min-h-[min(calc(100svh-var(--nav-h)-env(safe-area-inset-top,0px)),820px)] max-md:justify-center md:min-h-[calc(100svh-var(--nav-h)-env(safe-area-inset-top,0px))] md:justify-between md:gap-8 md:pb-10 md:[--s:min(480px,calc(100svh-340px))]"
       >
-        <div aria-hidden="true" className="absolute left-1/2 top-16 ml-[calc(var(--s)/-2)] h-[var(--s)] w-[var(--s)] md:top-[110px]">
-          <div data-sigil-hide className="absolute -inset-5 rounded-full border border-[rgba(255,59,48,.45)] md:-inset-10" />
-          <img
-            data-sigil-still
-            src={getAssetPath('/logo-sigil-384.webp')}
-            srcSet={`${getAssetPath('/logo-sigil-384.webp')} 384w, ${getAssetPath('/logo-sigil.webp')} 512w`}
-            sizes="(min-width: 900px) 480px, 300px"
-            width={512}
-            height={512}
-            alt=""
-            className="h-full w-full object-contain"
-          />
-        </div>
+        {/* count-in: a soft bone vignette breathes 4× on load, arming the room (CSS, dies under reduced motion) */}
+        <div className="fx fx-countin" aria-hidden="true" />
 
         <div className="relative">
           <h1 className={`${s.wm} rit mt-2 whitespace-nowrap text-center text-[min(15.4vw,60px)] md:mt-0 md:text-[min(15.5vw,240px)]`}>
@@ -64,14 +53,35 @@ export default function Home() {
               </span>
             ))}
           </h1>
-          <p className={`${s.rise} mono mx-auto mt-[14px] table bg-void/75 px-[10px] py-1 tracking-[.3em] md:mt-[18px] md:px-3 md:py-[5px]`} style={i(0)}>
+          <p className={`${s.rise} mono mx-auto mt-[10px] table bg-void/75 px-[10px] py-1 tracking-[.3em] md:mt-[18px] md:px-3 md:py-[5px]`} style={i(0)}>
             The room is the headliner
           </p>
         </div>
 
-        <div className="relative flex flex-wrap items-end justify-between gap-7">
-          <div className="w-full md:w-auto md:max-w-[520px]">
-            <p className={`${s.rise} num hot text-[38px] md:text-[64px]`} style={i(1)}>
+        {/* sigil still: in flow on phone (centred), absolute behind the wordmark on desktop. The live canvas lands on this box. */}
+        <div
+          aria-hidden="true"
+          data-flash
+          title="Tap for a glimpse of the room"
+          className="relative mx-auto mt-2 h-[var(--s)] w-[var(--s)] cursor-pointer md:absolute md:left-1/2 md:top-[110px] md:mx-0 md:mt-0 md:ml-[calc(var(--s)/-2)]"
+        >
+          <img
+            data-sigil-still
+            src={getAssetPath('/logo-sigil-384.webp')}
+            srcSet={`${getAssetPath('/logo-sigil-384.webp')} 384w, ${getAssetPath('/logo-sigil.webp')} 512w`}
+            sizes="(min-width: 900px) 480px, 230px"
+            width={512}
+            height={512}
+            alt=""
+            className="h-full w-full object-contain"
+          />
+        </div>
+
+        <div className="relative flex flex-wrap items-end justify-between gap-7 max-md:-mt-[calc(var(--s)*0.44)]">
+          <div className="relative isolate w-full md:w-auto md:max-w-[520px]">
+            {/* phone only: a dark fade behind the date so the red numerals stay legible over the bright chrome of the sigil's lower third */}
+            <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 -top-16 -z-10 h-32 bg-gradient-to-b from-void via-void/85 to-transparent md:hidden" />
+            <p className={`${s.rise} date-beat num hot text-[38px] md:text-[64px]`} style={i(1)}>
               {next ? fmtDate(next.date) : 'No date yet'}
             </p>
             {next && (
@@ -94,7 +104,6 @@ export default function Home() {
               <Arrow />
             </Link>
           </div>
-          {next && <Readout to={startsAt(next)} label={`Time until ${fmtDate(next.date)}`} zeroLabel={`${riteLabel(next)} is today`} />}
         </div>
       </section>
 

@@ -1,9 +1,10 @@
 'use client'
 import { useEffect, useRef } from 'react'
+import { getAssetPath } from '@/lib/basePath'
 
-/** The 26px ring that trails a mouse and swells over controls. Mouse only; nothing happens on touch or under reduced motion. */
+/** The small sigil mark that trails a mouse and swells over controls. Mouse only; nothing happens on touch or under reduced motion. */
 export default function Cursor() {
-  const ref = useRef<HTMLDivElement>(null)
+  const ref = useRef<HTMLImageElement>(null)
   useEffect(() => {
     const el = ref.current
     if (!el || !matchMedia('(pointer: fine)').matches || matchMedia('(prefers-reduced-motion: reduce)').matches) return
@@ -20,10 +21,13 @@ export default function Cursor() {
     return () => ac.abort()
   }, [])
   return (
-    <div
+    <img
       ref={ref}
+      src={getAssetPath('/logo-sigil-96.webp')}
+      alt=""
       aria-hidden="true"
-      className="pointer-events-none fixed left-0 top-0 z-20 -ml-[13px] -mt-[13px] hidden h-[26px] w-[26px] rounded-full border border-hot opacity-0 mix-blend-difference [transition:translate_.25s_cubic-bezier(.22,.61,.36,1),scale_.3s_cubic-bezier(.22,.61,.36,1),opacity_.2s] [@media(pointer:fine)]:block"
+      draggable={false}
+      className="pointer-events-none fixed left-0 top-0 z-20 -ml-[15px] -mt-[15px] hidden h-[30px] w-[30px] object-contain opacity-0 drop-shadow-[0_0_6px_rgba(255,59,48,.5)] [transition:translate_.22s_cubic-bezier(.22,.61,.36,1),scale_.3s_cubic-bezier(.22,.61,.36,1),opacity_.2s] [@media(pointer:fine)]:block"
     />
   )
 }

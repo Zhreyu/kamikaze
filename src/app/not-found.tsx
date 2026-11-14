@@ -12,7 +12,7 @@ const links = [
 
 export default function NotFound() {
   return (
-    <div data-sigil="off" className="wrap pb-10 pt-4 md:grid md:grid-cols-12 md:gap-x-10 md:pb-24 md:pt-10">
+    <div data-sigil="bg" className="wrap pb-10 pt-4 md:grid md:grid-cols-12 md:gap-x-10 md:pb-24 md:pt-10">
       <h1 className="rit text-[min(26.6vw,104px)] md:col-span-12 md:text-[min(11vw,160px)]">Wrong room</h1>
       <p className="mt-6 max-w-[65ch] md:col-span-5 md:mt-12 md:text-[20px]">There is no page here. Some old links stopped working when we rebuilt the site.</p>
       <nav aria-label="Where to go" className="mt-7 flex flex-col md:col-span-6 md:col-start-7 md:row-span-2 md:mt-12">

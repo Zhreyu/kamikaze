@@ -16,7 +16,7 @@ const routes = [
 
 export default function Contact() {
   return (
-    <div data-sigil="off" className="md:wrap md:grid md:grid-cols-12 md:gap-x-10 md:pb-16">
+    <div data-sigil="bg" className="md:wrap md:grid md:grid-cols-12 md:gap-x-10 md:pb-16">
       <section className="wrap flex flex-col pb-9 pt-4 md:col-span-6 md:px-0 md:pt-10">
         <h1 className="rit text-[min(20.5vw,80px)] md:text-[min(11vw,160px)]">Contact</h1>
         <p className="dim mb-5 mt-3 md:mb-10 md:mt-8">Bookings, questions, collabs. Pick a route.</p>

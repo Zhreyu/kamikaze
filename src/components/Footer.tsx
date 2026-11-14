@@ -39,9 +39,15 @@ export default function Footer() {
         </nav>
         <p className="mono dim hidden md:block">{copyright}</p>
       </div>
-      <p aria-hidden="true" className="rit mt-9 overflow-hidden whitespace-nowrap text-[15.4vw] text-transparent [-webkit-text-stroke:1px_rgba(239,239,239,.4)] [text-shadow:none] md:text-[min(15.5vw,240px)]">
-        Kamikaze
-      </p>
+      <div aria-hidden="true" className="relative mt-9">
+        <p className="rit overflow-hidden whitespace-nowrap text-[15.4vw] text-transparent [-webkit-text-stroke:1px_rgba(239,239,239,.4)] [text-shadow:none] md:text-[min(15.5vw,240px)]">
+          Kamikaze
+        </p>
+        {/* a hot light flows through the outlined letters; the same text clipped to a moving gradient, overlaid exactly */}
+        <p className="footmark-sweep rit pointer-events-none absolute inset-0 overflow-hidden whitespace-nowrap text-[15.4vw] [text-shadow:none] md:text-[min(15.5vw,240px)]">
+          Kamikaze
+        </p>
+      </div>
       <p className="mono dim mt-5 md:hidden">{copyright}</p>
     </footer>
   )

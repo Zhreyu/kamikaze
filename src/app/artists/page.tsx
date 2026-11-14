@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 
 export default function Artists() {
   return (
-    <div data-sigil="off" className="wrap">
+    <div data-sigil="bg" className="wrap">
       <header className="flex flex-col gap-3 pb-6 pt-4 md:flex-row md:items-end md:justify-between md:gap-10 md:pb-10 md:pt-12">
         <h1 className="rit text-[min(19vw,80px)] md:text-[min(11vw,160px)]">Artists</h1>
         <p className="dim md:pb-2 md:text-right">Everyone who has played a Kamikaze room.</p>
