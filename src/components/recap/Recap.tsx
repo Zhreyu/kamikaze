@@ -1,7 +1,7 @@
 'use client'
 import { useEffect, useRef, useState } from 'react'
 import { defaultContent, mediaUrl, photoSrcSet, slotPhoto } from '@/data/content'
-import { fmtDate, riteLabel, type Event } from '@/data/events'
+import { type Event } from '@/data/events'
 import { useContent } from '@/lib/content'
 import Arrow from '../Arrow'
 import s from './recap.module.css'
@@ -111,22 +111,14 @@ export function Player({ event }: { event: Event }) {
           fetchPriority="high"
         />
         {i >= 0 && <div key={i} className={s.noise} aria-hidden="true" />}
-        <p className={`${s.osd} mono hot top-3 md:top-[18px]`} aria-hidden="true">
-          {riteLabel(event)}
-          {event.city && ` / ${event.city}`}
-        </p>
-        <p className={`${s.osd} mono bottom-3 md:bottom-[18px]`} aria-hidden="true">
-          {event.name} / {fmtDate(event.date)}
-        </p>
         {i < 0 && (
-          <div className="absolute inset-0 z-[5] grid place-items-center">
-            <button type="button" data-kick onClick={start} className="cta mono min-h-[60px] px-[30px] text-[14px]">
-              <svg viewBox="0 0 14 14" aria-hidden="true" className="!h-[14px] !w-[14px]">
+          <button type="button" data-kick onClick={start} aria-label="Play the photos" className="absolute inset-0 z-[5] grid place-items-center">
+            <span className="grid h-[70px] w-[70px] place-items-center border border-bone/70 bg-void/35 transition-colors hover:border-hot [clip-path:polygon(0_0,calc(100%-10px)_0,100%_10px,100%_100%,10px_100%,0_calc(100%-10px))]">
+              <svg viewBox="0 0 14 14" aria-hidden="true" className="h-5 w-5 translate-x-[1px]">
                 <path d="M2 1l11 6-11 6z" fill="currentColor" />
               </svg>
-              Watch recap
-            </button>
-          </div>
+            </span>
+          </button>
         )}
       </div>
 
@@ -134,8 +126,8 @@ export function Player({ event }: { event: Event }) {
         <button type="button" aria-label="Previous photo" onClick={() => step(-1)} className="ghost mono flex-1 px-2 md:min-w-[76px] md:flex-none md:px-4">
           Prev
         </button>
-        <button ref={toggle} type="button" onClick={() => (i < 0 ? start() : setPlaying(!playing))} className="ghost mono flex-1 px-2 md:min-w-[76px] md:flex-none md:px-4">
-          {playing ? 'Pause' : 'Play'}
+        <button ref={toggle} type="button" onClick={() => (i < 0 ? start() : setPlaying(!playing))} className="ghost mono flex-1 px-2 md:min-w-[88px] md:flex-none md:px-4">
+          {i < 0 ? 'Play photos' : playing ? 'Pause' : 'Play'}
         </button>
         <button type="button" aria-label="Next photo" onClick={() => step(1)} className="ghost mono flex-1 px-2 md:min-w-[76px] md:flex-none md:px-4">
           Next

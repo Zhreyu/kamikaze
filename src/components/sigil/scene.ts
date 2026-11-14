@@ -16,10 +16,10 @@ const PRESETS: Record<string, [St, St]> = {
   off:     [st(0, 0, 1, 0, 0, 0, 1, 0),        st(0, 0, 1, 0, 0, 0, 1, 0)],
   ghost:   [st(0, .08, 1.9, 0, 0, .03, 1, 0),  st(.52, 0, 1.5, 0, 0, .07, 1, 0)],
   // faint chrome mark parked behind the inner pages (about, artists, contact, privacy, 404) so none is pure black. Low enough to read running text over; desktop offsets right to fill the empty column.
-  bg:      [st(0, .05, 1.5, .12, .1, 0, 1, 0),  st(.5, 0, 1.35, .22, .12, 0, 1, 0)],
+  bg:      [st(0, .05, 1.5, .08, .08, 0, 1, 0),  st(.58, 0, 1.3, .1, .08, 0, 1, 0)],
   hero:    [st(0, .1, 1, 1, 0, 0, 0, 1),       st(0, .02, 1, 1, 0, 0, 0, 1)],
   // "descent" plan: on phone the mark must grow/shrink through every section, not vanish. The old phone slam/up/pass were solid 0 (invisible).
-  slam:    [st(0, 0, 2.4, .55, 0, 0, 0, 0),    st(0, 0, 2.3, 0, 0, .28, 1, 0)],     // phone: translucent chrome swells behind the slam lines (text always paints over the canvas)
+  slam:    [st(0, 0, 2.4, 0, .05, .16, 0, 0),  st(0, 0, 2.3, 0, 0, .28, 1, 0)],     // phone: point cloud (not solid chrome) so the grey slam lines stay readable over it
   up:      [st(.5, .46, .42, 1, 0, 0, 0, 0),   st(.66, .52, .42, 1, 0, 0, 0, 1)],   // phone: small cold solid mark in the corner (was invisible wire)
   recap:   [st(0, 0, 2.2, 0, 0, .03, 1, 0),    st(0, 0, 2.2, 0, 0, .06, 1, 0)],     // prototype .08 / .14: readable behind the recap story text
   artists: [st(0, 0, 1, 0, .05, 0, .5, 0),     st(.3, 0, .95, 0, .2, 0, .3, .5)],

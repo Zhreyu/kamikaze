@@ -80,7 +80,7 @@ export default function Home() {
         <div className="relative flex flex-wrap items-end justify-between gap-7 max-md:-mt-[calc(var(--s)*0.44)]">
           <div className="relative isolate w-full md:w-auto md:max-w-[520px]">
             {/* phone only: a dark fade behind the date so the red numerals stay legible over the bright chrome of the sigil's lower third */}
-            <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 -top-16 -z-10 h-32 bg-gradient-to-b from-void via-void/85 to-transparent md:hidden" />
+            <div aria-hidden="true" className="pointer-events-none absolute inset-x-[-12%] -top-20 -z-10 h-44 bg-[radial-gradient(130%_100%_at_50%_42%,rgba(10,10,10,.92),rgba(10,10,10,.6)_45%,transparent_72%)] md:hidden" />
             <p className={`${s.rise} date-beat num hot text-[38px] md:text-[64px]`} style={i(1)}>
               {next ? fmtDate(next.date) : 'No date yet'}
             </p>

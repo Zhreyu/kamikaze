@@ -7,25 +7,22 @@ import { useContent } from '@/lib/content'
 import Arrow from './Arrow'
 import Countdown from './Countdown'
 
-/** A fact that is not announced yet: the redacted bar, with words for screen readers. */
-const Sealed = ({ width }: { width: number }) => (
-  <span className="bar max-w-full" style={{ width }}>
-    <span className="sr-only">Not announced yet</span>
-  </span>
-)
-
 /**
  * The next event. `home`: date, countdown, one action (phone: See the event; md+: the seal line + Get the venue first).
  * `events`: phone adds the full facts list; md+ is one row of date, countdown, action.
  */
 export function UpNext({ event, variant, className = '' }: { event: Event; variant: 'home' | 'events'; className?: string }) {
   const home = variant === 'home'
-  const facts: [string, React.ReactNode][] = [
-    ['Name', event.name ?? <Sealed width={170} />],
-    ['City', event.city ?? <Sealed width={130} />],
-    ['Venue', event.venue ?? <Sealed width={200} />],
-    ['Lineup', event.lineup?.map((slug) => getArtist(slug)?.name ?? slug).join(', ') ?? 'To be announced'],
-    ['Tickets', event.ticketUrl ? <a className="link" href={event.ticketUrl}>Get tickets</a> : 'Not on sale yet'],
+  // phone events list: show only what is actually announced; fold the sealed fields into one line instead of a stack of empty rows
+  const sealed = (['Name', 'City', 'Venue'] as const).filter((k) => !event[k.toLowerCase() as 'name' | 'city' | 'venue'])
+  const lineup = event.lineup?.map((slug) => getArtist(slug)?.name ?? slug).join(', ')
+  const rows: [string, React.ReactNode][] = [
+    ...(event.name ? ([['Name', event.name]] as [string, React.ReactNode][]) : []),
+    ...(event.city ? ([['City', event.city]] as [string, React.ReactNode][]) : []),
+    ...(event.venue ? ([['Venue', event.venue]] as [string, React.ReactNode][]) : []),
+    ...(sealed.length ? ([['Sealed', sealed.join(', ').toLowerCase()]] as [string, React.ReactNode][]) : []),
+    ...(lineup ? ([['Lineup', lineup]] as [string, React.ReactNode][]) : []),
+    ...(event.ticketUrl ? ([['Tickets', <a key="t" className="link" href={event.ticketUrl}>Get tickets</a>]] as [string, React.ReactNode][]) : []),
   ]
   return (
     <div
@@ -43,8 +40,8 @@ export function UpNext({ event, variant, className = '' }: { event: Event; varia
       </div>
       {!home && (
         <dl className="flex flex-col md:hidden">
-          {facts.map(([label, value], i) => (
-            <div key={label} className={`rowlink justify-start ${i === facts.length - 1 ? 'border-b border-hair' : ''}`}>
+          {rows.map(([label, value], i) => (
+            <div key={label} className={`rowlink justify-start ${i === rows.length - 1 ? 'border-b border-hair' : ''}`}>
               <dt className="mono dim w-[84px] shrink-0">{label}</dt>
               <dd className="min-w-0 flex-1">{value}</dd>
             </div>

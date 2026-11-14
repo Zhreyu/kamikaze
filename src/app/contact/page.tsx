@@ -9,8 +9,7 @@ export const metadata: Metadata = {
 }
 
 const routes = [
-  ['Bookings', EMAIL, `mailto:${EMAIL}?subject=Booking`],
-  ['General', EMAIL, `mailto:${EMAIL}`],
+  ['Email', EMAIL, `mailto:${EMAIL}`],
   ['Instagram', 'kamikaze.intl', INSTAGRAM],
 ]
 

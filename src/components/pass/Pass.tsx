@@ -250,7 +250,7 @@ export default function Pass({ rite, date }: { rite?: string; date?: string }) {
                   inputMode="tel"
                   autoComplete="tel"
                   enterKeyHint="next"
-                  placeholder="+91"
+                  placeholder="e.g. +91 98765 43210"
                   maxLength={40}
                   aria-invalid={!!errs.whatsapp}
                   aria-describedby="p-wa-help"

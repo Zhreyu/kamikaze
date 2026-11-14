@@ -60,7 +60,7 @@ export default function Nav() {
   const current = (href: string) => (pathname.startsWith(href) ? 'page' : undefined)
 
   return (
-    <header className="wrap fixed inset-x-0 top-0 z-10 flex h-[calc(var(--nav-h)+env(safe-area-inset-top,0px))] items-center justify-between gap-4 bg-gradient-to-b from-void/90 to-void/0 pt-[env(safe-area-inset-top,0px)]">
+    <header className="wrap fixed inset-x-0 top-0 z-10 flex h-[calc(var(--nav-h)+env(safe-area-inset-top,0px))] items-center justify-between gap-4 bg-gradient-to-b from-void via-void/90 to-void/0 pt-[env(safe-area-inset-top,0px)] [backdrop-filter:blur(3px)]">
       <Link href="/" aria-label="Kamikaze home" className="relative z-[2] flex min-h-[44px] items-center gap-[10px]">
         <img src={getAssetPath('/logo-sigil-96.webp')} alt="" width={34} height={34} />
         <span className="mono">Kamikaze</span>
